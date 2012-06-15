@@ -1,15 +1,16 @@
-require "cistern/version"
+require 'cistern/version'
+require 'formatador'
 
 module Cistern
   Error = Class.new(StandardError)
 
-  require "cistern/hash"
+  require 'cistern/hash'
   require 'cistern/mock'
   require 'cistern/wait_for'
-  require "cistern/attributes"
-  require "cistern/collection"
-  require "cistern/model"
-  require "cistern/service"
+  require 'cistern/attributes'
+  require 'cistern/collection'
+  require 'cistern/model'
+  require 'cistern/service'
 
   def self.timeout=(timeout)
     @timeout= timeout
