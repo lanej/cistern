@@ -29,11 +29,11 @@ class Cistern::Model
   def reload
     requires :identity
 
-    data = collection.get(identity)
-
-    new_attributes = data.attributes
-    merge_attributes(new_attributes)
-    self
+    if data = collection.get(identity)
+      new_attributes = data.attributes
+      merge_attributes(new_attributes)
+      self
+    end
   end
 
   def ==(comparison_object)
