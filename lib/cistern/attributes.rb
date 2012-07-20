@@ -35,19 +35,19 @@ module Cistern
         when :float
           class_eval <<-EOS, __FILE__, __LINE__
           def #{name}=(new_#{name})
-            attributes[:#{name}] = new_#{name}.to_f
+            attributes[:#{name}] = new_#{name} && new_#{name}.to_f
           end
           EOS
         when :integer
           class_eval <<-EOS, __FILE__, __LINE__
           def #{name}=(new_#{name})
-            attributes[:#{name}] = new_#{name}.to_i
+            attributes[:#{name}] = new_#{name} && new_#{name}.to_i
           end
           EOS
         when :string
           class_eval <<-EOS, __FILE__, __LINE__
           def #{name}=(new_#{name})
-            attributes[:#{name}] = new_#{name}.to_s
+            attributes[:#{name}] = new_#{name} && new_#{name}.to_s
           end
           EOS
         when :time
