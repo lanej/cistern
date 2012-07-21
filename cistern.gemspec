@@ -6,7 +6,7 @@ Gem::Specification.new do |gem|
   gem.email         = ["me@joshualane.com"]
   gem.description   = %q{API client framework extracted from Fog}
   gem.summary       = %q{API client framework}
-  gem.homepage      = ""
+  gem.homepage      = "http://joshualane.com/cistern"
 
   gem.files         = `git ls-files`.split($\)
   gem.executables   = gem.files.grep(%r{^bin/}).map{ |f| File.basename(f) }
