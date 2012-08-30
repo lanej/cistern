@@ -2,29 +2,23 @@ class Cistern::Collection < Array
   extend Cistern::Attributes::ClassMethods
   include Cistern::Attributes::InstanceMethods
 
-  Array.public_instance_methods(false).each do |method|
-    unless [:reject, :select, :slice].include?(method.to_sym)
-      class_eval <<-EOS, __FILE__, __LINE__
-        def #{method}(*args)
-          unless @loaded
-            lazy_load
-          end
-          super
-        end
-      EOS
+  %w[reject select slice].each do |method|
+    define_method(method) do |*args, &block|
+      unless @loaded
+        lazy_load
+      end
+      data = super(*args, &block)
+      self.clone.clear.concat(data)
     end
   end
 
-  %w[reject select slice].each do |method|
-    class_eval <<-EOS, __FILE__, __LINE__
-      def #{method}(*args)
-        unless @loaded
-          lazy_load
-        end
-        data = super
-        self.clone.clear.concat(data)
+  %w[first last].each do |method|
+    define_method(method) do
+      unless @loaded
+        lazy_load
       end
-    EOS
+      super()
+    end
   end
 
   def self.model(new_model=nil)
@@ -80,38 +74,10 @@ class Cistern::Collection < Array
     self
   end
 
-  def inspect
-    Thread.current[:formatador] ||= Formatador.new
-    data = "#{Thread.current[:formatador].indentation}<#{self.class.name}\n"
-    Thread.current[:formatador].indent do
-      unless self.class.attributes.empty?
-        data << "#{Thread.current[:formatador].indentation}"
-        data << self.class.attributes.map {|attribute| "#{attribute}=#{send(attribute).inspect}"}.join(",\n#{Thread.current[:formatador].indentation}")
-        data << "\n"
-      end
-      data << "#{Thread.current[:formatador].indentation}["
-      unless self.empty?
-        data << "\n"
-        Thread.current[:formatador].indent do
-          data << self.map {|member| member.inspect}.join(",\n")
-          data << "\n"
-        end
-        data << Thread.current[:formatador].indentation
-      end
-      data << "]\n"
-    end
-    data << "#{Thread.current[:formatador].indentation}>"
-    data
-  end
-
   def reload
     clear
     lazy_load
     self
-  end
-
-  def table(attributes = nil)
-    Formatador.display_table(self.map {|instance| instance.attributes}, attributes)
   end
 
   private
