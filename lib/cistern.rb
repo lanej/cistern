@@ -1,5 +1,5 @@
 require 'cistern/version'
-require 'forwardable'
+require 'time'
 
 module Cistern
   Error = Class.new(StandardError)

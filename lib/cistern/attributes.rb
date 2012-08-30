@@ -1,7 +1,42 @@
 module Cistern
   module Attributes
-    module ClassMethods
+    def self.parsers
+      @parsers ||= {
+        :string  => lambda{|v,opts| v.to_s},
+        :time    => lambda{|v,opts| v.is_a?(Time) ? v : v && Time.parse(v.to_s)},
+        :integer => lambda{|v,opts| v && v.to_i},
+        :float   => lambda{|v,opts| v && v.to_f},
+        :array   => lambda{|v,opts| [*v]},
+        :squash  => Proc.new do |v, opts|
+          squash = options[:squash]
+          if v.is_a?(::Hash)
+            if v.has_key(squash.to_s.to_sym)
+              v[squash.to_s.to_sym]
+            elsif v.has_key?(squash.to_s)
+              v[squash.to_s]
+            else
+              [v]
+            end
+          end
+        end,
+        :boolean => Proc.new do |v, opts|
+          {
+            true    => true,
+            "true"  => true,
+            "1"     => true,
+            false   => false,
+            "false" => false,
+            "0"     => false
+          }[v]
+        end,
+      }
+    end
 
+    def self.default_parser
+      @default_parser ||= lambda{|v, opts| v}
+    end
+
+    module ClassMethods
       def _load(marshalled)
         new(Marshal.load(marshalled))
       end
@@ -15,82 +50,16 @@ module Cistern
       end
 
       def attribute(name, options = {})
-        class_eval <<-EOS, __FILE__, __LINE__
-          def #{name}
-            attributes[:#{name}]
-          end
-          EOS
-        case options[:type]
-        when :boolean
-          class_eval <<-EOS, __FILE__, __LINE__
-          def #{name}=(new_#{name})
-            attributes[:#{name}] = case new_#{name}
-            when true,'true'
-              true
-            when false,'false'
-              false
-            end
-          end
-          EOS
-        when :float
-          class_eval <<-EOS, __FILE__, __LINE__
-          def #{name}=(new_#{name})
-            attributes[:#{name}] = new_#{name} && new_#{name}.to_f
-          end
-          EOS
-        when :integer
-          class_eval <<-EOS, __FILE__, __LINE__
-          def #{name}=(new_#{name})
-            attributes[:#{name}] = new_#{name} && new_#{name}.to_i
-          end
-          EOS
-        when :string
-          class_eval <<-EOS, __FILE__, __LINE__
-          def #{name}=(new_#{name})
-            attributes[:#{name}] = new_#{name} && new_#{name}.to_s
-          end
-          EOS
-        when :time
-          class_eval <<-EOS, __FILE__, __LINE__
-            def #{name}=(new_#{name})
-              attributes[:#{name}] = if new_#{name}.nil? || new_#{name} == "" || new_#{name}.is_a?(Time)
-                new_#{name}
-              else
-                Time.parse(new_#{name})
-              end
-            end
-          EOS
-        when :array
-          class_eval <<-EOS, __FILE__, __LINE__
-            def #{name}=(new_#{name})
-              attributes[:#{name}] = [*new_#{name}]
-            end
-          EOS
-        else
-          if squash = options[:squash]
-            class_eval <<-EOS, __FILE__, __LINE__
-            def #{name}=(new_data)
-              if new_data.is_a?(::Hash)
-                if new_data.has_key?(:'#{squash}')
-                  attributes[:#{name}] = new_data[:'#{squash}']
-                elsif new_data.has_key?("#{squash}")
-                  attributes[:#{name}] = new_data["#{squash}"]
-                else
-                  attributes[:#{name}] = [ new_data ]
-                end
-              else
-                attributes[:#{name}] = new_data
-              end
-            end
-            EOS
-          else
-            class_eval <<-EOS, __FILE__, __LINE__
-              def #{name}=(new_#{name})
-                attributes[:#{name}] = new_#{name}
-              end
-            EOS
-          end
+        parser = Cistern::Attributes.parsers[options[:type]] ||
+          options[:parser] ||
+          Cistern::Attributes.default_parser
+        self.send(:define_method, name) do
+          attributes[name.to_s.to_sym]
         end
+        self.send(:define_method, "#{name}=") do |value|
+          attributes[name.to_s.to_sym]= parser.call(value, options)
+        end
+
         @attributes ||= []
         @attributes |= [name]
         for new_alias in [*options[:aliases]]
