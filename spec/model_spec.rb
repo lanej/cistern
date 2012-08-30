@@ -8,6 +8,9 @@ describe "Cistern::Model" do
       attribute :name, type: :string
       attribute :created_at, type: :time
       attribute :flag, type: :boolean
+      attribute :list, type: :array
+      attribute :number, type: :integer
+      attribute :floater, type: :float
       attribute :custom, parser: lambda{|v, opts| "X!#{v}"}
     end
 
@@ -27,6 +30,20 @@ describe "Cistern::Model" do
       TypeSpec.new(flag: "true").flag.should be_true
       TypeSpec.new(flag: false).flag.should be_false
       TypeSpec.new(flag: true).flag.should be_true
+      TypeSpec.new(flag: "0").flag.should be_false
+      TypeSpec.new(flag: "1").flag.should be_true
+      TypeSpec.new(flag: 0).flag.should be_false
+      TypeSpec.new(flag: 1).flag.should be_true
+    end
+
+    it "should parse an array" do
+      TypeSpec.new(list: []).list.should == []
+      TypeSpec.new(list: "item").list.should == ["item"]
+    end
+
+    it "should parse a float" do
+      TypeSpec.new(floater: "0.01").floater.should == 0.01
+      TypeSpec.new(floater: 0.01).floater.should == 0.01
     end
 
     it "should use custom parser" do
