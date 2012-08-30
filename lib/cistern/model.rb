@@ -4,23 +4,21 @@ class Cistern::Model
 
   attr_accessor :collection, :connection
 
-  def initialize(attributes={})
-    merge_attributes(attributes)
+  def self.formatter
+    @formatter ||= Cistern::Formatter::Default
+  end
+
+  def self.formatter=(formatter)
+    @formatter = formatter
   end
 
   def inspect
-    Thread.current[:formatador] ||= Formatador.new
-    data = "#{Thread.current[:formatador].indentation}<#{self.class.name}"
-    Thread.current[:formatador].indent do
-      unless self.class.attributes.empty?
-        data << "\n#{Thread.current[:formatador].indentation}"
-        data << self.class.attributes.map {|attribute| "#{attribute}=#{send(attribute).inspect}"}.join(",\n#{Thread.current[:formatador].indentation}")
-      end
-    end
-    data << "\n#{Thread.current[:formatador].indentation}>"
-    data
+    self.class.formatter.call(self)
   end
 
+  def initialize(attributes={})
+    merge_attributes(attributes)
+  end
 
   def save
     raise NotImplementedError

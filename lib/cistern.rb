@@ -1,5 +1,5 @@
 require 'cistern/version'
-require 'formatador'
+require 'forwardable'
 
 module Cistern
   Error = Class.new(StandardError)
@@ -11,6 +11,9 @@ module Cistern
   require 'cistern/collection'
   require 'cistern/model'
   require 'cistern/service'
+
+  autoload :Formatter, 'cistern/formatter'
+
 
   def self.timeout=(timeout)
     @timeout= timeout
