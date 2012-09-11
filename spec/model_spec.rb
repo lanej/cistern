@@ -2,6 +2,23 @@ require 'spec_helper'
 
 describe "Cistern::Model" do
 
+  it "should duplicate a model" do
+    class DupSpec < Cistern::Model
+      identity :id
+      attribute :name
+      attribute :properties
+    end
+
+    model = DupSpec.new(id: 1, name: "string", properties: {value: "something", else: "what"})
+    duplicate = model.dup
+
+    duplicate.should == model
+    duplicate.should_not eql model
+
+    model.name= "anotherstring"
+    duplicate.name.should == "string"
+  end
+
   context "attribute parsing" do
     class TypeSpec < Cistern::Model
       identity :id

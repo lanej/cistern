@@ -80,11 +80,9 @@ module Cistern::Attributes
     def ignored_attributes
       @ignored_attributes ||= []
     end
-
   end
 
   module InstanceMethods
-
     def _dump(level)
       Marshal.dump(attributes)
     end
@@ -93,9 +91,13 @@ module Cistern::Attributes
       @attributes ||= {}
     end
 
+    def attributes=(attributes)
+      @attributes = attributes
+    end
+
     def dup
       copy = super
-      copy.dup_attributes!
+      copy.attributes= copy.attributes.dup
       copy
     end
 
@@ -153,20 +155,6 @@ module Cistern::Attributes
         end
       end
       missing
-    end
-
-    def dup_attributes!
-      @attributes = @attributes.dup
-    end
-
-    private
-
-    def remap_attributes(attributes, mapping)
-      for key, value in mapping
-        if attributes.key?(key)
-          attributes[value] = attributes.delete(key)
-        end
-      end
     end
   end
 end
