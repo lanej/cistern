@@ -6,18 +6,6 @@ module Cistern::Attributes
       :integer => lambda{|v,opts| v && v.to_i},
       :float   => lambda{|v,opts| v && v.to_f},
       :array   => lambda{|v,opts| [*v]},
-      :squash  => Proc.new do |v, opts|
-        squash = options[:squash]
-        if v.is_a?(::Hash)
-          if v.has_key(squash.to_s.to_sym)
-            v[squash.to_s.to_sym]
-          elsif v.has_key?(squash.to_s)
-            v[squash.to_s]
-          else
-            [v]
-          end
-        end
-      end,
       :boolean => Proc.new do |v, opts|
         {
           true    => true,
@@ -30,6 +18,24 @@ module Cistern::Attributes
           0       => false,
         }[v]
       end,
+    }
+  end
+
+  def self.transforms
+    @transforms ||= {
+      :squash  => Proc.new do |v, options|
+        squash = options[:squash]
+        if v.is_a?(::Hash)
+          if v.key?(squash.to_s.to_sym)
+            v[squash.to_s.to_sym]
+          elsif v.has_key?(squash.to_s)
+            v[squash.to_s]
+          else
+            [v]
+          end
+        end
+      end,
+      :none => lambda{|v, opts| v},
     }
   end
 
@@ -54,11 +60,15 @@ module Cistern::Attributes
       parser = Cistern::Attributes.parsers[options[:type]] ||
         options[:parser] ||
         Cistern::Attributes.default_parser
+      transform = Cistern::Attributes.transforms[options[:squash] ? :squash : :none] ||
+        Cistern::Attributes.default_transform
+
       self.send(:define_method, name) do
         attributes[name.to_s.to_sym]
       end
       self.send(:define_method, "#{name}=") do |value|
-        attributes[name.to_s.to_sym]= parser.call(value, options)
+        transformed = transform.call(value, options)
+        attributes[name.to_s.to_sym]= parser.call(transformed, options)
       end
 
       @attributes ||= []

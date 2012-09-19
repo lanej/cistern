@@ -28,6 +28,7 @@ describe "Cistern::Model" do
       attribute :list, type: :array
       attribute :number, type: :integer
       attribute :floater, type: :float
+      attribute :butternut, type: :integer, squash: "id"
       attribute :custom, parser: lambda{|v, opts| "X!#{v}"}
     end
 
@@ -65,6 +66,10 @@ describe "Cistern::Model" do
 
     it "should use custom parser" do
       TypeSpec.new(custom: "15").custom.should == "X!15"
+    end
+
+    it "should squash and cast" do
+      TypeSpec.new(butternut: {"id" => "12"}).butternut.should == 12
     end
   end
 
