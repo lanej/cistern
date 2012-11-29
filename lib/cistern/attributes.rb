@@ -23,7 +23,7 @@ module Cistern::Attributes
 
   def self.transforms
     @transforms ||= {
-      :squash  => Proc.new do |v, options|
+      :squash  => Proc.new do |k, v, options|
         squash = options[:squash]
         if v.is_a?(::Hash)
           if v.key?(squash.to_s.to_sym)
@@ -31,11 +31,12 @@ module Cistern::Attributes
           elsif v.has_key?(squash.to_s)
             v[squash.to_s]
           else
-            [v]
+            v
           end
+        else v
         end
       end,
-      :none => lambda{|v, opts| v},
+      :none => lambda{|k, v, opts| v},
     }
   end
 
@@ -66,13 +67,15 @@ module Cistern::Attributes
       self.send(:define_method, name) do
         attributes[name.to_s.to_sym]
       end
+
       self.send(:define_method, "#{name}=") do |value|
-        transformed = transform.call(value, options)
+        transformed = transform.call(name, value, options)
         attributes[name.to_s.to_sym]= parser.call(transformed, options)
       end
 
       @attributes ||= []
       @attributes |= [name]
+
       for new_alias in [*options[:aliases]]
         aliases[new_alias] = name
       end
@@ -124,7 +127,7 @@ module Cistern::Attributes
         unless self.class.ignored_attributes.include?(key)
           if aliased_key = self.class.aliases[key]
             send("#{aliased_key}=", value)
-          elsif self.respond_to?("#{key}=",true)
+          elsif self.respond_to?("#{key}=", true)
             send("#{key}=", value)
           else
             attributes[key] = value

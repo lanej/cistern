@@ -14,8 +14,4 @@ Gem::Specification.new do |gem|
   gem.name          = "cistern"
   gem.require_paths = ["lib"]
   gem.version       = Cistern::VERSION
-
-  gem.add_development_dependency "rspec", "~> 2.0"
-  gem.add_development_dependency "guard-rspec"
-  gem.add_development_dependency "rake"
 end

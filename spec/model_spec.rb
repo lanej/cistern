@@ -28,7 +28,7 @@ describe "Cistern::Model" do
       attribute :list, type: :array
       attribute :number, type: :integer
       attribute :floater, type: :float
-      attribute :butternut, type: :integer, squash: "id"
+      attribute :butternut, type: :integer, aliases: "squash", squash: "id"
       attribute :custom, parser: lambda{|v, opts| "X!#{v}"}
     end
 
@@ -69,7 +69,7 @@ describe "Cistern::Model" do
     end
 
     it "should squash and cast" do
-      TypeSpec.new(butternut: {"id" => "12"}).butternut.should == 12
+      TypeSpec.new({"squash" => {"id" => "12"}}).butternut.should == 12
     end
   end
 
