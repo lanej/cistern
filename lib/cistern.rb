@@ -14,12 +14,8 @@ module Cistern
 
   autoload :Formatter, 'cistern/formatter'
 
-
-  def self.timeout=(timeout)
-    @timeout= timeout
-  end
-
-  def self.timeout
-    @timeout || 0
-  end
+  def self.timeout=(timeout); @timeout= timeout; end
+  def self.timeout; @timeout || 0; end
+  def self.formatter; @formatter ||= Cistern::Formatter::Default; end
+  def self.formatter=(formatter); @formatter = formatter; end
 end

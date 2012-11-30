@@ -72,37 +72,4 @@ describe "Cistern::Model" do
       TypeSpec.new({"squash" => {"id" => "12"}}).butternut.should == 12
     end
   end
-
-  context "inspection engine" do
-    class InspectorSpec < Cistern::Model
-      identity :id
-      attribute :name
-    end
-
-    after(:all) do
-      InspectorSpec.formatter= Cistern::Formatter::Default
-    end
-
-    it "should default to default formatter" do
-      InspectorSpec.formatter.should == Cistern::Formatter::Default
-    end
-
-    it "should use default" do
-      InspectorSpec.new(id: 1, name: "name").inspect.should match /#<InspectorSpec:0x[0-9a-f]+ attributes={id:1,name:\"name\"}/
-    end
-
-    it "should use awesome_print" do
-      defined?(AwesomePrint).should be_false # don't require if not used
-      InspectorSpec.formatter= Cistern::Formatter::AwesomePrint
-
-      InspectorSpec.new(id: 1, name: "name").inspect.match /(?x-mi:\#<InspectorSpec:0x[0-9a-f]+>\ {\n\ \ \ \ \ \ :id\x1B\[0;37m\ =>\ \x1B\[0m\x1B\[1;34m1\x1B\[0m,\n\ \ \ \ :name\x1B\[0;37m\ =>\ \x1B\[0m\x1B\[0;33m"name"\x1B\[0m\n})/
-    end
-
-    it "should use formatador" do
-      defined?(Formatador).should be_false # don't require if not used
-      InspectorSpec.formatter= Cistern::Formatter::Formatador
-
-      InspectorSpec.new(id: 1, name: "name").inspect.should == "  <InspectorSpec\n    id=1,\n    name=\"name\"\n  >"
-    end
-  end
 end

@@ -1,9 +1,10 @@
 class Cistern::Service
-  def self.mock!;   @mocking= true; end
-  def self.mocking?; @mocking; end
-  def self.unmock!; @mocking= false; end
-  module Collections
 
+  def self.mock!;    @mocking = true; end
+  def self.mocking?; @mocking; end
+  def self.unmock!;  @mocking = false; end
+
+  module Collections
     def collections
       service.collections
     end
@@ -15,8 +16,8 @@ class Cistern::Service
     def requests
       service.requests
     end
-
   end
+
   class << self
     def inherited(klass)
       klass.class_eval <<-EOS, __FILE__, __LINE__
@@ -32,6 +33,7 @@ class Cistern::Service
         end
       EOS
     end
+
     def model_path(model_path)
       @model_path = model_path
     end
@@ -68,8 +70,8 @@ class Cistern::Service
       self.recognized_arguments.concat(args)
     end
 
-    def model(model_name)
-      models << model_name
+    def model(model_name, options={})
+      models << [model_name, options]
     end
 
     def mocked_requests
@@ -100,8 +102,14 @@ class Cistern::Service
     def setup_requirements
       @required ||= false
       unless @required
-        models.each do |model|
-          require File.join(@model_path, model.to_s)
+        models.each do |model, options|
+          require File.join(@model_path, model.to_s) unless options[:require] == false
+          class_name = model.to_s.split("_").map(&:capitalize).join
+          self.const_get(:Collections).module_eval <<-EOS, __FILE__, __LINE__
+            def #{model}(attributes={})
+              #{service}::#{class_name}.new({connection: self}.merge(attributes))
+            end
+          EOS
         end
         requests.each do |request|
           require File.join(@request_path, request.to_s)

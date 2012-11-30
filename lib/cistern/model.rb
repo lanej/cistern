@@ -4,16 +4,8 @@ class Cistern::Model
 
   attr_accessor :collection, :connection
 
-  def self.formatter
-    @formatter ||= Cistern::Formatter::Default
-  end
-
-  def self.formatter=(formatter)
-    @formatter = formatter
-  end
-
   def inspect
-    self.class.formatter.call(self)
+    Cistern.formatter.call(self)
   end
 
   def initialize(attributes={})
