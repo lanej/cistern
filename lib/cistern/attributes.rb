@@ -130,7 +130,7 @@ module Cistern::Attributes
           elsif self.respond_to?("#{key}=", true)
             send("#{key}=", value)
           else
-            attributes[key] = value
+            # ignore data: unknown attribute : attributes[key] = value
           end
         end
       end

@@ -71,5 +71,9 @@ describe "Cistern::Model" do
     it "should squash and cast" do
       TypeSpec.new({"squash" => {"id" => "12"}}).butternut.should == 12
     end
+
+    it "should slice out unaccounted for attributes" do
+      TypeSpec.new({"something" => {"id" => "12"}}).attributes.keys.should_not include("something")
+    end
   end
 end
