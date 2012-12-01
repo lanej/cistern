@@ -1,5 +1,5 @@
 module Cistern::Formatter
-  autoload :AwesomePrint, 'cistern/formatters/awesome_print'
-  autoload :Default, 'cistern/formatters/default'
-  autoload :Formatador, 'cistern/formatters/formatador'
+  autoload :AwesomePrint, 'cistern/formatter/awesome_print'
+  autoload :Default, 'cistern/formatter/default'
+  autoload :Formatador, 'cistern/formatter/formatador'
 end
