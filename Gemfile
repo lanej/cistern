@@ -8,6 +8,7 @@ group :test do
   gem "guard-rspec"
   gem "rake"
   gem 'rb-fsevent', '~> 0.9.1'
+  gem 'pry-nav'
 end
 
 group :formatters do

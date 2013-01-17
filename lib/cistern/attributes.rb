@@ -161,13 +161,7 @@ module Cistern::Attributes
     protected
 
     def missing_attributes(args)
-      missing = []
-      for arg in [:connection] | args
-        unless send("#{arg}") || attributes.has_key?(arg)
-          missing << arg
-        end
-      end
-      missing
+      ([:connection] | args).select{|arg| send("#{arg}").nil?}
     end
   end
 end

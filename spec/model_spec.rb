@@ -30,6 +30,10 @@ describe "Cistern::Model" do
       attribute :floater, type: :float
       attribute :butternut, type: :integer, aliases: "squash", squash: "id"
       attribute :custom, parser: lambda{|v, opts| "X!#{v}"}
+
+      def save
+        requires :flag
+      end
     end
 
     it "should parse string" do
@@ -74,6 +78,16 @@ describe "Cistern::Model" do
 
     it "should slice out unaccounted for attributes" do
       TypeSpec.new({"something" => {"id" => "12"}}).attributes.keys.should_not include("something")
+    end
+
+    describe "#requires" do
+      it "should raise if attribute not provided" do
+        lambda { TypeSpec.new({"connection" => "fake", "something" => {"id" => "12"}}).save }.should raise_exception(ArgumentError)
+      end
+
+      it "should raise if attribute is provided and is nil" do
+        lambda { TypeSpec.new({"connection" => "fake", "custom" => nil}).save }.should raise_exception(ArgumentError)
+      end
     end
   end
 end
