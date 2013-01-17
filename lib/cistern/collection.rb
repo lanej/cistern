@@ -4,9 +4,7 @@ class Cistern::Collection < Array
 
   %w[reject select slice].each do |method|
     define_method(method) do |*args, &block|
-      unless @loaded
-        lazy_load
-      end
+      lazy_load unless @loaded
       data = super(*args, &block)
       self.clone.clear.concat(data)
     end
@@ -14,9 +12,7 @@ class Cistern::Collection < Array
 
   %w[first last].each do |method|
     define_method(method) do
-      unless @loaded
-        lazy_load
-      end
+      lazy_load unless @loaded
       super()
     end
   end
@@ -35,8 +31,7 @@ class Cistern::Collection < Array
   end
 
   def create(attributes={})
-    model = self.new(attributes)
-    model.save
+    self.new(attributes).save
   end
 
   def get(identity)
@@ -59,10 +54,10 @@ class Cistern::Collection < Array
       raise(ArgumentError.new("Initialization parameters must be an attributes hash, got #{attributes.class} #{attributes.inspect}"))
     end
     model.new(
-      attributes.merge(
+      {
         :collection => self,
-        :connection => connection
-      )
+        :connection => connection,
+      }.merge(attributes)
     )
   end
 
@@ -78,6 +73,11 @@ class Cistern::Collection < Array
     clear
     lazy_load
     self
+  end
+
+  def inspect
+    lazy_load unless @loaded
+    Cistern.formatter.call(self)
   end
 
   private

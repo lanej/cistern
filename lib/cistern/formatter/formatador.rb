@@ -2,6 +2,14 @@ require 'formatador'
 
 module Cistern::Formatter::Formatador
   def self.call(model)
+    case model
+    when Cistern::Collection then collection_inspect(model)
+    when Cistern::Model then model_inspect(model)
+    else model.inspect
+    end
+  end
+
+  def self.model_inspect(model)
     Thread.current[:formatador] ||= Formatador.new
     data = "#{Thread.current[:formatador].indentation}<#{model.class.name}"
     Thread.current[:formatador].indent do
@@ -14,20 +22,20 @@ module Cistern::Formatter::Formatador
     data
   end
 
-  def inspect
+  def self.collection_inspect(collection)
     Thread.current[:formatador] ||= Formatador.new
-    data = "#{Thread.current[:formatador].indentation}<#{self.class.name}\n"
+    data = "#{Thread.current[:formatador].indentation}<#{collection.class.name}\n"
     Thread.current[:formatador].indent do
-      unless self.class.attributes.empty?
+      unless collection.class.attributes.empty?
         data << "#{Thread.current[:formatador].indentation}"
-        data << self.class.attributes.map {|attribute| "#{attribute}=#{send(attribute).inspect}"}.join(",\n#{Thread.current[:formatador].indentation}")
+        data << collection.class.attributes.map {|attribute| "#{attribute}=#{send(attribute).inspect}"}.join(",\n#{Thread.current[:formatador].indentation}")
         data << "\n"
       end
       data << "#{Thread.current[:formatador].indentation}["
-      unless self.empty?
+      unless collection.empty?
         data << "\n"
         Thread.current[:formatador].indent do
-          data << self.map {|member| member.inspect}.join(",\n")
+          data << collection.map {|member| member.inspect}.join(",\n")
           data << "\n"
         end
         data << Thread.current[:formatador].indentation
