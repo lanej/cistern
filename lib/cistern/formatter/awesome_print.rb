@@ -16,6 +16,8 @@ module AwesomePrint::Cistern
     cast = cast_without_cistern(object, type)
     if object.is_a?(Cistern::Model)
       cast = :cistern_model
+    elsif object.is_a?(Cistern::Collection)
+      cast = :cistern_collection
     end
     cast
   end
@@ -25,6 +27,12 @@ module AwesomePrint::Cistern
   def awesome_cistern_model(object)
     data = object.attributes.keys.inject({}){|r,k| r.merge(k => object.send(k))}
     "#{object} " << awesome_hash(data)
+  end
+
+  # Format Cistern::Model
+  #------------------------------------------------------------------------------
+  def awesome_cistern_collection(object)
+    "#{object.class.name} " << awesome_array(object)
   end
 end
 

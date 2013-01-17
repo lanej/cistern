@@ -57,7 +57,7 @@ describe "#inspect" do
     end
     it "should use awesome_print" do
       Cistern.formatter = Cistern::Formatter::AwesomePrint
-      Inspectors.new.all.inspect.should match(/^\[.*\]$/m) # close enough
+      Inspectors.new.all.inspect.should match(/Inspectors\s+\[.*\]$/m) # close enough
     end
     it "should use formatador"
   end
