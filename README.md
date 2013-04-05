@@ -12,7 +12,7 @@ If you've used the fog library, this library extracts a lot of the logic provide
 
 ## How do I use this?
 
-Check out the zendesk2 gem, for examples of usage and structure. It is implemented with cistern.
+Check out the [zendesk2](https://github.com/lanej/zendesk2) gem, for examples of usage and structure. It is implemented with cistern.
 
 ## Releasing
 
