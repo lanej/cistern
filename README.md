@@ -2,25 +2,17 @@
 
 [![Build Status](https://secure.travis-ci.org/lanej/cistern.png)](http://travis-ci.org/lanej/cistern)
 
-TODO: Write a gem description
+## Synopsis
 
-## Installation
-
-Add this line to your application's Gemfile:
-
-    gem 'cistern'
-
-And then execute:
-
-    $ bundle
-
-Or install it yourself as:
-
-    $ gem install cistern
+An API client framework.
 
 ## Usage
 
-TODO: Write usage instructions here
+If you've used the fog library, this library extracts a lot of the logic provided by fog of having a mocking mode, modeling requests, organizing an api client code library for any given service.
+
+## How do I use this?
+
+Check out the zendesk2 gem, for examples of usage and structure. It is implemented with cistern.
 
 ## Releasing
 
