@@ -15,152 +15,165 @@ Service initialization will only accept parameters enumerated by ```requires``` 
 
 ```Mock.data``` is commonly used to store mock data.  It is often easiest to use identity to raw response mappings within the ```Mock.data``` hash.
 
-    class Foo::Client < Cistern::Service
+```ruby
 
-      model_path "foo/models"
-      request_path "foo/requests"
+class Foo::Client < Cistern::Service
 
-      model :bar
-      collection :bars
-      request :create_bar
-      request :get_bar
-      request :get_bars
+  model_path "foo/models"
+  request_path "foo/requests"
 
-      requires :hmac_id, :hmac_secret
-      recognizes :host
+  model :bar
+  collection :bars
+  request :create_bar
+  request :get_bar
+  request :get_bars
 
-      class Real
-        def initialize(options={})
-          # setup connection
-        end
-      end
+  requires :hmac_id, :hmac_secret
+  recognizes :host
 
-      class Mock
-        def self.data
-          @data ||= {
-                      :bars => {},
-                    }
-        end
-
-        def self.reset!
-          @data = nil
-        end
-
-        def data
-          self.class.data
-        end
-        def initialize(options={})
-          # setup mock data
-        end
-      end
+  class Real
+    def initialize(options={})
+      # setup connection
     end
+  end
+
+  class Mock
+    def self.data
+      @data ||= {
+                  :bars => {},
+                }
+    end
+
+    def self.reset!
+      @data = nil
+    end
+
+    def data
+      self.class.data
+    end
+    def initialize(options={})
+      # setup mock data
+    end
+  end
+end
+
+```
 
 ### Model
 
 ```connection``` represents the associated ```Foo::Client``` instance.
 
-    class Foo::Client::Bar < Cistern::Model
-      identity :id
+```ruby
 
-      attribute :flavor
-      attribute :keypair_id, aliases: "keypair",  squash: "id"
-      attribute :private_ips, type: :array
+class Foo::Client::Bar < Cistern::Model
+  identity :id
 
-      def destroy
-        params  = {
-          "id" => self.identity
-        }
-        self.connection.destroy_bar(params).body["request"]
-      end
+  attribute :flavor
+  attribute :keypair_id, aliases: "keypair",  squash: "id"
+  attribute :private_ips, type: :array
 
-      def save
-        requires :keypair_id
+  def destroy
+    params  = {
+      "id" => self.identity
+    }
+    self.connection.destroy_bar(params).body["request"]
+  end
 
-        params = {
-          "keypair" => self.keypair_id,
-          "bar"     => {
-            "flavor" => self.flavor,
-          },
-        }
+  def save
+    requires :keypair_id
 
-        if new_record?
-          request_attributes = connection.create_bar(params).body["request"]
-          merge_attributes(new_attributes)
-        end
-      end
+    params = {
+      "keypair" => self.keypair_id,
+      "bar"     => {
+        "flavor" => self.flavor,
+      },
+    }
+
+    if new_record?
+      request_attributes = connection.create_bar(params).body["request"]
+      merge_attributes(new_attributes)
     end
+  end
+end
+
+```
 
 ### Collection
 
 ```model``` tells Cistern which class is contained within the collection.  ```Cistern::Collection``` inherits from ```Array``` and lazy loads where applicable.
 
-    class Foo::Client::Bars < Cistern::Collection
+```ruby
 
-      model Foo::Client::Bar
+class Foo::Client::Bars < Cistern::Collection
 
-      def all(params = {})
-        response = connection.get_bars(params)
+  model Foo::Client::Bar
 
-        data = self.clone.load(response.body["bars"])
+  def all(params = {})
+    response = connection.get_bars(params)
 
-        collection.attributes.clear
-        collection.merge_attributes(data)
-      end
+    data = self.clone.load(response.body["bars"])
 
-      def discover(provisioned_id, options={})
-        params = {
-          "provisioned_id" => provisioned_id,
-        }
-        params.merge!("location" => options[:location]) if options.key?(:location)
+    collection.attributes.clear
+    collection.merge_attributes(data)
+  end
 
-        connection.requests.new(connection.discover_bar(params).body["request"])
-      end
+  def discover(provisioned_id, options={})
+    params = {
+      "provisioned_id" => provisioned_id,
+    }
+    params.merge!("location" => options[:location]) if options.key?(:location)
 
-      def get(id)
-        if data = connection.get_bar("id" => id).body["bar"]
-          new(data)
-        else
-          nil
-        end
-      end
+    connection.requests.new(connection.discover_bar(params).body["request"])
+  end
+
+  def get(id)
+    if data = connection.get_bar("id" => id).body["bar"]
+      new(data)
+    else
+      nil
     end
+  end
+end
 
+```
 
 ### Request
 
-    module Foo
-      class Client
-        class Real
-          def create_bar(options={})
-            request(
-              :body     => {"bar" => options},
-              :method   => :post,
-              :path     => '/bar'
-            )
-          end
-        end # Real
+```ruby
 
-        class Mock
-          def create_bar(options={})
-            id = Foo.random_hex(6)
+module Foo
+  class Client
+    class Real
+      def create_bar(options={})
+        request(
+          :body     => {"bar" => options},
+          :method   => :post,
+          :path     => '/bar'
+        )
+      end
+    end # Real
 
-            bar = {
-              "id" => id
-            }.merge(options)
+    class Mock
+      def create_bar(options={})
+        id = Foo.random_hex(6)
 
-            self.data[:bars][id]= bar
+        bar = {
+          "id" => id
+        }.merge(options)
 
-            response(
-              :body   => {"bar" => bar},
-              :status => 201,
-              :path => '/bar',
-            )
-          end
-        end # Mock
-      end # Client
-    end # Foo
+        self.data[:bars][id]= bar
 
+        response(
+          :body   => {"bar" => bar},
+          :status => 201,
+          :path => '/bar',
+        )
+      end
+    end # Mock
+  end # Client
+end # Foo
 
+```
 
 ## Examples
 
