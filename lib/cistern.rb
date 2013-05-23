@@ -16,6 +16,14 @@ module Cistern
 
   def self.timeout=(timeout); @timeout= timeout; end
   def self.timeout; @timeout || 0; end
-  def self.formatter; @formatter ||= Cistern::Formatter::Default; end
   def self.formatter=(formatter); @formatter = formatter; end
+
+  def self.formatter
+    @formatter ||= if defined?(AwesomePrint)
+                     Cistern::Formatter::AwesomePrint
+                   elsif defined?(Formatador)
+                     Cistern::Formatter::Formatador
+                   else Cistern::Formatter::Default
+                   end
+  end
 end
