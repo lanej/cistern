@@ -32,4 +32,8 @@ describe "Cistern::Collection" do
   it "should slice" do
     SampleCollection.new.slice(0,2).should == [SampleCollectionModel.new(id: 1), SampleCollectionModel.new(id: 3, name: "tom")]
   end
+
+  it "should ==" do
+    SampleCollection.new.all == SampleCollection.new.all
+  end
 end
