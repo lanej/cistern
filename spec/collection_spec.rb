@@ -13,6 +13,17 @@ describe "Cistern::Collection" do
     end
   end
 
+  it "should give to_s" do
+    collection = SampleCollection.new
+    collection.to_s.should_not eq "[]"
+    collection.to_s.gsub(/:[^>]*/,'').should == collection.all.to_s.gsub(/:[^>]*/,'')
+  end
+
+  it "should give size and count" do
+    SampleCollection.new.size.should == 3
+    SampleCollection.new.count.should == 3
+  end
+
   it "should give first" do
     SampleCollection.new.first.should == SampleCollectionModel.new(id: 1)
   end
