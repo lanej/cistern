@@ -28,10 +28,13 @@ class Cistern::Service
             #{klass.name}
           end
         end
+
         def self.service
           #{klass.name}
         end
       EOS
+
+      klass.send(:const_set, :Timeout, Class.new(Cistern::Error))
     end
 
     def model_path(model_path)
@@ -82,8 +85,8 @@ class Cistern::Service
       requests << request_name
     end
 
-    def collection(collection_name)
-      collections << collection_name
+    def collection(collection_name, options={})
+      collections << [collection_name, options]
     end
 
     def validate_options(options={})
@@ -123,8 +126,8 @@ class Cistern::Service
             EOS
           end
         end
-        collections.each do |collection|
-          require File.join(@model_path, collection.to_s)
+        collections.each do |collection, options|
+          require File.join(@model_path, collection.to_s) unless options[:require] == false
           class_name = collection.to_s.split("_").map(&:capitalize).join
           self.const_get(:Collections).module_eval <<-EOS, __FILE__, __LINE__
             def #{collection}(attributes={})
@@ -140,13 +143,12 @@ class Cistern::Service
       validate_options(options)
       setup_requirements
 
-      if self.mocking?
-        self.const_get(:Mock).send(:include, self.const_get(:Collections))
-        self.const_get(:Mock).new(options)
-      else
-        self.const_get(:Real).send(:include, self.const_get(:Collections))
-        self.const_get(:Real).new(options)
-      end
+      klass = self.const_get(self.mocking? ? :Mock : :Real)
+
+      klass.send(:include, service::Collections)
+      klass.send(:extend, Cistern::WaitFor)
+      klass.timeout_error = service::Timeout
+      klass.new(options)
     end
 
     def reset!

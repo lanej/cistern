@@ -33,19 +33,15 @@ class Cistern::Model
        !comparison_object.new_record?)
   end
 
-  def wait_for(timeout=Cistern.timeout, interval=1, &block)
-    reload
-    retries = 3
-    Cistern.wait_for(timeout, interval) do
-      if reload
-        retries = 3
-      elsif retries > 0
-        retries -= 1
-        sleep(1)
-      elsif retries == 0
-        raise Cistern::Error.new("Reload failed, #{self.class} #{self.identity} went away.") # FIXME: pretty much assumes you are calling #ready?
-      end
-      instance_eval(&block)
-    end
+  def service
+    self.connection ? self.connection.class : Cistern
+  end
+
+  def wait_for(timeout = self.service.timeout, interval = self.service.poll_interval, &block)
+    service.wait_for(timeout, interval) { reload && block.call(self) }
+  end
+
+  def wait_for!(timeout = self.service.timeout, interval = self.service.poll_interval, &block)
+    service.wait_for!(timeout, interval) { reload && block.call(self) }
   end
 end

@@ -2,7 +2,9 @@ require 'cistern/version'
 require 'time'
 
 module Cistern
-  Error = Class.new(StandardError)
+
+  Error   = Class.new(StandardError)
+  Timeout = Class.new(Error)
 
   require 'cistern/hash'
   require 'cistern/mock'
@@ -12,18 +14,14 @@ module Cistern
   require 'cistern/model'
   require 'cistern/service'
 
+  extend WaitFor
+  timeout_error = Timeout
+
   autoload :Formatter, 'cistern/formatter'
 
-  def self.timeout=(timeout); @timeout= timeout; end
-  def self.timeout; @timeout || 0; end
   def self.formatter=(formatter); @formatter = formatter; end
 
   def self.formatter
-    @formatter ||= if defined?(AwesomePrint)
-                     Cistern::Formatter::AwesomePrint
-                   elsif defined?(Formatador)
-                     Cistern::Formatter::Formatador
-                   else Cistern::Formatter::Default
-                   end
+    @formatter ||= Cistern::Formatter.default
   end
 end
