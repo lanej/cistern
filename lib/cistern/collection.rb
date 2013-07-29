@@ -25,9 +25,18 @@ class Cistern::Collection < Array
     end
   end
 
+  attr_accessor :connection
+
+  alias build initialize
+
   def initialize(attributes = {})
     @loaded = false
     merge_attributes(attributes)
+  end
+
+  def clear
+    @loaded = true
+    super
   end
 
   def create(attributes={})
@@ -38,16 +47,27 @@ class Cistern::Collection < Array
     raise NotImplementedError
   end
 
-  def clear
-    @loaded = true
-    super
+  def inspect
+    lazy_load unless @loaded
+    Cistern.formatter.call(self)
+  end
+
+  # @api private
+  def lazy_load
+    self.all
+  end
+
+  def load(objects)
+    clear
+    for object in objects
+      self << new(object)
+    end
+    self
   end
 
   def model
     self.class.instance_variable_get('@model')
   end
-
-  attr_accessor :connection
 
   def new(attributes = {})
     unless attributes.is_a?(::Hash)
@@ -61,28 +81,9 @@ class Cistern::Collection < Array
     )
   end
 
-  def load(objects)
-    clear
-    for object in objects
-      self << new(object)
-    end
-    self
-  end
-
   def reload
     clear
     lazy_load
     self
-  end
-
-  def inspect
-    lazy_load unless @loaded
-    Cistern.formatter.call(self)
-  end
-
-  private
-
-  def lazy_load
-    self.all
   end
 end
