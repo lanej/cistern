@@ -6,18 +6,7 @@ module Cistern::Attributes
       :integer => lambda{|v,opts| v && v.to_i},
       :float   => lambda{|v,opts| v && v.to_f},
       :array   => lambda{|v,opts| [*v]},
-      :boolean => Proc.new do |v, opts|
-        {
-          true    => true,
-          "true"  => true,
-          "1"     => true,
-          1       => true,
-          false   => false,
-          "false" => false,
-          "0"     => false,
-          0       => false,
-        }[v]
-      end,
+      :boolean => lambda{|v,opts| ['true', '1'].include?(v.to_s.downcase)}
     }
   end
 
