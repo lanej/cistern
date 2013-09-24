@@ -31,6 +31,13 @@ describe "Cistern::Model" do
       attribute :butternut, type: :integer, aliases: "squash", squash: "id"
       attribute :custom, parser: lambda{|v, opts| "X!#{v}"}
 
+      attribute :same_alias_1, aliases: "nested"
+      attribute :same_alias_2, aliases: "nested"
+
+      attribute :same_alias_squashed_1, aliases: "nested", squash: "attr_1"
+      attribute :same_alias_squashed_2, aliases: "nested", squash: "attr_2"
+      attribute :same_alias_squashed_3, aliases: "nested", squash: "attr_2"
+
       def save
         requires :flag
       end
@@ -74,6 +81,21 @@ describe "Cistern::Model" do
 
     it "should squash and cast" do
       TypeSpec.new({"squash" => {"id" => "12"}}).butternut.should == 12
+    end
+
+    context "allowing the same alias for multiple attributes" do
+      it "should do so when not squashing" do
+        type_spec = TypeSpec.new({"nested" => "bamboo"})
+        type_spec.same_alias_1.should == "bamboo"
+        type_spec.same_alias_2.should == "bamboo"
+      end
+
+      it "should do so when squashing" do
+        type_spec = TypeSpec.new({"nested" => {"attr_1" => "bamboo", "attr_2" => "panda"}})
+        type_spec.same_alias_squashed_1.should == "bamboo"
+        type_spec.same_alias_squashed_2.should == "panda"
+        type_spec.same_alias_squashed_3.should == "panda"
+      end
     end
 
     it "should slice out unaccounted for attributes" do
