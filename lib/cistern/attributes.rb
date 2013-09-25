@@ -65,8 +65,9 @@ module Cistern::Attributes
       @attributes ||= []
       @attributes |= [name]
 
-      for new_alias in [*options[:aliases]]
-        aliases[new_alias] = name
+      Array(options[:aliases]).each do |new_alias|
+        aliases[new_alias] ||= []
+        aliases[new_alias] << name
       end
     end
 
@@ -114,8 +115,10 @@ module Cistern::Attributes
     def merge_attributes(new_attributes = {})
       for key, value in new_attributes
         unless self.class.ignored_attributes.include?(key)
-          if aliased_key = self.class.aliases[key]
-            send("#{aliased_key}=", value)
+          if self.class.aliases.has_key?(key)
+            self.class.aliases[key].each do |aliased_key|
+              send("#{aliased_key}=", value)
+            end
           elsif self.respond_to?("#{key}=", true)
             send("#{key}=", value)
           else
