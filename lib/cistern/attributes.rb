@@ -1,36 +1,44 @@
 module Cistern::Attributes
   def self.parsers
     @parsers ||= {
-      :string  => lambda{|v,opts| v.to_s},
-      :time    => lambda{|v,opts| v.is_a?(Time) ? v : v && Time.parse(v.to_s)},
-      :integer => lambda{|v,opts| v && v.to_i},
-      :float   => lambda{|v,opts| v && v.to_f},
-      :array   => lambda{|v,opts| [*v]},
-      :boolean => lambda{|v,opts| ['true', '1'].include?(v.to_s.downcase)}
+      :string  => lambda { |v| v.to_s },
+      :time    => lambda { |v| v.is_a?(Time) ? v : v && Time.parse(v.to_s) },
+      :integer => lambda { |v| v && v.to_i },
+      :float   => lambda { |v| v && v.to_f },
+      :array   => lambda { |v| [*v] },
+      :boolean => lambda { |v| ['true', '1'].include?(v.to_s.downcase) }
     }
   end
 
-  def self.transforms
-    @transforms ||= {
-      :squash  => Proc.new do |k, v, options|
-        squash = options[:squash]
-        if v.is_a?(::Hash)
-          if v.key?(squash.to_s.to_sym)
-            v[squash.to_s.to_sym]
-          elsif v.has_key?(squash.to_s)
-            v[squash.to_s]
-          else
-            v
+  def self.processors
+    @processors ||= {
+      :drill => Proc.new do |mc, n, p|
+        path      = [*p]
+        root      = path.first.to_s.to_sym
+        drill_bit = Proc.new do |h, x|
+          head = x.shift
+          if h.is_a?(::Hash)
+            if h.key?(head.to_s.to_sym)
+              drill_bit.call(h[head.to_s.to_sym], x)
+            elsif h.has_key?(head.to_s)
+              drill_bit.call(h[head.to_s], x)
+            end
+          elsif x.empty?
+            h
           end
-        else v
         end
-      end,
-      :none => lambda{|k, v, opts| v},
-    }
-  end
 
-  def self.default_parser
-    @default_parser ||= lambda{|v, opts| v}
+        # root processor sets path of associated attribute and leaves return value intact
+        mc.attribute_writer(root)
+        mc.processors[root].unshift(lambda { |m, v| m.send("#{n}=", drill_bit.call(v, path.dup[1..-1])); v })
+      end,
+      :parser => Proc.new do |mc, n, block|
+        mc.processors[n].push(lambda { |m, v| block.call(v) })
+      end,
+      :type => Proc.new do |mc, n, args|
+        mc.processors[n].push(lambda { |m, v| Cistern::Attributes.parsers[args || :string].call(v) })
+      end,
+    }
   end
 
   module ClassMethods
@@ -39,34 +47,38 @@ module Cistern::Attributes
     end
 
     def aliases
-      @aliases ||= {}
+      @aliases ||= Hash.new { |h, k| h[k] = [] }
     end
 
     def attributes
-      @attributes ||= []
+      @attributes ||= {}
+    end
+
+    def processors
+      @processors ||= Hash.new { |h, k| h[k] = [] }
+    end
+
+    def attribute_writer(name)
+      unless self.instance_methods.include?("#{name}=")
+        self.send(:define_method, "#{name}=") { |v| attribute_set(name, self.class.processors[name].inject(v) { |r, p| p.call(self, r) }) }
+      end
+    end
+
+    def attribute_reader(name)
+      self.send(:define_method, name) { attributes[name.to_s.to_sym] }
     end
 
     def attribute(name, options = {})
-      parser = Cistern::Attributes.parsers[options[:type]] ||
-        options[:parser] ||
-        Cistern::Attributes.default_parser
-      transform = Cistern::Attributes.transforms[options[:squash] ? :squash : :none] ||
-        Cistern::Attributes.default_transform
+      attributes[name.to_s.to_sym] = options
 
-      self.send(:define_method, name) do
-        attributes[name.to_s.to_sym]
-      end
+      transform_options = (options.keys & Cistern::Attributes.processors.keys).inject({}) { |r, k| r.merge(k => options[k]) }
+      transform_options.each { |k, opts| Cistern::Attributes.processors[k].call(self, name.to_s.to_sym, opts) }
 
-      self.send(:define_method, "#{name}=") do |value|
-        transformed = transform.call(name, value, options)
-        attributes[name.to_s.to_sym]= parser.call(transformed, options)
-      end
-
-      @attributes ||= []
-      @attributes |= [name]
+      # default accessor
+      attribute_reader(name.to_s.to_sym)
+      attribute_writer(name.to_s.to_sym)
 
       Array(options[:aliases]).each do |new_alias|
-        aliases[new_alias] ||= []
         aliases[new_alias] << name
       end
     end
@@ -90,6 +102,10 @@ module Cistern::Attributes
       Marshal.dump(attributes)
     end
 
+    def attribute_set(name, value)
+      attributes[name.to_s.to_sym] = value
+    end
+
     def attributes
       @attributes ||= {}
     end
@@ -99,9 +115,7 @@ module Cistern::Attributes
     end
 
     def dup
-      copy = super
-      copy.attributes= copy.attributes.dup
-      copy
+      super.tap { |d| d.attributes = self.attributes.dup }
     end
 
     def identity
@@ -119,10 +133,9 @@ module Cistern::Attributes
             self.class.aliases[key].each do |aliased_key|
               send("#{aliased_key}=", value)
             end
-          elsif self.respond_to?("#{key}=", true)
+          end
+          if self.respond_to?("#{key}=", true)
             send("#{key}=", value)
-          else
-            # ignore data: unknown attribute : attributes[key] = value
           end
         end
       end
