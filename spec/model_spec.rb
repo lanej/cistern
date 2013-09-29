@@ -28,15 +28,18 @@ describe "Cistern::Model" do
       attribute :list, type: :array
       attribute :number, type: :integer
       attribute :floater, type: :float
-      attribute :butternut, type: :integer, aliases: "squash", squash: "id"
-      attribute :custom, parser: lambda{|v, opts| "X!#{v}"}
+      attribute :butternut_id, drill: ["squash", "id"], type: :integer
+      attribute :butternut_type, drill: ["squash", "type"]
+      attribute :squash
+      attribute :vegetable, aliases: "squash"
+      attribute :custom, parser: lambda { |v| "X!#{v}" }
 
       attribute :same_alias_1, aliases: "nested"
       attribute :same_alias_2, aliases: "nested"
 
-      attribute :same_alias_squashed_1, aliases: "nested", squash: "attr_1"
-      attribute :same_alias_squashed_2, aliases: "nested", squash: "attr_2"
-      attribute :same_alias_squashed_3, aliases: "nested", squash: "attr_2"
+      attribute :same_alias_squashed_1, drill: ["nested", "attr_1"]
+      attribute :same_alias_squashed_2, drill: ["nested", "attr_2"]
+      attribute :same_alias_squashed_3, drill: ["nested", "attr_2"]
 
       def save
         requires :flag
@@ -79,8 +82,22 @@ describe "Cistern::Model" do
       TypeSpec.new(custom: "15").custom.should == "X!15"
     end
 
-    it "should squash and cast" do
-      TypeSpec.new({"squash" => {"id" => "12"}}).butternut.should == 12
+    it "should drill, cast, alias an attribute and keep a vanilla reference" do
+      # vanilla drill
+      TypeSpec.new({"squash" => {"id" => "12", "type" => "fred"}}).butternut_type.should == "fred"
+      TypeSpec.new({"squash" => {"id" => "12", "type" => nil}}).butternut_type.should be_nil
+      TypeSpec.new({"squash" => nil}).butternut_type.should be_nil
+
+      # composite processors: drill and cast
+      TypeSpec.new({"squash" => {"id" => "12", "type" => "fred"}}).butternut_id.should == 12
+      TypeSpec.new({"squash" => {"id" => nil, "type" => "fred"}}).butternut_id.should be_nil
+      TypeSpec.new({"squash" => {"type" => "fred"}}).butternut_id.should be_nil
+
+      # override intermediate processing
+      TypeSpec.new({"squash" => {"id" => "12", "type" => "fred"}}).squash.should == {"id" => "12", "type" => "fred"}
+
+      # alias of override
+      TypeSpec.new({"squash" => {"id" => "12", "type" => "fred"}}).vegetable.should == {"id" => "12", "type" => "fred"}
     end
 
     context "allowing the same alias for multiple attributes" do
