@@ -69,7 +69,7 @@ class Foo::Client::Bar < Cistern::Model
   identity :id
 
   attribute :flavor
-  attribute :keypair_id, aliases: "keypair",  squash: "id"
+  attribute :keypair_id, aliases: "keypair",  drill: "id"
   attribute :private_ips, type: :array
 
   def destroy
