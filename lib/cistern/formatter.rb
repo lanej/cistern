@@ -4,9 +4,9 @@ module Cistern::Formatter
   autoload :Formatador, 'cistern/formatter/formatador'
 
   def self.default
-    if defined?(AwesomePrint)
+    if defined?(::AwesomePrint)
       Cistern::Formatter::AwesomePrint
-    elsif defined?(Formatador)
+    elsif defined?(::Formatador)
       Cistern::Formatter::Formatador
     else Cistern::Formatter::Default
     end
