@@ -121,7 +121,7 @@ class Cistern::Service
           else
             service::Mock.module_eval <<-EOS, __FILE__, __LINE__
               def #{request}(*args)
-                Cistern::Mock.not_implemented
+                Cistern::Mock.not_implemented(request)
               end
             EOS
           end
