@@ -1,7 +1,7 @@
 module Cistern
   class Mock
-    def self.not_implemented
-      raise NotImplementedError
+    def self.not_implemented(method="")
+      raise NotImplementedError, method ? "The call '#{method}' is not implemented" : ""
     end
 
     def self.random_hex(length)
