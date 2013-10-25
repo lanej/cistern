@@ -63,6 +63,8 @@ describe "Cistern::Model" do
       TypeSpec.new(flag: "1").flag.should be_true
       TypeSpec.new(flag: 0).flag.should be_false
       TypeSpec.new(flag: 1).flag.should be_true
+      TypeSpec.new(flag: false).should_not be_flag
+      TypeSpec.new(flag: true).should be_flag
     end
 
     it "should parse an array" do
