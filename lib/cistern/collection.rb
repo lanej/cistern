@@ -10,7 +10,7 @@ class Cistern::Collection < Array
     end
   end
 
-  %w[first last size count to_s].each do |method|
+  %w[first last size count inspect].each do |method|
     define_method(method) do
       lazy_load unless @loaded
       super()
