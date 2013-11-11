@@ -1,19 +1,38 @@
-class Cistern::Collection < Array
+class Cistern::Collection
   extend Cistern::Attributes::ClassMethods
   include Cistern::Attributes::InstanceMethods
 
-  %w[reject select slice].each do |method|
-    define_method(method) do |*args, &block|
-      lazy_load unless @loaded
-      data = super(*args, &block)
-      self.clone.clear.concat(data)
+  include Enumerable
+
+  def each(*args, &block)
+    lazy_load
+    self.data.each(*args, &block)
+    self
+  end
+
+  def ==(other)
+    lazy_load
+
+    case other
+    when Cistern::Collection
+      other.lazy_load
+      self.data == other.data
+    when Array
+      self.data == other
     end
   end
 
-  %w[first last size count to_s].each do |method|
+  %w[reject select slice].each do |method|
+    define_method(method) do |*args, &block|
+      lazy_load
+      self.clone(self.data.send(method, *args, &block))
+    end
+  end
+
+  %w[empty? first last size count to_s].each do |method|
     define_method(method) do
-      lazy_load unless @loaded
-      super()
+      lazy_load
+      self.data.send(method)
     end
   end
 
@@ -27,16 +46,27 @@ class Cistern::Collection < Array
 
   attr_accessor :connection
 
+  # @api private
+  attr_accessor :data
+
   alias build initialize
 
   def initialize(attributes = {})
     @loaded = false
+    @data = []
     merge_attributes(attributes)
   end
 
+  def clone(with_data=nil)
+    copy = super()
+    copy.data = with_data || @data.clone
+    copy
+  end
+
   def clear
-    @loaded = true
-    super
+    @loaded = false
+    @data.clear
+    self
   end
 
   def create(attributes={})
@@ -48,20 +78,22 @@ class Cistern::Collection < Array
   end
 
   def inspect
-    lazy_load unless @loaded
+    lazy_load
     Cistern.formatter.call(self)
   end
 
   # @api private
   def lazy_load
-    self.all
+    @loaded or self.all
+    nil
   end
 
   def load(objects)
     clear
     for object in objects
-      self << new(object)
+      self.data << new(object)
     end
+    @loaded = true
     self
   end
 
