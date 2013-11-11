@@ -35,7 +35,7 @@ class Cistern::Collection < Array
   end
 
   def clear
-    @loaded = true
+    @loaded = false
     super
   end
 
@@ -62,6 +62,7 @@ class Cistern::Collection < Array
     for object in objects
       self << new(object)
     end
+    @loaded = true
     self
   end
 
