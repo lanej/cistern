@@ -1,21 +1,14 @@
-class Cistern::Collection < Array
+class Cistern::Collection
   extend Cistern::Attributes::ClassMethods
   include Cistern::Attributes::InstanceMethods
 
-  %w[reject select slice].each do |method|
-    define_method(method) do |*args, &block|
-      lazy_load unless @loaded
-      data = super(*args, &block)
-      self.clone.clear.concat(data)
-    end
-  end
+  BLACKLISTED_ARRAY_METHODS = [
+    :compact!, :flatten!, :reject!, :reverse!, :rotate!, :map!,
+    :shuffle!, :slice!, :sort!, :sort_by!, :delete_if,
+    :keep_if, :pop, :shift, :delete_at, :compact
+  ].to_set # :nodoc:
 
-  %w[first last size count to_s].each do |method|
-    define_method(method) do
-      lazy_load unless @loaded
-      super()
-    end
-  end
+  attr_accessor :records, :loaded, :connection
 
   def self.model(new_model=nil)
     if new_model == nil
@@ -25,18 +18,14 @@ class Cistern::Collection < Array
     end
   end
 
-  attr_accessor :connection
-
   alias build initialize
 
   def initialize(attributes = {})
-    @loaded = false
     merge_attributes(attributes)
   end
 
-  def clear
-    @loaded = false
-    super
+  def all(identity)
+    raise NotImplementedError
   end
 
   def create(attributes={})
@@ -47,22 +36,29 @@ class Cistern::Collection < Array
     raise NotImplementedError
   end
 
+  def clear
+    self.loaded = false
+    records && records.clear
+  end
+
   def inspect
-    lazy_load unless @loaded
-    Cistern.formatter.call(self)
+    if Cistern.formatter
+      Cistern.formatter.call(self)
+    else super
+    end
   end
 
   # @api private
-  def lazy_load
-    self.all
+  def load_records
+    self.all unless self.loaded
   end
 
+  # Should be called within #all to load records into the collection
+  # @param [Array<Hash>] objects list of record attributes to be loaded
+  # @return self
   def load(objects)
-    clear
-    for object in objects
-      self << new(object)
-    end
-    @loaded = true
+    self.records = objects.map { |object| new(object) }
+    self.loaded = true
     self
   end
 
@@ -84,7 +80,30 @@ class Cistern::Collection < Array
 
   def reload
     clear
-    lazy_load
+    load_records
     self
+  end
+
+  def to_a
+    load_records
+    self.records || []
+  end
+
+  def respond_to?(method, include_private = false)
+    super || array_delegable?(method)
+  end
+
+  protected
+
+  def array_delegable?(method)
+    Array.method_defined?(method) && !BLACKLISTED_ARRAY_METHODS.include?(method)
+  end
+
+  def method_missing(method, *args, &block)
+    if array_delegable?(method)
+      to_a.public_send(method, *args, &block)
+    else
+      super
+    end
   end
 end

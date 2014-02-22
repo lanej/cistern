@@ -5,7 +5,10 @@ class Cistern::Model
   attr_accessor :collection, :connection
 
   def inspect
-    Cistern.formatter.call(self)
+    if Cistern.formatter
+      Cistern.formatter.call(self)
+    else super
+    end
   end
 
   def initialize(attributes={})
@@ -28,8 +31,8 @@ class Cistern::Model
 
   def ==(comparison_object)
     comparison_object.equal?(self) ||
-      (comparison_object.is_a?(self.class) && 
-       comparison_object.identity == self.identity && 
+      (comparison_object.is_a?(self.class) &&
+       comparison_object.identity == self.identity &&
        !comparison_object.new_record?)
   end
 

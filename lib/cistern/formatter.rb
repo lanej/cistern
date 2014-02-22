@@ -8,7 +8,6 @@ module Cistern::Formatter
       Cistern::Formatter::AwesomePrint
     elsif defined?(::Formatador)
       Cistern::Formatter::Formatador
-    else Cistern::Formatter::Default
     end
   end
 end

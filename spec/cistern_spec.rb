@@ -13,17 +13,7 @@ describe "#inspect" do
     end
   end
 
-  before(:all) do
-    Cistern.formatter = Cistern::Formatter::Default
-  end
-
   describe "Cistern::Model" do
-    it "should use default" do
-      Cistern.formatter = Cistern::Formatter::Default
-
-      Inspector.new(id: 1, name: "name").inspect.should match /#<Inspector:0x[0-9a-f]+ attributes={id:1,name:\"name\"}/
-    end
-
     it "should use awesome_print" do
       Cistern.formatter = Cistern::Formatter::AwesomePrint
 
@@ -41,7 +31,8 @@ describe "#inspect" do
   end
 
   describe "Cistern::Collection" do
-    it "should use default" do
+    it "should use formatador" do
+      Cistern.formatter = Cistern::Formatter::Formatador
       Inspectors.new.all.inspect.should == %q{  <Inspectors
     [
       <Inspector
@@ -55,10 +46,10 @@ describe "#inspect" do
     ]
   >}
     end
+
     it "should use awesome_print" do
       Cistern.formatter = Cistern::Formatter::AwesomePrint
       Inspectors.new.all.inspect.should match(/Inspectors\s+\[.*\]$/m) # close enough
     end
-    it "should use formatador"
   end
 end

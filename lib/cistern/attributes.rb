@@ -1,12 +1,12 @@
 module Cistern::Attributes
   def self.parsers
     @parsers ||= {
-      :string  => lambda{|v,opts| v.to_s},
-      :time    => lambda{|v,opts| v.is_a?(Time) ? v : v && Time.parse(v.to_s)},
-      :integer => lambda{|v,opts| v && v.to_i},
-      :float   => lambda{|v,opts| v && v.to_f},
-      :array   => lambda{|v,opts| [*v]},
-      :boolean => lambda{|v,opts| ['true', '1'].include?(v.to_s.downcase)}
+      :string  => lambda { |v,opts| v.to_s },
+      :time    => lambda { |v,opts| v.is_a?(Time) ? v : v && Time.parse(v.to_s) },
+      :integer => lambda { |v,opts| v && v.to_i },
+      :float   => lambda { |v,opts| v && v.to_f },
+      :array   => lambda { |v,opts| [*v] },
+      :boolean => lambda { |v,opts| ['true', '1'].include?(v.to_s.downcase) }
     }
   end
 
@@ -25,12 +25,12 @@ module Cistern::Attributes
         else v
         end
       end,
-      :none => lambda{|k, v, opts| v},
+      :none => lambda { |k, v, opts| v },
     }
   end
 
   def self.default_parser
-    @default_parser ||= lambda{|v, opts| v}
+    @default_parser ||= lambda { |v, opts| v }
   end
 
   module ClassMethods
