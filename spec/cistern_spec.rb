@@ -5,10 +5,13 @@ describe "#inspect" do
     identity :id
     attribute :name
   end
+
   class Inspectors < Cistern::Collection
+
     model Inspector
 
-    def all
+    def all(options={})
+      merge_attributes(options)
       self.load([{id: 1, name: "2"},{id: 3, name: "4"}])
     end
   end
@@ -49,7 +52,7 @@ describe "#inspect" do
 
     it "should use awesome_print" do
       Cistern.formatter = Cistern::Formatter::AwesomePrint
-      Inspectors.new.all.inspect.should match(/Inspectors\s+\[.*\]$/m) # close enough
+      Inspectors.new.all.inspect.should match(/Inspectors\s+{.*}$/m) # close enough
     end
   end
 end

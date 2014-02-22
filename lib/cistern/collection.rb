@@ -57,7 +57,7 @@ class Cistern::Collection
   # @param [Array<Hash>] objects list of record attributes to be loaded
   # @return self
   def load(objects)
-    self.records = objects.map { |object| new(object) }
+    self.records = (objects || []).map { |object| new(object) }
     self.loaded = true
     self
   end
@@ -91,6 +91,12 @@ class Cistern::Collection
 
   def respond_to?(method, include_private = false)
     super || array_delegable?(method)
+  end
+
+  def ==(comparison_object)
+    comparison_object.equal?(self) ||
+      (comparison_object.is_a?(self.class) &&
+       comparison_object.to_a == self.to_a)
   end
 
   protected
