@@ -90,8 +90,11 @@ class Foo::Client::Bar < Cistern::Model
     }
 
     if new_record?
-      request_attributes = connection.create_bar(params).body["request"]
-      merge_attributes(new_attributes)
+      merge_attributes(connection.create_bar(params).body["bar"])
+    else
+      requires :identity
+
+      merge_attributes(connection.update_bar(params).body["bar"])
     end
   end
 end
@@ -111,10 +114,10 @@ class Foo::Client::Bars < Cistern::Collection
   def all(params = {})
     response = connection.get_bars(params)
 
-    data = self.clone.load(response.body["bars"])
+    data = response.body
 
-    collection.attributes.clear
-    collection.merge_attributes(data)
+    self.load(data["bars"])     # store bar records in collection
+    self.merge_attributes(data) # store any other attributes of the response on the collection
   end
 
   def discover(provisioned_id, options={})
