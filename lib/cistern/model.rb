@@ -7,7 +7,8 @@ class Cistern::Model
   def inspect
     if Cistern.formatter
       Cistern.formatter.call(self)
-    else super
+    else
+      "#<#{self.class} #{self.identity}"
     end
   end
 
