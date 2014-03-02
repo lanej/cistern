@@ -14,7 +14,17 @@ module Cistern::Attributes
     @transforms ||= {
       :squash  => Proc.new do |k, v, options|
         squash = options[:squash]
-        if v.is_a?(::Hash)
+        if v.is_a?(::Hash) && squash.is_a?(Array)
+          travel = lambda do |tree, path|
+            if tree.is_a?(::Hash)
+              subtree = tree[path.shift]
+              travel.call(subtree, path)
+            else tree
+            end
+          end
+
+          travel.call(v, squash.dup)
+        elsif v.is_a?(::Hash)
           if v.key?(squash.to_s.to_sym)
             v[squash.to_s.to_sym]
           elsif v.has_key?(squash.to_s)
@@ -43,10 +53,12 @@ module Cistern::Attributes
     end
 
     def attributes
-      @attributes ||= []
+      @attributes ||= {}
     end
 
-    def attribute(name, options = {})
+    def attribute(_name, options = {})
+      name = _name.to_s.to_sym
+
       parser = Cistern::Attributes.parsers[options[:type]] ||
         options[:parser] ||
         Cistern::Attributes.default_parser
@@ -62,8 +74,11 @@ module Cistern::Attributes
         attributes[name.to_s.to_sym]= parser.call(transformed, options)
       end
 
-      @attributes ||= []
-      @attributes |= [name]
+      if self.attributes[name]
+        raise(ArgumentError, "#{self.name} attribute[#{_name}] specified more than once")
+      else
+        self.attributes[name] = options
+      end
 
       Array(options[:aliases]).each do |new_alias|
         aliases[new_alias] ||= []
@@ -113,16 +128,22 @@ module Cistern::Attributes
     end
 
     def merge_attributes(new_attributes = {})
-      for key, value in new_attributes
+      new_attributes.each do |key, value|
+        # find nested paths
+        value.is_a?(::Hash) && self.class.attributes.each do |name, options|
+          if (options[:squash] || []).first == key
+            send("#{name}=", {key => value})
+          end
+        end
         unless self.class.ignored_attributes.include?(key)
           if self.class.aliases.has_key?(key)
             self.class.aliases[key].each do |aliased_key|
               send("#{aliased_key}=", value)
             end
-          elsif self.respond_to?("#{key}=", true)
+          end
+
+          if self.respond_to?("#{key}=", true)
             send("#{key}=", value)
-          else
-            # ignore data: unknown attribute : attributes[key] = value
           end
         end
       end
