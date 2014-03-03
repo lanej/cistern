@@ -1,0 +1,13 @@
+language: ruby
+rvm:
+  - "2.1.1"
+  - "1.9.3"
+  - "jruby-19mode"
+bundler_args: "--without development"
+before_install:
+  - "gem install bundler -v 1.5.2"
+script: "bundle exec rake --trace"
+notifications:
+  email:
+    on_success: never
+    on_failure: change
