@@ -1,5 +1,7 @@
 require 'cistern/version'
+
 require 'time'
+require 'set'
 
 module Cistern
 
@@ -15,7 +17,6 @@ module Cistern
   require 'cistern/service'
 
   extend WaitFor
-  timeout_error = Timeout
 
   autoload :Formatter, 'cistern/formatter'
 
