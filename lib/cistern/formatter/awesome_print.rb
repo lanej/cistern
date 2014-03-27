@@ -32,7 +32,7 @@ module AwesomePrint::Cistern
   # Format Cistern::Model
   #------------------------------------------------------------------------------
   def awesome_cistern_collection(object)
-    "#{object.class.name} " << awesome_hash(attributes: object.attributes, records: object.records)
+    "#{object.class.name} " << awesome_hash(attributes: object.attributes, records: object.to_a)
   end
 end
 
