@@ -2,8 +2,8 @@ require 'timeout'
 
 module Cistern
   module WaitFor
-    DEFAULT_TIMEOUT       = 3 * 60 # 3 minutes
-    DEFAULT_POLL_INTERVAL = 10 # seconds
+    DEFAULT_TIMEOUT       = 180 # 3 minutes
+    DEFAULT_POLL_INTERVAL = 10  # 10 seconds
 
     def timeout; @timeout || DEFAULT_TIMEOUT; end
     def timeout=(timeout); @timeout = timeout; end
