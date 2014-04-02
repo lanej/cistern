@@ -129,4 +129,38 @@ describe "Cistern::Model" do
       end
     end
   end
+
+  context "attribute coverage info collecting", :coverage do
+    class CoverageSpec < Cistern::Model
+      identity :id
+
+      attribute :used, type: :string
+      attribute :unused, type: :string
+    end
+
+    let!(:obj) { CoverageSpec.new(used: "foo", unused: "bar") }
+
+    before(:each) do
+      CoverageSpec.attributes[:used][:coverage_hits] = 0
+      obj.used.should == "foo" # once
+      obj.used.should == "foo" # twice
+    end
+
+    it "should store the file path where the attribute was defined" do
+      CoverageSpec.attributes[:used][:coverage_file].should == __FILE__
+      CoverageSpec.attributes[:unused][:coverage_file].should == __FILE__
+    end
+
+    it "should store the line number where the attribute was defined" do
+      src_lines = File.read(__FILE__).lines
+
+      src_lines[CoverageSpec.attributes[:used][:coverage_line] - 1].should match(/attribute :used/)
+      src_lines[CoverageSpec.attributes[:unused][:coverage_line] - 1].should match(/attribute :unused/)
+    end
+
+    it "should store how many times an attribute's reader is called" do
+      CoverageSpec.attributes[:used][:coverage_hits].should == 2
+      CoverageSpec.attributes[:unused][:coverage_hits].should == 0
+    end
+  end
 end
