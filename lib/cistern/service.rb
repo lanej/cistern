@@ -37,6 +37,10 @@ class Cistern::Service
       klass.send(:const_set, :Timeout, Class.new(Cistern::Error))
     end
 
+    def collection_path(collection_path)
+      @collection_path = collection_path
+    end
+
     def model_path(model_path)
       @model_path = model_path
     end
@@ -127,7 +131,14 @@ class Cistern::Service
           end
         end
         collections.each do |collection, options|
-          require File.join(@model_path, collection.to_s) unless options[:require] == false
+          unless options[:require] == false
+            if @collection_path
+              require File.join(@collection_path, collection.to_s)
+            else
+              require File.join(@model_path, collection.to_s)
+            end
+          end
+
           class_name = collection.to_s.split("_").map(&:capitalize).join
           self.const_get(:Collections).module_eval <<-EOS, __FILE__, __LINE__
             def #{collection}(attributes={})
