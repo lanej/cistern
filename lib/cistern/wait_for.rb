@@ -2,15 +2,29 @@ require 'timeout'
 
 module Cistern
   module WaitFor
-    DEFAULT_TIMEOUT       = 180 # 3 minutes
-    DEFAULT_POLL_INTERVAL = 10  # 10 seconds
+    def timeout
+      @timeout || Cistern.timeout
+    end
 
-    def timeout; @timeout || DEFAULT_TIMEOUT; end
-    def timeout=(timeout); @timeout = timeout; end
-    def poll_interval; @poll_interval || DEFAULT_POLL_INTERVAL; end
-    def poll_interval=(poll_interval); @poll_interval = poll_interval; end
-    def timeout_error=(timeout_error); @timeout_error = timeout_error; end
-    def timeout_error; @timeout_error || self.const_defined?(:Timeout) && self.const_get(:Timeout) || ::Timeout::Error; end
+    def timeout=(timeout)
+      @timeout = timeout
+    end
+
+    def poll_interval
+      @poll_interval || Cistern.poll_interval
+    end
+
+    def poll_interval=(poll_interval)
+      @poll_interval = poll_interval
+    end
+
+    def timeout_error=(timeout_error)
+      @timeout_error = timeout_error
+    end
+
+    def timeout_error
+      @timeout_error || self.const_defined?(:Timeout) && self.const_get(:Timeout) || ::Timeout::Error
+    end
 
     def wait_for(timeout = self.timeout, interval = self.poll_interval, &block)
       duration = 0

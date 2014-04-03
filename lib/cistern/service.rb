@@ -32,9 +32,22 @@ class Cistern::Service
         def self.service
           #{klass.name}
         end
+
+        class Real
+        end
+
+        class Mock
+        end
       EOS
 
       klass.send(:const_set, :Timeout, Class.new(Cistern::Error))
+
+      klass::Mock.send(:include, klass::Collections)
+      klass::Mock.send(:extend, Cistern::WaitFor)
+      klass::Mock.timeout_error = klass::Timeout
+      klass::Real.send(:include, klass::Collections)
+      klass::Real.send(:extend, Cistern::WaitFor)
+      klass::Real.timeout_error = klass::Timeout
     end
 
     def collection_path(collection_path)
@@ -154,12 +167,7 @@ class Cistern::Service
       validate_options(options)
       setup_requirements
 
-      klass = self.const_get(self.mocking? ? :Mock : :Real)
-
-      klass.send(:include, service::Collections)
-      klass.send(:extend, Cistern::WaitFor)
-      klass.timeout_error = service::Timeout
-      klass.new(options)
+      self.const_get(self.mocking? ? :Mock : :Real).new(options)
     end
 
     def reset!

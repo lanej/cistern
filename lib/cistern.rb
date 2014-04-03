@@ -26,3 +26,6 @@ module Cistern
     @formatter ||= Cistern::Formatter.default
   end
 end
+
+Cistern.timeout       = 180 # 3 minutes
+Cistern.poll_interval = 15  # 15 seconds
