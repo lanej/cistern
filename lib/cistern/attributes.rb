@@ -83,6 +83,10 @@ module Cistern::Attributes
         attributes[name.to_s.to_sym]
       end
 
+      if options[:type] == :boolean
+        self.send(:alias_method, "#{name}?", name)
+      end
+
       self.send(:define_method, "#{name}=") do |value|
         transformed = transform.call(name, value, options)
         attributes[name.to_s.to_sym]= parser.call(transformed, options)
