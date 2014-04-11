@@ -33,6 +33,7 @@ describe "Cistern::Model" do
       attribute :squash
       attribute :vegetable, aliases: "squash"
       attribute :custom, parser: lambda { |v, _| "X!#{v}" }
+      attribute :default, default: "im a squash"
 
       attribute :same_alias_1, aliases: "nested"
       attribute :same_alias_2, aliases: "nested"
@@ -100,6 +101,14 @@ describe "Cistern::Model" do
 
       # alias of override
       TypeSpec.new({"squash" => {"id" => "12", "type" => "fred"}}).vegetable.should == {"id" => "12", "type" => "fred"}
+    end
+
+    it "should set a default value" do
+      TypeSpec.new.default.should == "im a squash"
+    end
+
+    it "should override a default value" do
+      TypeSpec.new(default: "now im a different squash").default.should == "now im a different squash"
     end
 
     context "allowing the same alias for multiple attributes" do
