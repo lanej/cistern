@@ -5,6 +5,7 @@ module Cistern::Formatter::Formatador
     case model
     when Cistern::Collection then collection_inspect(model)
     when Cistern::Model then model_inspect(model)
+    when Cistern::Singular then model_inspect(model)
     else model.inspect
     end
   end

@@ -16,6 +16,8 @@ module AwesomePrint::Cistern
     cast = cast_without_cistern(object, type)
     if object.is_a?(Cistern::Model)
       cast = :cistern_model
+    elsif object.is_a?(Cistern::Singular)
+      cast = :cistern_model
     elsif object.is_a?(Cistern::Collection)
       cast = :cistern_collection
     end

@@ -15,6 +15,7 @@ module Cistern
   require 'cistern/collection'
   require 'cistern/model'
   require 'cistern/service'
+  require 'cistern/singular'
 
   extend WaitFor
 
