@@ -80,7 +80,7 @@ module Cistern::Attributes
         # record the attribute was accessed
         self.class.attributes[name.to_s.to_sym][:coverage_hits] += 1 rescue  nil
 
-        attributes[name.to_s.to_sym]
+        attributes.fetch(name.to_s.to_sym, options[:default])
       end unless self.instance_methods.include?(name)
 
       if options[:type] == :boolean
