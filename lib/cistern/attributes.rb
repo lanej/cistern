@@ -81,7 +81,7 @@ module Cistern::Attributes
         self.class.attributes[name.to_s.to_sym][:coverage_hits] += 1 rescue  nil
 
         attributes[name.to_s.to_sym]
-      end
+      end unless self.instance_methods.include?(name)
 
       if options[:type] == :boolean
         self.send(:alias_method, "#{name}?", name)
@@ -90,7 +90,7 @@ module Cistern::Attributes
       self.send(:define_method, "#{name}=") do |value|
         transformed = transform.call(name, value, options)
         attributes[name.to_s.to_sym]= parser.call(transformed, options)
-      end
+      end unless self.instance_methods.include?("#{name}=".to_sym)
 
       if self.attributes[name]
         raise(ArgumentError, "#{self.name} attribute[#{_name}] specified more than once")
