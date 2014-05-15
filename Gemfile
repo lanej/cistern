@@ -4,10 +4,13 @@ source "https://rubygems.org"
 gemspec
 
 group :test do
-  gem "guard-rspec"
+  gem "guard-rspec", "~> 4.2", require: false
+  gem "guard-bundler", "~> 2.0", require: false
   gem "pry-nav"
   gem "rake"
   gem "rspec", "~> 2.0"
+  gem "redis-namespace"
+  gem "codeclimate-test-reporter", require: false
 end
 
 group :formatters do

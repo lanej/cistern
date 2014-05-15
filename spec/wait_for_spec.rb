@@ -26,13 +26,13 @@ end
 
 describe 'Cistern#wait_for' do
   it "should return false if timeout exceeded" do
-    Cistern.wait_for(0, 0) { false }.should be_false
+    expect(Cistern.wait_for(0, 0) { false }).to be_false
   end
 end
 
 describe 'Cistern#wait_for!' do
   it "should raise if timeout exceeded" do
-    lambda { Cistern.wait_for!(0, 0) { false } }.should raise_exception(Cistern::Timeout)
+    expect { Cistern.wait_for!(0, 0) { false } }.to raise_exception(Cistern::Timeout)
   end
 end
 
@@ -41,7 +41,7 @@ describe 'Cistern::Model#wait_for!' do
   let(:model)   { service.wait_for_models.new(identity: 1) }
 
   it "should raise if timeout exceeded" do
-    lambda { model.wait_for!(0, 0) { false } }.should raise_exception(WaitForService::Timeout)
+    expect { model.wait_for!(0, 0) { false } }.to raise_exception(WaitForService::Timeout)
   end
 end
 
@@ -57,9 +57,9 @@ describe "WaitForModel#timeout" do
     elapsed = 0
 
     timeout(2) do
-      lambda do
+      expect do
         model.wait_for! { sleep(0.2); elapsed += 0.2; elapsed > 0.2 }
-      end.should raise_exception(WaitForService::Timeout)
+      end.to raise_exception(WaitForService::Timeout)
     end
   end
 
@@ -70,9 +70,9 @@ describe "WaitForModel#timeout" do
     elapsed = 0
 
     timeout(2) do
-      lambda do
+      expect do
         model.wait_for!(0.1) { sleep(0.2); elapsed += 0.2; elapsed > 0.2 }
-      end.should raise_exception(WaitForService::Timeout)
+      end.to raise_exception(WaitForService::Timeout)
     end
   end
 end

@@ -15,33 +15,33 @@ describe "Cistern::Collection" do
 
   it "should give to_s" do
     collection = SampleCollection.new
-    collection.to_s.should_not eq "[]"
-    collection.to_s.gsub(/:[^>]*/,'').should == collection.all.to_s.gsub(/:[^>]*/,'')
+    expect(collection.to_s).not_to eq "[]"
+    expect(collection.to_s.gsub(/:[^>]*/,'')).to eq(collection.all.to_s.gsub(/:[^>]*/,''))
   end
 
   it "should give size and count" do
-    SampleCollection.new.size.should == 3
-    SampleCollection.new.count.should == 3
+    expect(SampleCollection.new.size).to eq(3)
+    expect(SampleCollection.new.count).to eq(3)
   end
 
   it "should give first" do
-    SampleCollection.new.first.should == SampleCollectionModel.new(id: 1)
+    expect(SampleCollection.new.first).to eq(SampleCollectionModel.new(id: 1))
   end
 
   it "should give last" do
-    SampleCollection.new.last.should == SampleCollectionModel.new(id: 2)
+    expect(SampleCollection.new.last).to eq(SampleCollectionModel.new(id: 2))
   end
 
   it "should reject" do
-    SampleCollection.new.reject{|m| m.id == 2}.should == [SampleCollectionModel.new(id: 1), SampleCollectionModel.new(id: 3)]
+    expect(SampleCollection.new.reject{|m| m.id == 2}).to eq([SampleCollectionModel.new(id: 1), SampleCollectionModel.new(id: 3)])
   end
 
   it "should select" do
-    SampleCollection.new.select{|m| m.id == 2}.should == [SampleCollectionModel.new(id: 2)]
+    expect(SampleCollection.new.select{|m| m.id == 2}).to eq([SampleCollectionModel.new(id: 2)])
   end
 
   it "should slice" do
-    SampleCollection.new.slice(0,2).should == [SampleCollectionModel.new(id: 1), SampleCollectionModel.new(id: 3, name: "tom")]
+    expect(SampleCollection.new.slice(0,2)).to eq([SampleCollectionModel.new(id: 1), SampleCollectionModel.new(id: 3, name: "tom")])
   end
 
   it "should ==" do

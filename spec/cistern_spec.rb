@@ -26,17 +26,17 @@ describe "#inspect" do
     it "should use formatador" do
       Cistern.formatter = Cistern::Formatter::Formatador
 
-      Inspector.new(id: 1, name: "name").inspect.should == %q{  <Inspector
+      expect(Inspector.new(id: 1, name: "name").inspect).to eq(%q{  <Inspector
     id=1,
     name="name"
-  >}
+  >})
     end
   end
 
   describe "Cistern::Collection" do
     it "should use formatador" do
       Cistern.formatter = Cistern::Formatter::Formatador
-      Inspectors.new.all.inspect.should == %q{  <Inspectors
+      expect(Inspectors.new.all.inspect).to eq(%q{  <Inspectors
     [
       <Inspector
         id=1,
@@ -47,12 +47,12 @@ describe "#inspect" do
         name="4"
       >
     ]
-  >}
+  >})
     end
 
     it "should use awesome_print" do
       Cistern.formatter = Cistern::Formatter::AwesomePrint
-      Inspectors.new.all.inspect.should match(/Inspectors\s+{.*}$/m) # close enough
+      expect(Inspectors.new.all.inspect).to match(/Inspectors\s+{.*}$/m) # close enough
     end
   end
 end

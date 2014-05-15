@@ -16,10 +16,13 @@ module Cistern
   require 'cistern/model'
   require 'cistern/service'
   require 'cistern/singular'
+  require 'cistern/data'
+  require 'cistern/data/hash'
+  require 'cistern/data/redis'
 
   extend WaitFor
 
-  autoload :Formatter, 'cistern/formatter'
+  require 'cistern/formatter'
 
   def self.formatter=(formatter); @formatter = formatter; end
 

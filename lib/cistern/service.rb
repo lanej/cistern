@@ -34,9 +34,13 @@ class Cistern::Service
         end
 
         class Real
+          def initialize(options={})
+          end
         end
 
         class Mock
+          def initialize(options={})
+          end
         end
       EOS
 
@@ -44,6 +48,7 @@ class Cistern::Service
 
       klass::Mock.send(:include, klass::Collections)
       klass::Mock.send(:extend, Cistern::WaitFor)
+      klass::Mock.send(:extend, Cistern::Data)
       klass::Mock.timeout_error = klass::Timeout
       klass::Real.send(:include, klass::Collections)
       klass::Real.send(:extend, Cistern::WaitFor)
@@ -108,12 +113,15 @@ class Cistern::Service
 
     def validate_options(options={})
       required_options = Cistern::Hash.slice(options, *required_arguments)
+
       missing_required_options = required_arguments - required_options.keys
+
       unless missing_required_options.empty?
         raise "Missing required options: #{missing_required_options.inspect}"
       end
-      recognized_options = Cistern::Hash.slice(options, *(required_arguments + recognized_arguments))
+
       unrecognized_options = options.keys - (required_arguments + recognized_arguments)
+
       unless unrecognized_options.empty?
         raise "Unrecognized options: #{unrecognized_options.inspect}"
       end
@@ -132,7 +140,10 @@ class Cistern::Service
           EOS
         end
         requests.each do |request|
-          require File.join(@request_path, request.to_s)
+          unless service::Real.method_defined?(request.to_s)
+            require File.join(@request_path, request.to_s)
+          end
+
           if service::Mock.method_defined?(request)
             mocked_requests << request
           else

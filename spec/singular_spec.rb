@@ -16,13 +16,13 @@ describe "Cistern::Singular" do
   end
 
   it "should work" do
-    SampleSingular.new(connection: :fake).name.should == "amazing"
+    expect(SampleSingular.new(connection: :fake).name).to eq("amazing")
   end
 
   it "should reload" do
     singular = SampleSingular.new(connection: :fake)
     old_count = singular.count
-    singular.count.should == old_count
-    singular.reload.count.should > old_count
+    expect(singular.count).to eq(old_count)
+    expect(singular.reload.count).to be > old_count
   end
 end

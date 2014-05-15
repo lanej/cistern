@@ -12,11 +12,11 @@ describe "Cistern::Model" do
     model = DupSpec.new(id: 1, name: "string", properties: {value: "something", else: "what"})
     duplicate = model.dup
 
-    duplicate.should == model
-    duplicate.should_not eql model
+    expect(duplicate).to eq(model)
+    expect(duplicate).not_to eql model
 
     model.name= "anotherstring"
-    duplicate.name.should == "string"
+    expect(duplicate.name).to eq("string")
   end
 
   context "attribute parsing" do
@@ -48,95 +48,95 @@ describe "Cistern::Model" do
     end
 
     it "should parse string" do
-      TypeSpec.new(name: 1).name.should == "1"
+      expect(TypeSpec.new(name: 1).name).to eq("1")
     end
 
     it "should parse time" do
       time = Time.now
       created_at = TypeSpec.new(created_at: time.to_s).created_at
-      created_at.should be_a(Time)
-      created_at.to_i.should == time.to_i
+      expect(created_at).to be_a(Time)
+      expect(created_at.to_i).to eq(time.to_i)
     end
 
     it "should parse boolean" do
-      TypeSpec.new(flag: "false").flag.should be_false
-      TypeSpec.new(flag: "true").flag.should be_true
-      TypeSpec.new(flag: false).flag.should be_false
-      TypeSpec.new(flag: true).flag.should be_true
-      TypeSpec.new(flag: "0").flag.should be_false
-      TypeSpec.new(flag: "1").flag.should be_true
-      TypeSpec.new(flag: 0).flag.should be_false
-      TypeSpec.new(flag: 1).flag.should be_true
-      TypeSpec.new(flag: false).should_not be_flag
-      TypeSpec.new(flag: true).should be_flag
+      expect(TypeSpec.new(flag: "false").flag).to be_false
+      expect(TypeSpec.new(flag: "true").flag).to be_true
+      expect(TypeSpec.new(flag: false).flag).to be_false
+      expect(TypeSpec.new(flag: true).flag).to be_true
+      expect(TypeSpec.new(flag: "0").flag).to be_false
+      expect(TypeSpec.new(flag: "1").flag).to be_true
+      expect(TypeSpec.new(flag: 0).flag).to be_false
+      expect(TypeSpec.new(flag: 1).flag).to be_true
+      expect(TypeSpec.new(flag: false)).not_to be_flag
+      expect(TypeSpec.new(flag: true)).to be_flag
     end
 
     it "should parse an array" do
-      TypeSpec.new(list: []).list.should == []
-      TypeSpec.new(list: "item").list.should == ["item"]
+      expect(TypeSpec.new(list: []).list).to eq([])
+      expect(TypeSpec.new(list: "item").list).to eq(["item"])
     end
 
     it "should parse a float" do
-      TypeSpec.new(floater: "0.01").floater.should == 0.01
-      TypeSpec.new(floater: 0.01).floater.should == 0.01
+      expect(TypeSpec.new(floater: "0.01").floater).to eq(0.01)
+      expect(TypeSpec.new(floater: 0.01).floater).to eq(0.01)
     end
 
     it "should use custom parser" do
-      TypeSpec.new(custom: "15").custom.should == "X!15"
+      expect(TypeSpec.new(custom: "15").custom).to eq("X!15")
     end
 
     it "should squash, cast, alias an attribute and keep a vanilla reference" do
       # vanilla squash
-      TypeSpec.new({"squash" => {"id" => "12", "type" => "fred"}}).butternut_type.should == "fred"
-      TypeSpec.new({"squash" => {"id" => "12", "type" => nil}}).butternut_type.should be_nil
-      TypeSpec.new({"squash" => nil}).butternut_type.should be_nil
+      expect(TypeSpec.new({"squash" => {"id" => "12", "type" => "fred"}}).butternut_type).to eq("fred")
+      expect(TypeSpec.new({"squash" => {"id" => "12", "type" => nil}}).butternut_type).to be_nil
+      expect(TypeSpec.new({"squash" => nil}).butternut_type).to be_nil
 
       # composite processors: squash and cast
-      TypeSpec.new({"squash" => {"id" => "12", "type" => "fred"}}).butternut_id.should == 12
-      TypeSpec.new({"squash" => {"id" => nil, "type" => "fred"}}).butternut_id.should be_nil
-      TypeSpec.new({"squash" => {"type" => "fred"}}).butternut_id.should be_nil
+      expect(TypeSpec.new({"squash" => {"id" => "12", "type" => "fred"}}).butternut_id).to eq(12)
+      expect(TypeSpec.new({"squash" => {"id" => nil, "type" => "fred"}}).butternut_id).to be_nil
+      expect(TypeSpec.new({"squash" => {"type" => "fred"}}).butternut_id).to be_nil
 
       # override intermediate processing
-      TypeSpec.new({"squash" => {"id" => "12", "type" => "fred"}}).squash.should == {"id" => "12", "type" => "fred"}
+      expect(TypeSpec.new({"squash" => {"id" => "12", "type" => "fred"}}).squash).to eq({"id" => "12", "type" => "fred"})
 
       # alias of override
-      TypeSpec.new({"squash" => {"id" => "12", "type" => "fred"}}).vegetable.should == {"id" => "12", "type" => "fred"}
+      expect(TypeSpec.new({"squash" => {"id" => "12", "type" => "fred"}}).vegetable).to eq({"id" => "12", "type" => "fred"})
     end
 
     it "should set a default value" do
-      TypeSpec.new.default.should == "im a squash"
+      expect(TypeSpec.new.default).to eq("im a squash")
     end
 
     it "should override a default value" do
-      TypeSpec.new(default: "now im a different squash").default.should == "now im a different squash"
+      expect(TypeSpec.new(default: "now im a different squash").default).to eq("now im a different squash")
     end
 
     context "allowing the same alias for multiple attributes" do
       it "should do so when not squashing" do
         type_spec = TypeSpec.new({"nested" => "bamboo"})
-        type_spec.same_alias_1.should == "bamboo"
-        type_spec.same_alias_2.should == "bamboo"
+        expect(type_spec.same_alias_1).to eq("bamboo")
+        expect(type_spec.same_alias_2).to eq("bamboo")
       end
 
       it "should do so when squashing" do
         type_spec = TypeSpec.new({"nested" => {"attr_1" => "bamboo", "attr_2" => "panda"}})
-        type_spec.same_alias_squashed_1.should == "bamboo"
-        type_spec.same_alias_squashed_2.should == "panda"
-        type_spec.same_alias_squashed_3.should == "panda"
+        expect(type_spec.same_alias_squashed_1).to eq("bamboo")
+        expect(type_spec.same_alias_squashed_2).to eq("panda")
+        expect(type_spec.same_alias_squashed_3).to eq("panda")
       end
     end
 
     it "should slice out unaccounted for attributes" do
-      TypeSpec.new({"something" => {"id" => "12"}}).attributes.keys.should_not include("something")
+      expect(TypeSpec.new({"something" => {"id" => "12"}}).attributes.keys).not_to include("something")
     end
 
     describe "#requires" do
       it "should raise if attribute not provided" do
-        lambda { TypeSpec.new({"connection" => "fake", "something" => {"id" => "12"}}).save }.should raise_exception(ArgumentError)
+        expect { TypeSpec.new({"connection" => "fake", "something" => {"id" => "12"}}).save }.to raise_exception(ArgumentError)
       end
 
       it "should raise if attribute is provided and is nil" do
-        lambda { TypeSpec.new({"connection" => "fake", "custom" => nil}).save }.should raise_exception(ArgumentError)
+        expect { TypeSpec.new({"connection" => "fake", "custom" => nil}).save }.to raise_exception(ArgumentError)
       end
     end
   end
@@ -153,25 +153,25 @@ describe "Cistern::Model" do
 
     before(:each) do
       CoverageSpec.attributes[:used][:coverage_hits] = 0
-      obj.used.should == "foo" # once
-      obj.used.should == "foo" # twice
+      expect(obj.used).to eq("foo") # once
+      expect(obj.used).to eq("foo") # twice
     end
 
     it "should store the file path where the attribute was defined" do
-      CoverageSpec.attributes[:used][:coverage_file].should == __FILE__
-      CoverageSpec.attributes[:unused][:coverage_file].should == __FILE__
+      expect(CoverageSpec.attributes[:used][:coverage_file]).to eq(__FILE__)
+      expect(CoverageSpec.attributes[:unused][:coverage_file]).to eq(__FILE__)
     end
 
     it "should store the line number where the attribute was defined" do
       src_lines = File.read(__FILE__).lines
 
-      src_lines[CoverageSpec.attributes[:used][:coverage_line] - 1].should match(/attribute :used/)
-      src_lines[CoverageSpec.attributes[:unused][:coverage_line] - 1].should match(/attribute :unused/)
+      expect(src_lines[CoverageSpec.attributes[:used][:coverage_line] - 1]).to match(/attribute :used/)
+      expect(src_lines[CoverageSpec.attributes[:unused][:coverage_line] - 1]).to match(/attribute :unused/)
     end
 
     it "should store how many times an attribute's reader is called" do
-      CoverageSpec.attributes[:used][:coverage_hits].should == 2
-      CoverageSpec.attributes[:unused][:coverage_hits].should == 0
+      expect(CoverageSpec.attributes[:used][:coverage_hits]).to eq(2)
+      expect(CoverageSpec.attributes[:unused][:coverage_hits]).to eq(0)
     end
   end
 end
