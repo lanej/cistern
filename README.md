@@ -13,7 +13,7 @@ This represents the remote service that you are wrapping. If the service name is
 
 #### Requests
 
-Requests are enumerated using the ```request``` method and required immediately via the relative path specified via ```request_path```.
+Requests are enumerated using the `request` method and required immediately via the relative path specified via `request_path`.
 
     class Foo::Client < Cistern::Service
       request_path "my-foo/requests"
@@ -48,13 +48,13 @@ A request is method defined within the context of service and mode (Real or Mock
       end # Mock
     end # Foo::client
 
-All declared requests can be listed via ```Cistern::Service#requests```.
+All declared requests can be listed via `Cistern::Service#requests`.
 
     Foo::Client.requests # => [:get_bar, :get_bars]
 
 #### Models and Collections
 
-Models and collections have declaration semantics similar to requests.  Models and collections are enumerated via ```model``` and ```collection``` respectively.
+Models and collections have declaration semantics similar to requests.  Models and collections are enumerated via `model` and `collection` respectively.
 
     class Foo::Client < Cistern::Service
       model_path "my-foo/models"
@@ -65,7 +65,7 @@ Models and collections have declaration semantics similar to requests.  Models a
 
 #### Initialization
 
-Service initialization parameters are enumerated by ```requires``` and ```recognizes```.  ```recognizes``` parameters are optional.
+Service initialization parameters are enumerated by `requires` and `recognizes`.  `recognizes` parameters are optional.
 
     class Foo::Client < Cistern::Service
       requires :hmac_id, :hmac_secret
@@ -81,9 +81,9 @@ Service initialization parameters are enumerated by ```requires``` and ```recogn
     Foo::Client.new(hmac_id: "1")
 
 
-#### Mocking
+### Mocking
 
-Cistern strongly encourages you to generate mock support for service. Mocking can be enabled using ```mock!```.
+Cistern strongly encourages you to generate mock support for service. Mocking can be enabled using `mock!`.
 
     Foo::Client.mocking?          # falsey
     real = Foo::Client.new        # Foo::Client::Real
@@ -95,10 +95,98 @@ Cistern strongly encourages you to generate mock support for service. Mocking ca
     real.is_a?(Foo::Client::Real) # true
     fake.is_a?(Foo::Client::Mock) # true
 
+#### Data
+
+A uniform interface for mock data is mixed into the `Mock` class by default.
+
+    Foo::Client.mock!
+    client = Foo::Client.new     # Foo::Client::Mock
+    client.data                  # Cistern::Data::Hash
+    client.data["bars"] += ["x"] # ["x"]
+
+Mock data is class-level by default
+
+    Foo::Client::Mock.data["bars"] # ["x"]
+
+`reset!` dimisses the `data` object.
+
+    client.data.object_id # 70199868585600
+    client.reset!
+    client.data["bars"]   # []
+    client.data.object_id # 70199868566840
+
+`clear` removes existing keys and values but keeps the same object.
+
+    client.data["bars"] += ["y"] # ["y"]
+    client.data.object_id        # 70199868378300
+    client.clear
+    client.data["bars"]          # []
+
+    client.data.object_id        # 70199868566840
+
+* `store` and `[]=` write
+* `fetch` and `[]` read
+
+You can make the service bypass Cistern's mock data structures by simply creating a `self.data` function in your service `Mock` declaration.
+
+    class Foo::Client < Cistern::Service
+      class Mock
+        def self.data
+          @data ||= {}
+        end
+      end
+    end
+
+
+#### Requests
+
+Mock requests should be defined within the contextual `Mock` module and interact with the `data` object directly.
+
+    # lib/foo/requests/create_bar.rb
+    class Foo::Client
+      class Mock
+        def create_bar(options={})
+          id = Foo.random_hex(6)
+
+          bar = {
+            "id" => id
+          }.merge(options)
+
+          self.data[:bars][id] = bar
+
+          response(
+            :body   => {"bar" => bar},
+            :status => 201,
+            :path => '/bar',
+          )
+        end
+      end # Mock
+    end # Foo::Client
+
+
+#### Storage
+
+Currently supported storage backends are:
+
+* `:hash` : `Cistern::Data::Hash` (default)
+* `:redis` : `Cistern::Data::Redis`
+
+
+Backends can be switched by using `store_in`.
+
+    # use redis with defaults
+    Patient::Mock.store_in(:redis)
+    # use redis with a specific client
+    Patient::Mock.store_in(:redis, client: Redis::Namespace.new("cistern", redis: Redis.new(host: "10.1.0.1"))
+    # use a hash
+    Patient::Mock.store_in(:hash)
 
 ### Model
 
-```connection``` represents the associated ```Foo::Client``` instance.
+* `connection` represents the associated `Foo::Client` instance.
+* `collection` represents the related collection (if applicable)
+
+Example
 
     class Foo::Client::Bar < Cistern::Model
       identity :id
@@ -136,7 +224,7 @@ Cistern strongly encourages you to generate mock support for service. Mocking ca
 
 ### Collection
 
-```model``` tells Cistern which class is contained within the collection.  ```Cistern::Collection``` inherits from ```Array``` and lazy loads where applicable.
+`model` tells Cistern which class is contained within the collection.  `Cistern::Collection` inherits from `Array` and lazy loads where applicable.
 
     class Foo::Client::Bars < Cistern::Collection
 
