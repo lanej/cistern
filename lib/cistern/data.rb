@@ -8,9 +8,15 @@ module Cistern::Data
     @backends ||= {}
   end
 
+  def self.backend(*args, &block)
+    engine, options = args
+
+    Cistern::Data.backends[engine].new(options || {}, &block)
+  end
+
   module ClassMethods
     def data
-      @data ||= Cistern::Data.backends[storage].new(@options || {}) { |d,k| d[k] = [] }
+      @data ||= Cistern::Data.backend(*storage) { |d,k| d[k] = [] }
     end
 
     def reset!
@@ -22,10 +28,9 @@ module Cistern::Data
       self.data.clear
     end
 
-    def store_in(storage, options)
-      @storage = storage
-      @options = options
-      @data = nil
+    def store_in(*args)
+      @storage = *args
+      @data    = nil
     end
 
     def storage
