@@ -70,17 +70,8 @@ module Cistern::Attributes
 
       name = _name.to_s.to_sym
 
-      parser = Cistern::Attributes.parsers[options[:type]] ||
-        options[:parser] ||
-        Cistern::Attributes.default_parser
-      transform = Cistern::Attributes.transforms[options[:squash] ? :squash : :none] ||
-        Cistern::Attributes.default_transform
-
       self.send(:define_method, name) do
-        # record the attribute was accessed
-        self.class.attributes[name.to_s.to_sym][:coverage_hits] += 1 rescue  nil
-
-        attributes.fetch(name.to_s.to_sym, options[:default])
+        read_attribute(name)
       end unless self.instance_methods.include?(name)
 
       if options[:type] == :boolean
@@ -88,8 +79,7 @@ module Cistern::Attributes
       end
 
       self.send(:define_method, "#{name}=") do |value|
-        transformed = transform.call(name, value, options)
-        attributes[name.to_s.to_sym]= parser.call(transformed, options)
+        write_attribute(name, value)
       end unless self.instance_methods.include?("#{name}=".to_sym)
 
       if self.attributes[name]
@@ -121,6 +111,25 @@ module Cistern::Attributes
   module InstanceMethods
     def _dump(level)
       Marshal.dump(attributes)
+    end
+
+    def read_attribute(name)
+      options = self.class.attributes[name] || {}
+      # record the attribute was accessed
+      self.class.attributes[name.to_s.to_sym][:coverage_hits] += 1 rescue  nil
+
+      attributes.fetch(name.to_s.to_sym, options[:default])
+    end
+
+    def write_attribute(name, value)
+      options = self.class.attributes[name] || {}
+      transform = Cistern::Attributes.transforms[options[:squash] ? :squash : :none] ||
+        Cistern::Attributes.default_transform
+      parser = Cistern::Attributes.parsers[options[:type]] ||
+        options[:parser] ||
+        Cistern::Attributes.default_parser
+      transformed = transform.call(name, value, options)
+      attributes[name.to_s.to_sym]= parser.call(transformed, options)
     end
 
     def attributes
