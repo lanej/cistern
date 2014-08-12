@@ -8,8 +8,8 @@ group :test do
   gem "guard-bundler", "~> 2.0", require: false
   gem "pry-nav"
   gem "rake"
-  gem "rspec", "~> 2.0"
-  gem "redis-namespace"
+  gem "rspec", "~> 2.99"
+  gem "redis-namespace", "~> 1.4", "< 1.5"
   gem "codeclimate-test-reporter", require: false
 end
 

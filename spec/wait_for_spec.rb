@@ -26,7 +26,7 @@ end
 
 describe 'Cistern#wait_for' do
   it "should return false if timeout exceeded" do
-    expect(Cistern.wait_for(0, 0) { false }).to be_false
+    expect(Cistern.wait_for(0, 0) { false }).to be_falsey
   end
 end
 

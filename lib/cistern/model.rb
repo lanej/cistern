@@ -31,10 +31,20 @@ class Cistern::Model
   end
 
   def ==(comparison_object)
-    comparison_object.equal?(self) ||
+    super ||
       (comparison_object.is_a?(self.class) &&
        comparison_object.identity == self.identity &&
        !comparison_object.new_record?)
+  end
+
+  alias :eql? :==
+
+  def hash
+    if self.identity
+      [self.class, self.identity].join(":").hash
+    else
+      super
+    end
   end
 
   def service

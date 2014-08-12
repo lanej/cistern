@@ -13,7 +13,7 @@ describe "Cistern::Model" do
     duplicate = model.dup
 
     expect(duplicate).to eq(model)
-    expect(duplicate).not_to eql model
+    expect(duplicate).to eql(model)
 
     model.name= "anotherstring"
     expect(duplicate.name).to eq("string")
@@ -59,14 +59,14 @@ describe "Cistern::Model" do
     end
 
     it "should parse boolean" do
-      expect(TypeSpec.new(flag: "false").flag).to be_false
-      expect(TypeSpec.new(flag: "true").flag).to be_true
-      expect(TypeSpec.new(flag: false).flag).to be_false
-      expect(TypeSpec.new(flag: true).flag).to be_true
-      expect(TypeSpec.new(flag: "0").flag).to be_false
-      expect(TypeSpec.new(flag: "1").flag).to be_true
-      expect(TypeSpec.new(flag: 0).flag).to be_false
-      expect(TypeSpec.new(flag: 1).flag).to be_true
+      expect(TypeSpec.new(flag: "false").flag).to be_falsey
+      expect(TypeSpec.new(flag: "true").flag).to be_truthy
+      expect(TypeSpec.new(flag: false).flag).to be_falsey
+      expect(TypeSpec.new(flag: true).flag).to be_truthy
+      expect(TypeSpec.new(flag: "0").flag).to be_falsey
+      expect(TypeSpec.new(flag: "1").flag).to be_truthy
+      expect(TypeSpec.new(flag: 0).flag).to be_falsey
+      expect(TypeSpec.new(flag: 1).flag).to be_truthy
       expect(TypeSpec.new(flag: false)).not_to be_flag
       expect(TypeSpec.new(flag: true)).to be_flag
     end
