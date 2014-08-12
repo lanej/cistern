@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe "cistern hashes" do
+describe "Cistern::Hash" do
   describe "#slice" do
     let(:input) do
       { one: "one", two: "two", three: "three" }
