@@ -48,23 +48,37 @@ class Cistern::Service
 
       klass::Mock.send(:include, klass::Collections)
       klass::Mock.send(:extend, Cistern::WaitFor)
-      klass::Mock.send(:extend, Cistern::Data)
       klass::Mock.timeout_error = klass::Timeout
+
+      klass::Mock.send(:extend, Cistern::Data)
+
       klass::Real.send(:include, klass::Collections)
       klass::Real.send(:extend, Cistern::WaitFor)
       klass::Real.timeout_error = klass::Timeout
     end
 
-    def collection_path(collection_path)
-      @collection_path = collection_path
+    def collection_path(collection_path = nil)
+      if collection_path
+        @collection_path = collection_path
+      else
+        @collection_path
+      end
     end
 
-    def model_path(model_path)
-      @model_path = model_path
+    def model_path(model_path = nil)
+      if model_path
+        @model_path = model_path
+      else
+        @model_path
+      end
     end
 
-    def request_path(request_path)
-      @request_path = request_path
+    def request_path(request_path = nil)
+      if request_path
+        @request_path = request_path
+      else
+        @request_path
+      end
     end
 
     def collections
