@@ -117,8 +117,8 @@ class Cistern::Service
       @mocked_requests ||= []
     end
 
-    def request(request_name)
-      requests << request_name
+    def request(request_name, options={})
+      requests << [request_name, options]
     end
 
     def collection(collection_name, options={})
@@ -144,18 +144,26 @@ class Cistern::Service
     def setup_requirements
       @required ||= false
       unless @required
+
+        # setup models
         models.each do |model, options|
-          require File.join(@model_path, model.to_s) unless options[:require] == false
+          unless options[:require] == false
+            require(options[:require] || File.join(@model_path, model.to_s))
+          end
+
           class_name = model.to_s.split("_").map(&:capitalize).join
+
           self.const_get(:Collections).module_eval <<-EOS, __FILE__, __LINE__
             def #{model}(attributes={})
               #{service}::#{class_name}.new({connection: self}.merge(attributes))
             end
           EOS
         end
-        requests.each do |request|
-          unless service::Real.method_defined?(request.to_s)
-            require File.join(@request_path, request.to_s)
+
+        # setup requests
+        requests.each do |request, options|
+          unless options[:require] == false || service::Real.method_defined?(request.to_s)
+            require(options[:require] || File.join(@request_path, request.to_s))
           end
 
           if service::Mock.method_defined?(request)
@@ -168,6 +176,8 @@ class Cistern::Service
             EOS
           end
         end
+
+        # setup collections
         collections.each do |collection, options|
           unless options[:require] == false
             if @collection_path
@@ -178,12 +188,14 @@ class Cistern::Service
           end
 
           class_name = collection.to_s.split("_").map(&:capitalize).join
+
           self.const_get(:Collections).module_eval <<-EOS, __FILE__, __LINE__
             def #{collection}(attributes={})
               #{service}::#{class_name}.new({connection: self}.merge(attributes))
             end
           EOS
         end
+
         @required = true
       end
     end
