@@ -2,6 +2,25 @@ require 'spec_helper'
 
 describe "Cistern::Model" do
 
+  describe "#update" do
+    class UpdateSpec < Cistern::Model
+      identity :id
+      attribute :name
+      attribute :properties
+
+      def save
+        attributes
+      end
+    end
+
+    it "should merge and save attributes" do
+      model = UpdateSpec.new(name: "steve")
+      model.save
+
+      expect(model.update(name: "karen")).to eq(name: "karen")
+    end
+  end
+
   it "should duplicate a model" do
     class DupSpec < Cistern::Model
       identity :id
@@ -15,7 +34,7 @@ describe "Cistern::Model" do
     expect(duplicate).to eq(model)
     expect(duplicate).to eql(model)
 
-    model.name= "anotherstring"
+    model.name = "anotherstring"
     expect(duplicate.name).to eq("string")
   end
 

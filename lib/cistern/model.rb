@@ -16,6 +16,11 @@ class Cistern::Model
     merge_attributes(attributes)
   end
 
+  def update(attributes)
+    merge_attributes(attributes)
+    save
+  end
+
   def save
     raise NotImplementedError
   end
