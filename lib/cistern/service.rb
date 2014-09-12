@@ -151,10 +151,11 @@ class Cistern::Service
             require(options[:require] || File.join(@model_path, model.to_s))
           end
 
-          class_name = model.to_s.split("_").map(&:capitalize).join
+          class_name    = options[:class] || model.to_s.split("_").map(&:capitalize).join
+          singular_name = options[:model] || model.to_s.gsub("/", "_")
 
           self.const_get(:Collections).module_eval <<-EOS, __FILE__, __LINE__
-            def #{model}(attributes={})
+            def #{singular_name}(attributes={})
               #{service}::#{class_name}.new({connection: self}.merge(attributes))
             end
           EOS
@@ -180,17 +181,14 @@ class Cistern::Service
         # setup collections
         collections.each do |collection, options|
           unless options[:require] == false
-            if @collection_path
-              require File.join(@collection_path, collection.to_s)
-            else
-              require File.join(@model_path, collection.to_s)
-            end
+            require(options[:require] || File.join(@collection_path || @model_path, request.to_s))
           end
 
-          class_name = collection.to_s.split("_").map(&:capitalize).join
+          class_name = collection.to_s.split("/").map(&:capitalize).join("::").split("_").map { |s| "#{s[0].upcase}#{s[1..-1]}" }.join
+          plural_name = options[:collection] || collection.to_s.gsub("/", "_")
 
           self.const_get(:Collections).module_eval <<-EOS, __FILE__, __LINE__
-            def #{collection}(attributes={})
+            def #{plural_name}(attributes={})
               #{service}::#{class_name}.new({connection: self}.merge(attributes))
             end
           EOS
