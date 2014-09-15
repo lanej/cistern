@@ -181,7 +181,7 @@ class Cistern::Service
         # setup collections
         collections.each do |collection, options|
           unless options[:require] == false
-            require(options[:require] || File.join(@collection_path || @model_path, request.to_s))
+            require(options[:require] || File.join(@collection_path || @model_path, collection.to_s))
           end
 
           class_name = collection.to_s.split("/").map(&:capitalize).join("::").split("_").map { |s| "#{s[0].upcase}#{s[1..-1]}" }.join
