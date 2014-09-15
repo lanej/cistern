@@ -123,13 +123,26 @@ module Cistern::Attributes
 
     def write_attribute(name, value)
       options = self.class.attributes[name] || {}
+
       transform = Cistern::Attributes.transforms[options[:squash] ? :squash : :none] ||
         Cistern::Attributes.default_transform
+
       parser = Cistern::Attributes.parsers[options[:type]] ||
         options[:parser] ||
         Cistern::Attributes.default_parser
+
       transformed = transform.call(name, value, options)
-      attributes[name.to_s.to_sym]= parser.call(transformed, options)
+
+      new_value = parser.call(transformed, options)
+      attribute = name.to_s.to_sym
+
+      previous_value = attributes[attribute]
+
+      attributes[attribute] = new_value
+
+      changed!(attribute, previous_value, new_value)
+
+      new_value
     end
 
     def attributes
@@ -174,6 +187,7 @@ module Cistern::Attributes
           end
         end
       end
+      changed.clear
       self
     end
 
@@ -198,10 +212,30 @@ module Cistern::Attributes
       end
     end
 
+    def dirty?
+      changed.any?
+    end
+
+    def dirty_attributes
+      changed.inject({}) { |r,(k,(_,v))| r.merge(k => v) }
+    end
+
+    def changed
+      @changes ||= {}
+    end
+
     protected
 
     def missing_attributes(args)
       ([:connection] | args).select{|arg| send("#{arg}").nil?}
+    end
+
+    def changed!(attribute, from, to)
+      changed[attribute] = if existing = changed[attribute]
+                             [existing.first, to]
+                           else
+                             [from, to]
+                           end
     end
   end
 end

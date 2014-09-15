@@ -1,7 +1,6 @@
 require 'spec_helper'
 
 describe "Cistern::Model" do
-
   describe "#update" do
     class UpdateSpec < Cistern::Model
       identity :id
