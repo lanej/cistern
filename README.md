@@ -15,154 +15,177 @@ This represents the remote service that you are wrapping. If the service name is
 
 Requests are enumerated using the `request` method and required immediately via the relative path specified via `request_path`.
 
-    class Foo::Client < Cistern::Service
-      request_path "my-foo/requests"
+```ruby
+class Foo::Client < Cistern::Service
+  request_path "my-foo/requests"
 
-      request :get_bar  # require my-foo/requests/get_bar.rb
-      request :get_bars # require my-foo/requests/get_bars.rb
+  request :get_bar  # require my-foo/requests/get_bar.rb
+  request :get_bars # require my-foo/requests/get_bars.rb
 
-      class Real
-        def request(url)
-          Net::HTTP.get(url)
-        end
-      end
+  class Real
+    def request(url)
+      Net::HTTP.get(url)
     end
+  end
+end
+```
 
 
 <!--todo move to a request section-->
 A request is method defined within the context of service and mode (Real or Mock).  Defining requests within the service mock class is optional.
 
-    # my-foo/requests/get_bar.rb
-    class Foo::Client
-      class Real
-        def get_bar(bar_id)
-          request("http://example.org/bar/#{bar_id}")
-        end
-      end # Real
+```ruby
+# my-foo/requests/get_bar.rb
+class Foo::Client
+  class Real
+    def get_bar(bar_id)
+      request("http://example.org/bar/#{bar_id}")
+    end
+  end # Real
 
-      # optional, but encouraged
-      class Mock
-        def get_bars
-          # do some mock things
-        end
-      end # Mock
-    end # Foo::client
+  # optional, but encouraged
+  class Mock
+    def get_bars
+      # do some mock things
+    end
+  end # Mock
+end # Foo::client
+```
 
 All declared requests can be listed via `Cistern::Service#requests`.
 
-    Foo::Client.requests # => [:get_bar, :get_bars]
+```ruby
+Foo::Client.requests # => [:get_bar, :get_bars]
+```
 
 #### Models and Collections
 
 Models and collections have declaration semantics similar to requests.  Models and collections are enumerated via `model` and `collection` respectively.
 
-    class Foo::Client < Cistern::Service
-      model_path "my-foo/models"
+```ruby
+class Foo::Client < Cistern::Service
+  model_path "my-foo/models"
 
-      model :bar       # require my-foo/models/bar.rb
-      collection :bars # require my-foo/models/bars.rb
-    end
+  model :bar       # require my-foo/models/bar.rb
+  collection :bars # require my-foo/models/bars.rb
+end
+```
 
 #### Initialization
 
 Service initialization parameters are enumerated by `requires` and `recognizes`.  `recognizes` parameters are optional.
 
-    class Foo::Client < Cistern::Service
-      requires :hmac_id, :hmac_secret
-      recognizes :url
-    end
+```ruby
+class Foo::Client < Cistern::Service
+  requires :hmac_id, :hmac_secret
+  recognizes :url
+end
 
-    # Acceptable
-    Foo::Client.new(hmac_id: "1", hmac_secret: "2")                            # Foo::Client::Real
-    Foo::Client.new(hmac_id: "1", hmac_secret: "2", url: "http://example.org") # Foo::Client::Real
+# Acceptable
+Foo::Client.new(hmac_id: "1", hmac_secret: "2")                            # Foo::Client::Real
+Foo::Client.new(hmac_id: "1", hmac_secret: "2", url: "http://example.org") # Foo::Client::Real
 
-    # ArgumentError
-    Foo::Client.new(hmac_id: "1", url: "http://example.org")
-    Foo::Client.new(hmac_id: "1")
+# ArgumentError
+Foo::Client.new(hmac_id: "1", url: "http://example.org")
+Foo::Client.new(hmac_id: "1")
+```
 
 
 ### Mocking
 
 Cistern strongly encourages you to generate mock support for service. Mocking can be enabled using `mock!`.
 
-    Foo::Client.mocking?          # falsey
-    real = Foo::Client.new        # Foo::Client::Real
-    Foo::Client.mock!
-    Foo::Client.mocking?          # true
-    fake = Foo::Client.new        # Foo::Client::Mock
-    Foo::Client.unmock!
-    Foo::Client.mocking?          # false
-    real.is_a?(Foo::Client::Real) # true
-    fake.is_a?(Foo::Client::Mock) # true
+```ruby
+Foo::Client.mocking?          # falsey
+real = Foo::Client.new        # Foo::Client::Real
+Foo::Client.mock!
+Foo::Client.mocking?          # true
+fake = Foo::Client.new        # Foo::Client::Mock
+Foo::Client.unmock!
+Foo::Client.mocking?          # false
+real.is_a?(Foo::Client::Real) # true
+fake.is_a?(Foo::Client::Mock) # true
+```
 
 #### Data
 
 A uniform interface for mock data is mixed into the `Mock` class by default.
 
-    Foo::Client.mock!
-    client = Foo::Client.new     # Foo::Client::Mock
-    client.data                  # Cistern::Data::Hash
-    client.data["bars"] += ["x"] # ["x"]
+```ruby
+Foo::Client.mock!
+client = Foo::Client.new     # Foo::Client::Mock
+client.data                  # Cistern::Data::Hash
+client.data["bars"] += ["x"] # ["x"]
+```
 
 Mock data is class-level by default
 
-    Foo::Client::Mock.data["bars"] # ["x"]
+```ruby
+Foo::Client::Mock.data["bars"] # ["x"]
+```
 
 `reset!` dimisses the `data` object.
 
-    client.data.object_id # 70199868585600
-    client.reset!
-    client.data["bars"]   # []
-    client.data.object_id # 70199868566840
+```ruby
+client.data.object_id # 70199868585600
+client.reset!
+client.data["bars"]   # []
+client.data.object_id # 70199868566840
+```
 
 `clear` removes existing keys and values but keeps the same object.
 
-    client.data["bars"] += ["y"] # ["y"]
-    client.data.object_id        # 70199868378300
-    client.clear
-    client.data["bars"]          # []
+```ruby
+client.data["bars"] += ["y"] # ["y"]
+client.data.object_id        # 70199868378300
+client.clear
+client.data["bars"]          # []
 
-    client.data.object_id        # 70199868566840
+client.data.object_id        # 70199868566840
+```
 
 * `store` and `[]=` write
 * `fetch` and `[]` read
 
 You can make the service bypass Cistern's mock data structures by simply creating a `self.data` function in your service `Mock` declaration.
 
-    class Foo::Client < Cistern::Service
-      class Mock
-        def self.data
-          @data ||= {}
-        end
-      end
+```ruby
+class Foo::Client < Cistern::Service
+  class Mock
+    def self.data
+      @data ||= {}
     end
+  end
+end
+```
 
 
 #### Requests
 
 Mock requests should be defined within the contextual `Mock` module and interact with the `data` object directly.
 
-    # lib/foo/requests/create_bar.rb
-    class Foo::Client
-      class Mock
-        def create_bar(options={})
-          id = Foo.random_hex(6)
+```ruby
+# lib/foo/requests/create_bar.rb
+class Foo::Client
+  class Mock
+    def create_bar(options={})
+      id = Foo.random_hex(6)
 
-          bar = {
-            "id" => id
-          }.merge(options)
+      bar = {
+        "id" => id
+      }.merge(options)
 
-          self.data[:bars][id] = bar
+      self.data[:bars][id] = bar
 
-          response(
-            :body   => {"bar" => bar},
-            :status => 201,
-            :path => '/bar',
-          )
-        end
-      end # Mock
-    end # Foo::Client
-
+      response(
+        :body   => {"bar" => bar},
+        :status => 201,
+        :path => '/bar',
+      )
+    end
+  end # Mock
+end # Foo::Client
+```
 
 #### Storage
 
@@ -174,12 +197,14 @@ Currently supported storage backends are:
 
 Backends can be switched by using `store_in`.
 
-    # use redis with defaults
-    Patient::Mock.store_in(:redis)
-    # use redis with a specific client
-    Patient::Mock.store_in(:redis, client: Redis::Namespace.new("cistern", redis: Redis.new(host: "10.1.0.1"))
-    # use a hash
-    Patient::Mock.store_in(:hash)
+```ruby
+# use redis with defaults
+Patient::Mock.store_in(:redis)
+# use redis with a specific client
+Patient::Mock.store_in(:redis, client: Redis::Namespace.new("cistern", redis: Redis.new(host: "10.1.0.1"))
+# use a hash
+Patient::Mock.store_in(:hash)
+```
 
 ### Model
 
@@ -188,108 +213,141 @@ Backends can be switched by using `store_in`.
 
 Example
 
-    class Foo::Client::Bar < Cistern::Model
-      identity :id
+```ruby
+class Foo::Client::Bar < Cistern::Model
+  identity :id
 
-      attribute :flavor
-      attribute :keypair_id, aliases: "keypair",  squash: "id"
-      attribute :private_ips, type: :array
+  attribute :flavor
+  attribute :keypair_id, aliases: "keypair",  squash: "id"
+  attribute :private_ips, type: :array
 
-      def destroy
-        params  = {
-          "id" => self.identity
-        }
-        self.connection.destroy_bar(params).body["request"]
-      end
+  def destroy
+    params  = {
+      "id" => self.identity
+    }
+    self.connection.destroy_bar(params).body["request"]
+  end
 
-      def save
-        requires :keypair_id
+  def save
+    requires :keypair_id
 
-        params = {
-          "keypair" => self.keypair_id,
-          "bar"     => {
-            "flavor" => self.flavor,
-          },
-        }
+    params = {
+      "keypair" => self.keypair_id,
+      "bar"     => {
+        "flavor" => self.flavor,
+      },
+    }
 
-        if new_record?
-          merge_attributes(connection.create_bar(params).body["bar"])
-        else
-          requires :identity
+    if new_record?
+      merge_attributes(connection.create_bar(params).body["bar"])
+    else
+      requires :identity
 
-          merge_attributes(connection.update_bar(params).body["bar"])
-        end
-      end
+      merge_attributes(connection.update_bar(params).body["bar"])
     end
+  end
+end
+```
+
+#### Dirty
+
+Dirty attributes are tracked and cleared when `merge_attributes` is called.
+
+* `changed` returns a Hash of changed attributes mapped to there initial value and current value
+* `dirty_attributes` returns Hash of changed attributes with there current value.  This should be used in the model `save` function.
+
+
+```ruby
+bar = Foo::Client::Bar.new(id: 1, flavor: "x") # => <#Foo::Client::Bar>
+
+bar.dirty?           # => false
+bar.changed          # => {}
+bar.dirty_attributes # => {}
+
+bar.flavor = "y"
+
+bar.dirty?           # => true
+bar.changed          # => {flavor: ["x", "y"]}
+bar.dirty_attributes # => {flavor: "y"}
+
+bar.save
+bar.dirty?           # => false
+bar.changed          # => {}
+bar.dirty_attributes # => {}
+```
 
 ### Collection
 
 `model` tells Cistern which class is contained within the collection.  `Cistern::Collection` inherits from `Array` and lazy loads where applicable.
 
-    class Foo::Client::Bars < Cistern::Collection
+```ruby
+class Foo::Client::Bars < Cistern::Collection
 
-      model Foo::Client::Bar
+  model Foo::Client::Bar
 
-      def all(params = {})
-        response = connection.get_bars(params)
+  def all(params = {})
+    response = connection.get_bars(params)
 
-        data = response.body
+    data = response.body
 
-        self.load(data["bars"])     # store bar records in collection
-        self.merge_attributes(data) # store any other attributes of the response on the collection
-      end
+    self.load(data["bars"])     # store bar records in collection
+    self.merge_attributes(data) # store any other attributes of the response on the collection
+  end
 
-      def discover(provisioned_id, options={})
-        params = {
-          "provisioned_id" => provisioned_id,
-        }
-        params.merge!("location" => options[:location]) if options.key?(:location)
+  def discover(provisioned_id, options={})
+    params = {
+      "provisioned_id" => provisioned_id,
+    }
+    params.merge!("location" => options[:location]) if options.key?(:location)
 
-        connection.requests.new(connection.discover_bar(params).body["request"])
-      end
+    connection.requests.new(connection.discover_bar(params).body["request"])
+  end
 
-      def get(id)
-        if data = connection.get_bar("id" => id).body["bar"]
-          new(data)
-        else
-          nil
-        end
-      end
+  def get(id)
+    if data = connection.get_bar("id" => id).body["bar"]
+      new(data)
+    else
+      nil
     end
+  end
+end
+```
 
 ### Request
 
-    module Foo
-      class Client
-        class Real
-          def create_bar(options={})
-            request(
-              :body     => {"bar" => options},
-              :method   => :post,
-              :path     => '/bar'
-            )
-          end
-        end # Real
+```ruby
+module Foo
+  class Client
+    class Real
+      def create_bar(options={})
+        request(
+          :body     => {"bar" => options},
+          :method   => :post,
+          :path     => '/bar'
+        )
+      end
+    end # Real
 
-        class Mock
-          def create_bar(options={})
-            id = Foo.random_hex(6)
+    class Mock
+      def create_bar(options={})
+        id = Foo.random_hex(6)
 
-            bar = {
-              "id" => id
-            }.merge(options)
+        bar = {
+          "id" => id
+        }.merge(options)
 
-            self.data[:bars][id]= bar
+        self.data[:bars][id]= bar
 
-            response(
-              :body   => {"bar" => bar},
-              :status => 201,
-              :path => '/bar',
-            )
-          end
-        end # Mock
-      end # Client
-    end # Foo
+        response(
+          :body   => {"bar" => bar},
+          :status => 201,
+          :path => '/bar',
+        )
+      end
+    end # Mock
+  end # Client
+end # Foo
+```
 
 ## Examples
 
