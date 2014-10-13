@@ -59,6 +59,7 @@ describe "Cistern::Model" do
       attribute :same_alias_squashed_1, squash: ["nested", "attr_1"]
       attribute :same_alias_squashed_2, squash: ["nested", "attr_2"]
       attribute :same_alias_squashed_3, squash: ["nested", "attr_2"]
+      attribute :adam_attributes, aliases: "attributes"
 
       def save
         requires :flag
@@ -67,6 +68,10 @@ describe "Cistern::Model" do
 
     it "should parse string" do
       expect(TypeSpec.new(name: 1).name).to eq("1")
+    end
+
+    it "should handle a 'attributes' aliased attribute" do
+      expect(TypeSpec.new(attributes: "x").adam_attributes).to eq("x")
     end
 
     it "should parse time" do

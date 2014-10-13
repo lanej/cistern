@@ -12,13 +12,14 @@ module Cistern::Attributes
 
   def self.transforms
     @transforms ||= {
-      :squash  => Proc.new do |k, v, options|
+      :squash  => Proc.new do |k, _v, options|
+        v      = Cistern::Hash.stringify_keys(_v)
         squash = options[:squash]
+
         if v.is_a?(::Hash) && squash.is_a?(Array)
           travel = lambda do |tree, path|
             if tree.is_a?(::Hash)
-              subtree = tree[path.shift]
-              travel.call(subtree, path)
+              travel.call(tree[path.shift], path)
             else tree
             end
           end
@@ -49,7 +50,7 @@ module Cistern::Attributes
     end
 
     def aliases
-      @aliases ||= {}
+      @aliases ||= Hash.new { |h,k| h[k] = [] }
     end
 
     def attributes
@@ -85,12 +86,16 @@ module Cistern::Attributes
       if self.attributes[name]
         raise(ArgumentError, "#{self.name} attribute[#{_name}] specified more than once")
       else
+        if options[:squash]
+          options[:squash] = Array(options[:squash]).map(&:to_s)
+        end
         self.attributes[name] = options
       end
 
-      Array(options[:aliases]).each do |new_alias|
-        aliases[new_alias] ||= []
-        aliases[new_alias] << name
+      options[:aliases] = Array(options[:aliases]).map { |a| a.to_s.to_sym }
+
+      options[:aliases].each do |new_alias|
+        aliases[new_alias] << name.to_s.to_sym
       end
     end
 
@@ -168,13 +173,15 @@ module Cistern::Attributes
     end
 
     def merge_attributes(new_attributes = {})
-      new_attributes.each do |key, value|
+      new_attributes.each do |_key, value|
+        key = _key.to_s.to_sym
         # find nested paths
         value.is_a?(::Hash) && self.class.attributes.each do |name, options|
-          if (options[:squash] || []).first == key
+          if (options[:squash] || []).first == key.to_s
             send("#{name}=", {key => value})
           end
         end
+
         unless self.class.ignored_attributes.include?(key)
           if self.class.aliases.has_key?(key)
             self.class.aliases[key].each do |aliased_key|
@@ -182,7 +189,9 @@ module Cistern::Attributes
             end
           end
 
-          if self.respond_to?("#{key}=", true)
+          protected_methods = Cistern::Model.instance_methods - [:connection, :identity, :collection]
+
+          if !protected_methods.include?(key) && self.respond_to?("#{key}=", true)
             send("#{key}=", value)
           end
         end
