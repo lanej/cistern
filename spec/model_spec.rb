@@ -155,11 +155,11 @@ describe "Cistern::Model" do
 
     describe "#requires" do
       it "should raise if attribute not provided" do
-        expect { TypeSpec.new({"connection" => "fake", "something" => {"id" => "12"}}).save }.to raise_exception(ArgumentError)
+        expect { TypeSpec.new({"service" => "fake", "something" => {"id" => "12"}}).save }.to raise_exception(ArgumentError)
       end
 
       it "should raise if attribute is provided and is nil" do
-        expect { TypeSpec.new({"connection" => "fake", "custom" => nil}).save }.to raise_exception(ArgumentError)
+        expect { TypeSpec.new({"service" => "fake", "custom" => nil}).save }.to raise_exception(ArgumentError)
       end
     end
   end

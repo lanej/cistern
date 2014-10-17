@@ -42,6 +42,19 @@ class Cistern::Service
           def initialize(options={})
           end
         end
+
+        class Request
+          include Cistern::Request
+
+          def self.inherited(klass)
+            klass.extend(Cistern::Request::ClassMethods)
+            Cistern::Request.service_request(service, klass)
+          end
+
+          def self.service
+            #{klass.name}
+          end
+        end
       EOS
 
       klass.send(:const_set, :Timeout, Class.new(Cistern::Error))
@@ -156,7 +169,7 @@ class Cistern::Service
 
           self.const_get(:Collections).module_eval <<-EOS, __FILE__, __LINE__
             def #{singular_name}(attributes={})
-              #{service}::#{class_name}.new({connection: self}.merge(attributes))
+              #{service}::#{class_name}.new({service: self}.merge(attributes))
             end
           EOS
         end
@@ -189,7 +202,7 @@ class Cistern::Service
 
           self.const_get(:Collections).module_eval <<-EOS, __FILE__, __LINE__
             def #{plural_name}(attributes={})
-              #{service}::#{class_name}.new({connection: self}.merge(attributes))
+              #{service}::#{class_name}.new({service: self}.merge(attributes))
             end
           EOS
         end

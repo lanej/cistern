@@ -189,7 +189,7 @@ module Cistern::Attributes
             end
           end
 
-          protected_methods = Cistern::Model.instance_methods - [:connection, :identity, :collection]
+          protected_methods = Cistern::Model.instance_methods - [:service, :identity, :collection]
 
           if !protected_methods.include?(key) && self.respond_to?("#{key}=", true)
             send("#{key}=", value)
@@ -236,7 +236,7 @@ module Cistern::Attributes
     protected
 
     def missing_attributes(args)
-      ([:connection] | args).select{|arg| send("#{arg}").nil?}
+      ([:service] | args).select{|arg| send("#{arg}").nil?}
     end
 
     def changed!(attribute, from, to)

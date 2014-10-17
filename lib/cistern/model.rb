@@ -2,7 +2,7 @@ class Cistern::Model
   extend Cistern::Attributes::ClassMethods
   include Cistern::Attributes::InstanceMethods
 
-  attr_accessor :collection, :connection
+  attr_accessor :collection, :service
 
   def inspect
     if Cistern.formatter
@@ -52,15 +52,15 @@ class Cistern::Model
     end
   end
 
-  def service
-    self.connection ? self.connection.class : Cistern
+  def wait_for(timeout = self.service_class.timeout, interval = self.service_class.poll_interval, &block)
+    service_class.wait_for(timeout, interval) { reload && block.call(self) }
   end
 
-  def wait_for(timeout = self.service.timeout, interval = self.service.poll_interval, &block)
-    service.wait_for(timeout, interval) { reload && block.call(self) }
+  def wait_for!(timeout = self.service_class.timeout, interval = self.service_class.poll_interval, &block)
+    service_class.wait_for!(timeout, interval) { reload && block.call(self) }
   end
 
-  def wait_for!(timeout = self.service.timeout, interval = self.service.poll_interval, &block)
-    service.wait_for!(timeout, interval) { reload && block.call(self) }
+  def service_class
+    self.service ? self.service.class : Cistern
   end
 end

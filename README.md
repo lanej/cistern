@@ -208,7 +208,7 @@ Patient::Mock.store_in(:hash)
 
 ### Model
 
-* `connection` represents the associated `Foo::Client` instance.
+* `service` represents the associated `Foo::Client` instance.
 * `collection` represents the related collection (if applicable)
 
 Example
@@ -225,7 +225,7 @@ class Foo::Client::Bar < Cistern::Model
     params  = {
       "id" => self.identity
     }
-    self.connection.destroy_bar(params).body["request"]
+    self.service.destroy_bar(params).body["request"]
   end
 
   def save
@@ -239,11 +239,11 @@ class Foo::Client::Bar < Cistern::Model
     }
 
     if new_record?
-      merge_attributes(connection.create_bar(params).body["bar"])
+      merge_attributes(service.create_bar(params).body["bar"])
     else
       requires :identity
 
-      merge_attributes(connection.update_bar(params).body["bar"])
+      merge_attributes(service.update_bar(params).body["bar"])
     end
   end
 end
@@ -286,7 +286,7 @@ class Foo::Client::Bars < Cistern::Collection
   model Foo::Client::Bar
 
   def all(params = {})
-    response = connection.get_bars(params)
+    response = service.get_bars(params)
 
     data = response.body
 
@@ -300,11 +300,11 @@ class Foo::Client::Bars < Cistern::Collection
     }
     params.merge!("location" => options[:location]) if options.key?(:location)
 
-    connection.requests.new(connection.discover_bar(params).body["request"])
+    service.requests.new(service.discover_bar(params).body["request"])
   end
 
   def get(id)
-    if data = connection.get_bar("id" => id).body["bar"]
+    if data = service.get_bar("id" => id).body["bar"]
       new(data)
     else
       nil

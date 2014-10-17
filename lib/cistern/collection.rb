@@ -8,7 +8,7 @@ class Cistern::Collection
     :keep_if, :pop, :shift, :delete_at, :compact
   ].to_set # :nodoc:
 
-  attr_accessor :records, :loaded, :connection
+  attr_accessor :records, :loaded, :service
 
   def self.model(new_model=nil)
     if new_model == nil
@@ -73,7 +73,7 @@ class Cistern::Collection
     model.new(
       {
         :collection => self,
-        :connection => connection,
+        :service => service,
       }.merge(attributes)
     )
   end
