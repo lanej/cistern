@@ -4,6 +4,7 @@ if ENV["TRAVIS"]
 end
 
 require File.expand_path('../../lib/cistern', __FILE__)
+Dir[File.expand_path("../{support,shared,matchers,fixtures}/*.rb", __FILE__)].each{|f| require(f)}
 
 Bundler.require(:test)
 

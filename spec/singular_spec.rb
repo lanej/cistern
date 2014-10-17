@@ -6,8 +6,8 @@ describe "Cistern::Singular" do
     attribute :count, type: :number
 
     def fetch_attributes
-      #test that initialize waits for connection to be defined
-      raise "missing connection" unless connection
+      #test that initialize waits for service to be defined
+      raise "missing service" unless service
 
       @counter ||= 0
       @counter += 1
@@ -16,11 +16,11 @@ describe "Cistern::Singular" do
   end
 
   it "should work" do
-    expect(SampleSingular.new(connection: :fake).name).to eq("amazing")
+    expect(SampleSingular.new(service: :fake).name).to eq("amazing")
   end
 
   it "should reload" do
-    singular = SampleSingular.new(connection: :fake)
+    singular = SampleSingular.new(service: :fake)
     old_count = singular.count
     expect(singular.count).to eq(old_count)
     expect(singular.reload.count).to be > old_count

@@ -1,8 +1,27 @@
-class Cistern::Model
-  extend Cistern::Attributes::ClassMethods
+module Cistern::Model
   include Cistern::Attributes::InstanceMethods
 
-  attr_accessor :collection, :connection
+  def self.included(klass)
+    klass.send(:extend, Cistern::Attributes::ClassMethods)
+    klass.send(:include, Cistern::Attributes::InstanceMethods)
+    klass.send(:extend, Cistern::Model::ClassMethods)
+  end
+
+  def self.service_model(service, klass, name)
+    service.class_eval <<-EOS, __FILE__, __LINE__
+      def #{name}(attributes={})
+        #{klass.name}.new(attributes.merge(service: self))
+      end
+    EOS
+  end
+
+  module ClassMethods
+    def service_method(name=nil)
+      @_service_method ||= name
+    end
+  end
+
+  attr_accessor :collection, :service
 
   def inspect
     if Cistern.formatter
@@ -52,15 +71,15 @@ class Cistern::Model
     end
   end
 
-  def service
-    self.connection ? self.connection.class : Cistern
+  def wait_for(timeout = self.service_class.timeout, interval = self.service_class.poll_interval, &block)
+    service_class.wait_for(timeout, interval) { reload && block.call(self) }
   end
 
-  def wait_for(timeout = self.service.timeout, interval = self.service.poll_interval, &block)
-    service.wait_for(timeout, interval) { reload && block.call(self) }
+  def wait_for!(timeout = self.service_class.timeout, interval = self.service_class.poll_interval, &block)
+    service_class.wait_for!(timeout, interval) { reload && block.call(self) }
   end
 
-  def wait_for!(timeout = self.service.timeout, interval = self.service.poll_interval, &block)
-    service.wait_for!(timeout, interval) { reload && block.call(self) }
+  def service_class
+    self.service ? self.service.class : Cistern
   end
 end

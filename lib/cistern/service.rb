@@ -9,10 +9,6 @@ class Cistern::Service
       service.collections
     end
 
-    def mocked_requests
-      service.mocked_requests
-    end
-
     def requests
       service.requests
     end
@@ -42,6 +38,56 @@ class Cistern::Service
           def initialize(options={})
           end
         end
+
+        class Model
+          include Cistern::Model
+
+          def self.inherited(klass)
+            service.models << klass
+          end
+
+          def self.service
+            #{klass.name}
+          end
+        end
+
+        class Collection
+          include Cistern::Collection
+
+          def self.inherited(klass)
+            klass.send(:extend, Cistern::Attributes::ClassMethods)
+            klass.send(:extend, Cistern::Collection::ClassMethods)
+            klass.send(:include, Cistern::Attributes::InstanceMethods)
+
+            service.collections << klass
+          end
+
+          def self.service
+            #{klass.name}
+          end
+        end
+
+        class Request
+          include Cistern::Request
+
+          def self.inherited(klass)
+            klass.extend(Cistern::Request::ClassMethods)
+
+            service.requests << klass
+          end
+
+          def self.service
+            #{klass.name}
+          end
+
+          def _mock(*args)
+            mock(*args)
+          end
+
+          def _real(*args)
+            real(*args)
+          end
+        end
       EOS
 
       klass.send(:const_set, :Timeout, Class.new(Cistern::Error))
@@ -57,48 +103,24 @@ class Cistern::Service
       klass::Real.timeout_error = klass::Timeout
     end
 
-    def collection_path(collection_path = nil)
-      if collection_path
-        @collection_path = collection_path
-      else
-        @collection_path
-      end
-    end
-
-    def model_path(model_path = nil)
-      if model_path
-        @model_path = model_path
-      else
-        @model_path
-      end
-    end
-
-    def request_path(request_path = nil)
-      if request_path
-        @request_path = request_path
-      else
-        @request_path
-      end
-    end
-
     def collections
       @collections ||= []
     end
 
     def models
-      @models ||= []
+      @_models ||= []
     end
 
     def recognized_arguments
-      @recognized_arguments ||= []
+      @_recognized_arguments ||= []
     end
 
     def required_arguments
-      @required_arguments ||= []
+      @_required_arguments ||= []
     end
 
     def requests
-      @requests ||= []
+      @_requests ||= []
     end
 
     def requires(*args)
@@ -107,22 +129,6 @@ class Cistern::Service
 
     def recognizes(*args)
       self.recognized_arguments.concat(args)
-    end
-
-    def model(model_name, options={})
-      models << [model_name, options]
-    end
-
-    def mocked_requests
-      @mocked_requests ||= []
-    end
-
-    def request(request_name, options={})
-      requests << [request_name, options]
-    end
-
-    def collection(collection_name, options={})
-      collections << [collection_name, options]
     end
 
     def validate_options(options={})
@@ -141,66 +147,35 @@ class Cistern::Service
       end
     end
 
-    def setup_requirements
-      @required ||= false
-      unless @required
+    def setup
+      return true if @_setup
 
-        # setup models
-        models.each do |model, options|
-          unless options[:require] == false
-            require(options[:require] || File.join(@model_path, model.to_s))
-          end
+      requests.each do |klass|
+        name = klass.service_method || Cistern::String.camelize(Cistern::String.demodulize(klass.name))
 
-          class_name    = options[:class] || model.to_s.split("_").map(&:capitalize).join
-          singular_name = options[:model] || model.to_s.gsub("/", "_")
-
-          self.const_get(:Collections).module_eval <<-EOS, __FILE__, __LINE__
-            def #{singular_name}(attributes={})
-              #{service}::#{class_name}.new({connection: self}.merge(attributes))
-            end
-          EOS
-        end
-
-        # setup requests
-        requests.each do |request, options|
-          unless options[:require] == false || service::Real.method_defined?(request.to_s)
-            require(options[:require] || File.join(@request_path, request.to_s))
-          end
-
-          if service::Mock.method_defined?(request)
-            mocked_requests << request
-          else
-            service::Mock.module_eval <<-EOS, __FILE__, __LINE__
-              def #{request}(*args)
-                Cistern::Mock.not_implemented(request)
-              end
-            EOS
-          end
-        end
-
-        # setup collections
-        collections.each do |collection, options|
-          unless options[:require] == false
-            require(options[:require] || File.join(@collection_path || @model_path, collection.to_s))
-          end
-
-          class_name = collection.to_s.split("/").map(&:capitalize).join("::").split("_").map { |s| "#{s[0].upcase}#{s[1..-1]}" }.join
-          plural_name = options[:collection] || collection.to_s.gsub("/", "_")
-
-          self.const_get(:Collections).module_eval <<-EOS, __FILE__, __LINE__
-            def #{plural_name}(attributes={})
-              #{service}::#{class_name}.new({connection: self}.merge(attributes))
-            end
-          EOS
-        end
-
-        @required = true
+        Cistern::Request.service_request(self, klass, name)
       end
+
+      collections.each do |klass|
+        name = klass.service_method ||
+          Cistern::String.underscore(klass.name.gsub("#{self.name}::", "").gsub("::", ""))
+
+        Cistern::Collection.service_collection(service, klass, name)
+      end
+
+      models.each do |klass|
+        name = klass.service_method ||
+          Cistern::String.underscore(klass.name.gsub("#{self.name}::", "").gsub("::", ""))
+
+        Cistern::Model.service_model(service, klass, name)
+      end
+
+      @_setup = true
     end
 
     def new(options={})
+      setup
       validate_options(options)
-      setup_requirements
 
       self.const_get(self.mocking? ? :Mock : :Real).new(options)
     end

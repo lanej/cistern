@@ -1,13 +1,12 @@
 require 'spec_helper'
 
 describe "#inspect" do
-  class Inspector < Cistern::Model
+  class Inspector < Sample::Model
     identity :id
     attribute :name
   end
 
-  class Inspectors < Cistern::Collection
-
+  class Inspectors < Sample::Collection
     model Inspector
 
     def all(options={})

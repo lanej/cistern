@@ -1,23 +1,13 @@
 require 'spec_helper'
 
-class WaitForService < Cistern::Service
-  model :wait_for_model, require: false
-  collection :wait_for_models, require: false
-
-  class Real
-    def initialize(*args)
-    end
-  end
-end
-
-class WaitForService::WaitForModel < Cistern::Model
+class WaitForModel < Sample::Model
   identity :id
 
   attribute :name
 end
 
-class WaitForService::WaitForModels < Cistern::Collection
-  model WaitForService::WaitForModel
+class WaitForModels < Sample::Collection
+  model WaitForModel
 
   def get(identity)
     self
@@ -37,17 +27,17 @@ describe 'Cistern#wait_for!' do
 end
 
 describe 'Cistern::Model#wait_for!' do
-  let(:service) { WaitForService.new }
+  let(:service) { Sample.new }
   let(:model)   { service.wait_for_models.new(identity: 1) }
 
   it "should raise if timeout exceeded" do
-    expect { model.wait_for!(0, 0) { false } }.to raise_exception(WaitForService::Timeout)
+    expect { model.wait_for!(0, 0) { false } }.to raise_exception(Sample::Timeout)
   end
 end
 
 
 describe "WaitForModel#timeout" do
-  let(:service) { WaitForService.new }
+  let(:service) { Sample.new }
   let(:model)   { service.wait_for_models.new(identity: 1) }
 
   it "should use service-specific timeout in #wait_for" do
@@ -59,7 +49,7 @@ describe "WaitForModel#timeout" do
     timeout(2) do
       expect do
         model.wait_for! { sleep(0.2); elapsed += 0.2; elapsed > 0.2 }
-      end.to raise_exception(WaitForService::Timeout)
+      end.to raise_exception(Sample::Timeout)
     end
   end
 
@@ -72,7 +62,7 @@ describe "WaitForModel#timeout" do
     timeout(2) do
       expect do
         model.wait_for!(0.1) { sleep(0.2); elapsed += 0.2; elapsed > 0.2 }
-      end.to raise_exception(WaitForService::Timeout)
+      end.to raise_exception(Sample::Timeout)
     end
   end
 end

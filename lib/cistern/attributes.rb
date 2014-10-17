@@ -1,12 +1,12 @@
 module Cistern::Attributes
   def self.parsers
     @parsers ||= {
-      :string  => lambda { |v,opts| v.to_s },
-      :time    => lambda { |v,opts| v.is_a?(Time) ? v : v && Time.parse(v.to_s) },
-      :integer => lambda { |v,opts| v && v.to_i },
-      :float   => lambda { |v,opts| v && v.to_f },
-      :array   => lambda { |v,opts| [*v] },
-      :boolean => lambda { |v,opts| ['true', '1'].include?(v.to_s.downcase) }
+      :string  => lambda { |v, _| v.to_s },
+      :time    => lambda { |v, _| v.is_a?(Time) ? v : v && Time.parse(v.to_s) },
+      :integer => lambda { |v, _| v && v.to_i },
+      :float   => lambda { |v, _| v && v.to_f },
+      :array   => lambda { |v, _| [*v] },
+      :boolean => lambda { |v, _| ['true', '1'].include?(v.to_s.downcase) }
     }
   end
 
@@ -26,10 +26,12 @@ module Cistern::Attributes
 
           travel.call(v, squash.dup)
         elsif v.is_a?(::Hash)
-          if v.key?(squash.to_s.to_sym)
-            v[squash.to_s.to_sym]
-          elsif v.has_key?(squash.to_s)
-            v[squash.to_s]
+          squash_s = squash.to_s
+
+          if v.key?(key = squash_s.to_sym)
+            v[key]
+          elsif v.has_key?(squash_s)
+            v[squash_s]
           else
             v
           end
@@ -92,7 +94,7 @@ module Cistern::Attributes
         self.attributes[name] = options
       end
 
-      options[:aliases] = Array(options[:aliases]).map { |a| a.to_s.to_sym }
+      options[:aliases] = Array(options[:aliases] || options[:alias]).map { |a| a.to_s.to_sym }
 
       options[:aliases].each do |new_alias|
         aliases[new_alias] << name.to_s.to_sym
@@ -121,7 +123,7 @@ module Cistern::Attributes
     def read_attribute(name)
       options = self.class.attributes[name] || {}
       # record the attribute was accessed
-      self.class.attributes[name.to_s.to_sym][:coverage_hits] += 1 rescue  nil
+      self.class.attributes[name.to_s.to_sym][:coverage_hits] += 1 rescue nil
 
       attributes.fetch(name.to_s.to_sym, options[:default])
     end
@@ -160,7 +162,7 @@ module Cistern::Attributes
 
     def dup
       copy = super
-      copy.attributes= copy.attributes.dup
+      copy.attributes = copy.attributes.dup
       copy
     end
 
@@ -173,7 +175,7 @@ module Cistern::Attributes
     end
 
     def merge_attributes(new_attributes = {})
-      protected_methods  = (Cistern::Model.instance_methods - [:connection, :identity, :collection])
+      protected_methods  = (Cistern::Model.instance_methods - [:service, :identity, :collection])
       ignored_attributes = self.class.ignored_attributes
       class_attributes   = self.class.attributes
       class_aliases      = self.class.aliases
@@ -249,7 +251,7 @@ module Cistern::Attributes
     protected
 
     def missing_attributes(args)
-      ([:connection] | args).select{|arg| send("#{arg}").nil?}
+      ([:service] | args).select{|arg| send("#{arg}").nil?}
     end
 
     def changed!(attribute, from, to)
