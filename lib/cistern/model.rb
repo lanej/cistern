@@ -1,6 +1,10 @@
-class Cistern::Model
-  extend Cistern::Attributes::ClassMethods
+module Cistern::Model
   include Cistern::Attributes::InstanceMethods
+
+  def self.included(klass)
+    klass.send(:extend, Cistern::Attributes::ClassMethods)
+    klass.send(:include, Cistern::Attributes::InstanceMethods)
+  end
 
   attr_accessor :collection, :service
 

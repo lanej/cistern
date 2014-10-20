@@ -1,13 +1,12 @@
 require 'spec_helper'
 
 describe "Cistern::Collection" do
-
-  class SampleCollectionModel < Cistern::Model
+  class SampleCollectionModel < Sample::Model
     identity :id
     attribute :name
   end
 
-  class SampleCollection < Cistern::Collection
+  class SampleCollection < Sample::Collection
     model SampleCollectionModel
 
     def all

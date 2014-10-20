@@ -1,6 +1,4 @@
-class Cistern::Collection
-  extend Cistern::Attributes::ClassMethods
-  include Cistern::Attributes::InstanceMethods
+module Cistern::Collection
 
   BLACKLISTED_ARRAY_METHODS = [
     :compact!, :flatten!, :reject!, :reverse!, :rotate!, :map!,
@@ -8,13 +6,21 @@ class Cistern::Collection
     :keep_if, :pop, :shift, :delete_at, :compact
   ].to_set # :nodoc:
 
+  def self.service_collection(service, klass)
+    plural_name = Cistern::String.underscore(Cistern::String.demodulize(klass.name))
+
+    service.const_get(:Collections).module_eval <<-EOS, __FILE__, __LINE__
+      def #{plural_name}(attributes={})
+      #{klass.name}.new(attributes.merge(service: self))
+      end
+    EOS
+  end
+
   attr_accessor :records, :loaded, :service
 
-  def self.model(new_model=nil)
-    if new_model == nil
-      @model
-    else
-      @model = new_model
+  module ClassMethods
+    def model(new_model=nil)
+      @model ||= new_model
     end
   end
 
@@ -73,7 +79,7 @@ class Cistern::Collection
     model.new(
       {
         :collection => self,
-        :service => service,
+        :service    => service,
       }.merge(attributes)
     )
   end

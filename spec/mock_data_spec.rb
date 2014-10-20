@@ -1,37 +1,31 @@
 require 'spec_helper'
 
 describe 'mock data' do
-  class Patient < Cistern::Service
-    request :diagnosis
-    request :treat
-
-    class Real
-      def diagnosis(options={})
-      end
-
-      def treat(options={})
-      end
+  class Diagnosis < Sample::Request
+    def real(diagnosis)
     end
 
-    class Mock
-      def diagnosis(diagnosis)
-        #self.data[:diagnosis] << rand(2) == 0 ? "sick" : "healthy"
-        self.data.store(:diagnosis, self.data.fetch(:diagnosis) + [diagnosis])
-      end
+    def mock(diagnosis)
+      service.data.store(:diagnosis, service.data.fetch(:diagnosis) + [diagnosis])
+    end
+  end
 
-      def treat(treatment)
-        self.data[:treatments] += [treatment]
-      end
+  class Treat < Sample::Request
+    def real(treatment)
+    end
+
+    def mock(treatment)
+      service.data[:treatments] += [treatment]
     end
   end
 
   shared_examples "mock_data#backend" do |backend, options|
     it "should store mock data" do
-      Patient.mock!
-      Patient::Mock.store_in(backend, options)
-      Patient.reset!
+      Sample.mock!
+      Sample::Mock.store_in(backend, options)
+      Sample.reset!
 
-      p = Patient.new
+      p = Sample.new
       p.diagnosis("sick")
       expect(p.data[:diagnosis]).to eq(["sick"])
 
@@ -42,7 +36,7 @@ describe 'mock data' do
       p.treat("healthy")
       expect(p.data[:treatments]).to eq(["healthy"])
 
-      Patient.reset!
+      Sample.reset!
 
       expect(p.data[:treatments]).to eq([])
     end
