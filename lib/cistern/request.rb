@@ -1,6 +1,6 @@
 module Cistern::Request
   def self.service_request(service, klass)
-    request = klass.request_name || Cistern::String.camelize(klass.name)
+    request = klass.request_name || Cistern::String.camelize(Cistern::String.demodulize(klass.name))
 
     service::Mock.module_eval <<-EOS, __FILE__, __LINE__
       def #{request}(*args)
