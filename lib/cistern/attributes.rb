@@ -173,26 +173,39 @@ module Cistern::Attributes
     end
 
     def merge_attributes(new_attributes = {})
+      protected_methods  = (Cistern::Model.instance_methods - [:connection, :identity, :collection])
+      ignored_attributes = self.class.ignored_attributes
+      class_attributes   = self.class.attributes
+      class_aliases      = self.class.aliases
+
       new_attributes.each do |_key, value|
-        key = _key.to_s.to_sym
+        string_key = _key.kind_of?(String) ? _key : _key.to_s
+        symbol_key = case _key
+              when String
+                _key.to_sym
+              when Symbol
+                _key
+              else
+                string_key.to_sym
+              end
+
         # find nested paths
-        value.is_a?(::Hash) && self.class.attributes.each do |name, options|
-          if (options[:squash] || []).first == key.to_s
-            send("#{name}=", {key => value})
+        value.is_a?(::Hash) && class_attributes.each do |name, options|
+          if options[:squash] && options[:squash].first == string_key
+            send("#{name}=", {symbol_key => value})
           end
         end
 
-        unless self.class.ignored_attributes.include?(key)
-          if self.class.aliases.has_key?(key)
-            self.class.aliases[key].each do |aliased_key|
+        unless ignored_attributes.include?(symbol_key)
+          if class_aliases.has_key?(symbol_key)
+            class_aliases[symbol_key].each do |aliased_key|
               send("#{aliased_key}=", value)
             end
           end
 
-          protected_methods = Cistern::Model.instance_methods - [:connection, :identity, :collection]
-
-          if !protected_methods.include?(key) && self.respond_to?("#{key}=", true)
-            send("#{key}=", value)
+          assignment_method = "#{string_key}="
+          if !protected_methods.include?(symbol_key) && self.respond_to?(assignment_method, true)
+            send(assignment_method, value)
           end
         end
       end
