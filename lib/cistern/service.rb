@@ -99,6 +99,12 @@ class Cistern::Service
       @collections ||= []
     end
 
+    def collection_method(klass)
+      relative_demodulized = klass.name.gsub("#{self.name}::", "").gsub("::", "")
+
+      Cistern::String.underscore(relative_demodulized)
+    end
+
     def models
       @models ||= []
     end

@@ -7,11 +7,11 @@ module Cistern::Collection
   ].to_set # :nodoc:
 
   def self.service_collection(service, klass)
-    plural_name = Cistern::String.underscore(Cistern::String.demodulize(klass.name))
+    plural_name = service.collection_method(klass)
 
     service.const_get(:Collections).module_eval <<-EOS, __FILE__, __LINE__
       def #{plural_name}(attributes={})
-      #{klass.name}.new(attributes.merge(service: self))
+        #{klass.name}.new(attributes.merge(service: self))
       end
     EOS
   end
