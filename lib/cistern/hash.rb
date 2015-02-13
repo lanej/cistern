@@ -6,7 +6,13 @@ class Cistern::Hash
   end
 
   def self.except(hash, *keys)
-    hash.dup.except!(*keys)
+    Cistern::Hash.except!(hash.dup, *keys)
+  end
+
+  # Replaces the hash without the given keys.
+  def self.except!(hash, *keys)
+    hash.keys.each { |key| hash.delete(key) }
+    hash
   end
 
   def self.stringify_keys(object)
