@@ -5,6 +5,10 @@ class Cistern::Hash
     end
   end
 
+  def self.except(hash, *keys)
+    hash.dup.except!(*keys)
+  end
+
   def self.stringify_keys(object)
     case object
     when Hash
