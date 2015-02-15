@@ -1,3 +1,3 @@
 module Cistern
-  VERSION = "1.0.1.pre4"
+  VERSION = "1.0.1.pre5"
 end
