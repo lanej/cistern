@@ -4,15 +4,17 @@ module Cistern::Request
 
     service::Mock.module_eval <<-EOS, __FILE__, __LINE__
       def #{request}(*args)
-        #{klass}.new(self).mock(*args)
+        #{klass}.new(self)._mock(*args)
       end
     EOS
 
     service::Real.module_eval <<-EOS, __FILE__, __LINE__
       def #{request}(*args)
-        #{klass}.new(self).real(*args)
+        #{klass}.new(self)._real(*args)
       end
     EOS
+
+    request
   end
 
   attr_reader :service

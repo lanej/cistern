@@ -73,11 +73,21 @@ class Cistern::Service
           def self.inherited(klass)
             klass.extend(Cistern::Request::ClassMethods)
 
-            Cistern::Request.service_request(service, klass)
+            name = Cistern::Request.service_request(service, klass)
+
+            service.requests[name.to_sym] = klass
           end
 
           def self.service
             #{klass.name}
+          end
+
+          def _mock(*args)
+            mock(*args)
+          end
+
+          def _real(*args)
+            real(*args)
           end
         end
       EOS
@@ -118,7 +128,7 @@ class Cistern::Service
     end
 
     def requests
-      @requests ||= []
+      @requests ||= {}
     end
 
     def requires(*args)
@@ -130,7 +140,7 @@ class Cistern::Service
     end
 
     def mocked_requests
-      @mocked_requests ||= []
+      @mocked_requests ||= {}
     end
 
     def validate_options(options={})
