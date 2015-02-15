@@ -11,7 +11,7 @@ class Cistern::Hash
 
   # Replaces the hash without the given keys.
   def self.except!(hash, *keys)
-    hash.keys.each { |key| hash.delete(key) }
+    keys.each { |key| hash.delete(key) }
     hash
   end
 
