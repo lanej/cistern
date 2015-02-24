@@ -1,12 +1,12 @@
 module Cistern::Attributes
   def self.parsers
     @parsers ||= {
-      :string  => lambda { |v,opts| v.to_s },
-      :time    => lambda { |v,opts| v.is_a?(Time) ? v : v && Time.parse(v.to_s) },
-      :integer => lambda { |v,opts| v && v.to_i },
-      :float   => lambda { |v,opts| v && v.to_f },
-      :array   => lambda { |v,opts| [*v] },
-      :boolean => lambda { |v,opts| ['true', '1'].include?(v.to_s.downcase) }
+      :string  => lambda { |v, _| v.to_s },
+      :time    => lambda { |v, _| v.is_a?(Time) ? v : v && Time.parse(v.to_s) },
+      :integer => lambda { |v, _| v && v.to_i },
+      :float   => lambda { |v, _| v && v.to_f },
+      :array   => lambda { |v, _| [*v] },
+      :boolean => lambda { |v, _| ['true', '1'].include?(v.to_s.downcase) }
     }
   end
 
@@ -121,7 +121,7 @@ module Cistern::Attributes
     def read_attribute(name)
       options = self.class.attributes[name] || {}
       # record the attribute was accessed
-      self.class.attributes[name.to_s.to_sym][:coverage_hits] += 1 rescue  nil
+      self.class.attributes[name.to_s.to_sym][:coverage_hits] += 1 rescue nil
 
       attributes.fetch(name.to_s.to_sym, options[:default])
     end
@@ -160,7 +160,7 @@ module Cistern::Attributes
 
     def dup
       copy = super
-      copy.attributes= copy.attributes.dup
+      copy.attributes = copy.attributes.dup
       copy
     end
 
