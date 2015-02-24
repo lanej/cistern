@@ -55,9 +55,9 @@ class Cistern::Service
           include Cistern::Collection
 
           def self.inherited(klass)
-            klass.extend(Cistern::Attributes::ClassMethods)
-            klass.extend(Cistern::Collection::ClassMethods)
-            klass.include(Cistern::Attributes::InstanceMethods)
+            klass.send(:extend, Cistern::Attributes::ClassMethods)
+            klass.send(:extend, Cistern::Collection::ClassMethods)
+            klass.send(:include, Cistern::Attributes::InstanceMethods)
 
             Cistern::Collection.service_collection(service, klass)
           end
