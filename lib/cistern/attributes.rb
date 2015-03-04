@@ -26,10 +26,12 @@ module Cistern::Attributes
 
           travel.call(v, squash.dup)
         elsif v.is_a?(::Hash)
-          if v.key?(squash.to_s.to_sym)
-            v[squash.to_s.to_sym]
-          elsif v.has_key?(squash.to_s)
-            v[squash.to_s]
+          squash_s = squash.to_s
+
+          if v.key?(key = squash_s.to_sym)
+            v[key]
+          elsif v.has_key?(squash_s)
+            v[squash_s]
           else
             v
           end
@@ -92,7 +94,7 @@ module Cistern::Attributes
         self.attributes[name] = options
       end
 
-      options[:aliases] = Array(options[:aliases]).map { |a| a.to_s.to_sym }
+      options[:aliases] = Array(options[:aliases] || options[:alias]).map { |a| a.to_s.to_sym }
 
       options[:aliases].each do |new_alias|
         aliases[new_alias] << name.to_s.to_sym
