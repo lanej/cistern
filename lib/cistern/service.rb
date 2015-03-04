@@ -59,7 +59,7 @@ class Cistern::Service
             klass.send(:extend, Cistern::Collection::ClassMethods)
             klass.send(:include, Cistern::Attributes::InstanceMethods)
 
-            Cistern::Collection.service_collection(service, klass)
+            service.collections << klass
           end
 
           def self.service
@@ -105,12 +105,6 @@ class Cistern::Service
 
     def collections
       @collections ||= []
-    end
-
-    def collection_method(klass)
-      relative_demodulized = klass.name.gsub("#{self.name}::", "").gsub("::", "")
-
-      Cistern::String.underscore(relative_demodulized)
     end
 
     def models
@@ -160,6 +154,13 @@ class Cistern::Service
         name = klass.request_name || Cistern::String.camelize(Cistern::String.demodulize(klass.name))
 
         Cistern::Request.service_request(self, klass, name)
+      end
+
+      collections.each do |klass|
+        name = klass.collection_name ||
+          Cistern::String.underscore(klass.name.gsub("#{self.name}::", "").gsub("::", ""))
+
+        Cistern::Collection.service_collection(service, klass, name)
       end
     end
 

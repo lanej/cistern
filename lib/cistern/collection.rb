@@ -6,11 +6,9 @@ module Cistern::Collection
     :keep_if, :pop, :shift, :delete_at, :compact
   ].to_set # :nodoc:
 
-  def self.service_collection(service, klass)
-    plural_name = service.collection_method(klass)
-
+  def self.service_collection(service, klass, name)
     service.const_get(:Collections).module_eval <<-EOS, __FILE__, __LINE__
-      def #{plural_name}(attributes={})
+      def #{name}(attributes={})
         #{klass.name}.new(attributes.merge(service: self))
       end
     EOS
@@ -20,7 +18,11 @@ module Cistern::Collection
 
   module ClassMethods
     def model(new_model=nil)
-      @model ||= new_model
+      @_model ||= new_model
+    end
+
+    def collection_name(name=nil)
+      @_collection_name ||= name
     end
   end
 
@@ -69,7 +71,7 @@ module Cistern::Collection
   end
 
   def model
-    self.class.instance_variable_get('@model')
+    self.class.model
   end
 
   def new(attributes = {})

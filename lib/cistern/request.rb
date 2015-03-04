@@ -21,7 +21,7 @@ module Cistern::Request
 
   module ClassMethods
     def request_name(name=nil)
-      name.nil? ? @_request_name : (@_request_name = name)
+      @_request_name ||= name
     end
   end
 end
