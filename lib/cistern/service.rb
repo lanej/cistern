@@ -73,9 +73,7 @@ class Cistern::Service
           def self.inherited(klass)
             klass.extend(Cistern::Request::ClassMethods)
 
-            name = Cistern::Request.service_request(service, klass)
-
-            service.requests[name.to_sym] = klass
+            service.requests << klass
           end
 
           def self.service
@@ -116,19 +114,19 @@ class Cistern::Service
     end
 
     def models
-      @models ||= []
+      @_models ||= []
     end
 
     def recognized_arguments
-      @recognized_arguments ||= []
+      @_recognized_arguments ||= []
     end
 
     def required_arguments
-      @required_arguments ||= []
+      @_required_arguments ||= []
     end
 
     def requests
-      @requests ||= {}
+      @_requests ||= []
     end
 
     def requires(*args)
@@ -137,10 +135,6 @@ class Cistern::Service
 
     def recognizes(*args)
       self.recognized_arguments.concat(args)
-    end
-
-    def mocked_requests
-      @mocked_requests ||= {}
     end
 
     def validate_options(options={})
@@ -159,7 +153,18 @@ class Cistern::Service
       end
     end
 
+    def setup
+      return true if @_setup
+
+      requests.each do |klass|
+        name = klass.request_name || Cistern::String.camelize(Cistern::String.demodulize(klass.name))
+
+        Cistern::Request.service_request(self, klass, name)
+      end
+    end
+
     def new(options={})
+      setup
       validate_options(options)
 
       self.const_get(self.mocking? ? :Mock : :Real).new(options)

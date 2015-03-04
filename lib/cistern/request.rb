@@ -1,20 +1,16 @@
 module Cistern::Request
-  def self.service_request(service, klass)
-    request = klass.request_name || Cistern::String.camelize(Cistern::String.demodulize(klass.name))
-
+  def self.service_request(service, klass, name)
     service::Mock.module_eval <<-EOS, __FILE__, __LINE__
-      def #{request}(*args)
+      def #{name}(*args)
         #{klass}.new(self)._mock(*args)
       end
     EOS
 
     service::Real.module_eval <<-EOS, __FILE__, __LINE__
-      def #{request}(*args)
+      def #{name}(*args)
         #{klass}.new(self)._real(*args)
       end
     EOS
-
-    request
   end
 
   attr_reader :service
@@ -24,7 +20,8 @@ module Cistern::Request
   end
 
   module ClassMethods
-    def request_name
+    def request_name(name=nil)
+      name.nil? ? @_request_name : (@_request_name = name)
     end
   end
 end
