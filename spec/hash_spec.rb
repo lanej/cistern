@@ -15,6 +15,20 @@ describe "Cistern::Hash" do
     end
   end
 
+  describe "#except" do
+    let(:input) do
+      { one: "one", two: "two", three: "three" }
+    end
+
+    it "returns a new hash without the specified keys" do
+      expect(Cistern::Hash.except(input, :one, :two)).to eq({three: "three"})
+    end
+
+    it "skips keys that aren't in the original hash" do
+      expect(Cistern::Hash.except(input, :four)).to eq(input)
+    end
+  end
+
   describe "#stringify_keys" do
     let(:input) do
       { one: "one", two: "two" }

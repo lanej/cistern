@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 describe "Cistern::Model#dirty" do
-  class DirtySpec < Cistern::Model
+  class DirtySpec < Sample::Model
     identity :id
 
     attribute :name

@@ -2,7 +2,7 @@ require 'spec_helper'
 
 describe "Cistern::Model" do
   describe "#update" do
-    class UpdateSpec < Cistern::Model
+    class UpdateSpec < Sample::Model
       identity :id
       attribute :name
       attribute :properties
@@ -21,7 +21,7 @@ describe "Cistern::Model" do
   end
 
   it "should duplicate a model" do
-    class DupSpec < Cistern::Model
+    class DupSpec < Sample::Model
       identity :id
       attribute :name
       attribute :properties
@@ -38,7 +38,7 @@ describe "Cistern::Model" do
   end
 
   context "attribute parsing" do
-    class TypeSpec < Cistern::Model
+    class TypeSpec < Sample::Model
       identity :id
       attribute :name, type: :string
       attribute :created_at, type: :time
@@ -155,17 +155,17 @@ describe "Cistern::Model" do
 
     describe "#requires" do
       it "should raise if attribute not provided" do
-        expect { TypeSpec.new({"connection" => "fake", "something" => {"id" => "12"}}).save }.to raise_exception(ArgumentError)
+        expect { TypeSpec.new({"service" => "fake", "something" => {"id" => "12"}}).save }.to raise_exception(ArgumentError)
       end
 
       it "should raise if attribute is provided and is nil" do
-        expect { TypeSpec.new({"connection" => "fake", "custom" => nil}).save }.to raise_exception(ArgumentError)
+        expect { TypeSpec.new({"service" => "fake", "custom" => nil}).save }.to raise_exception(ArgumentError)
       end
     end
   end
 
   context "attribute coverage info collecting", :coverage do
-    class CoverageSpec < Cistern::Model
+    class CoverageSpec < Sample::Model
       identity :id
 
       attribute :used, type: :string

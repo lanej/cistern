@@ -9,6 +9,7 @@ module Cistern
   Timeout = Class.new(Error)
 
   require 'cistern/hash'
+  require 'cistern/string'
   require 'cistern/mock'
   require 'cistern/wait_for'
   require 'cistern/attributes'
@@ -16,6 +17,7 @@ module Cistern
   require 'cistern/model'
   require 'cistern/service'
   require 'cistern/singular'
+  require 'cistern/request'
   require 'cistern/data'
   require 'cistern/data/hash'
   require 'cistern/data/redis'

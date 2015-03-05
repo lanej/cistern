@@ -11,68 +11,6 @@ Cistern helps you consistenly build your API clients and faciliates building moc
 
 This represents the remote service that you are wrapping. If the service name is 'foo' then a good name is 'Foo::Client'.
 
-#### Requests
-
-Requests are enumerated using the `request` method and required immediately via the relative path specified via `request_path`.
-
-```ruby
-class Foo::Client < Cistern::Service
-  request_path "my-foo/requests"
-
-  request :get_bar  # require my-foo/requests/get_bar.rb
-  request :get_bars # require my-foo/requests/get_bars.rb
-
-  class Real
-    def request(url)
-      Net::HTTP.get(url)
-    end
-  end
-end
-```
-
-
-<!--todo move to a request section-->
-A request is method defined within the context of service and mode (Real or Mock).  Defining requests within the service mock class is optional.
-
-```ruby
-# my-foo/requests/get_bar.rb
-class Foo::Client
-  class Real
-    def get_bar(bar_id)
-      request("http://example.org/bar/#{bar_id}")
-    end
-  end # Real
-
-  # optional, but encouraged
-  class Mock
-    def get_bars
-      # do some mock things
-    end
-  end # Mock
-end # Foo::client
-```
-
-All declared requests can be listed via `Cistern::Service#requests`.
-
-```ruby
-Foo::Client.requests # => [:get_bar, :get_bars]
-```
-
-#### Models and Collections
-
-Models and collections have declaration semantics similar to requests.  Models and collections are enumerated via `model` and `collection` respectively.
-
-```ruby
-class Foo::Client < Cistern::Service
-  model_path "my-foo/models"
-
-  model :bar       # require my-foo/models/bar.rb
-  collection :bars # require my-foo/models/bars.rb
-end
-```
-
-#### Initialization
-
 Service initialization parameters are enumerated by `requires` and `recognizes`.  `recognizes` parameters are optional.
 
 ```ruby
@@ -90,6 +28,7 @@ Foo::Client.new(hmac_id: "1", url: "http://example.org")
 Foo::Client.new(hmac_id: "1")
 ```
 
+Cistern will define for you two classes, `Mock` and `Real`.
 
 ### Mocking
 
@@ -105,6 +44,148 @@ Foo::Client.unmock!
 Foo::Client.mocking?          # false
 real.is_a?(Foo::Client::Real) # true
 fake.is_a?(Foo::Client::Mock) # true
+```
+
+### Requests
+
+Requests are defined by subclassing `#{service}::Request`.
+
+* `service` represents the associated `Foo::Client` instance.
+
+```ruby
+class Foo::Client::GetBar < Foo::Client::Request
+  def real(params)
+    # make a real request
+    "i'm real"
+  end
+
+  def mock(params)
+    # return a fake response
+    "imposter!"
+  end
+end
+
+Foo::Client.new.get_bar # "i'm real"
+```
+
+The `#service_method` function allows you to specific the name of generated method.
+
+```ruby
+class Foo::Client::GetBars < Foo::Client::Request
+  service_method :get_all_the_bars
+
+  def real(params)
+    "all the bars"
+  end
+end
+
+Foo::Client.new.respond_to?(:get_bars) # false
+Foo::Client.new.get_all_the_bars       # "all the bars"
+
+All declared requests can be listed via `Cistern::Service#requests`.
+
+```ruby
+Foo::Client.requests # => [Foo::Client::GetBars, Foo::Client::GetBar]
+```
+
+### Models
+
+* `service` represents the associated `Foo::Client` instance.
+* `collection` represents the related collection (if applicable)
+* `new_record?` checks if `identity` is present
+* `requires(*requirements)` throws `ArgumentError` if an attribute matching a requirement isn't set
+* `merge_attributes(attributes)` sets attributes for the current model instance
+
+#### Attributes
+
+Attributes are designed to be a flexible way of parsing service request responses.
+
+`identity` is special but not required.
+
+`attribute :flavor` makes `Foo::Client::Bar.new.respond_to?(:flavor)`
+
+* `:aliases` or `:alias` allows a attribute key to be different then a response key. `attribute :keypair_id, alias: "keypair"` with `merge_attributes("keypair" => 1)` sets `keypair_id` to `1`
+* `:type` automatically casts the attribute do the specified type. `attribute :private_ips, type: :array` with `merge_attributes("private_ips" => 2)` sets `private_ips` to `[2]`
+* `:squash` traverses nested hashes for a key. `attribute :keypair_id, aliases: "keypair", squash: "id"` with `merge_attributes("keypair" => {"id" => 3})` sets `keypair_id` to `3`
+
+Example
+
+```ruby
+class Foo::Client::Bar < Foo::Client::Model
+  identity :id
+
+  attribute :flavor
+  attribute :keypair_id, aliases: "keypair",  squash: "id"
+  attribute :private_ips, type: :array
+
+  def destroy
+    params  = {
+      "id" => self.identity
+    }
+    self.service.destroy_bar(params).body["request"]
+  end
+
+  def save
+    requires :keypair_id
+
+    params = {
+      "keypair" => self.keypair_id,
+      "bar"     => {
+        "flavor" => self.flavor,
+      },
+    }
+
+    if new_record?
+      merge_attributes(service.create_bar(params).body["bar"])
+    else
+      requires :identity
+
+      merge_attributes(service.update_bar(params).body["bar"])
+    end
+  end
+end
+```
+
+### Collection
+
+* `model` tells Cistern which class is contained within the collection.
+* `service` is the associated `Foo::Client` instance
+* `attribute` specifications on collections are allowed. use `merge_attributes`
+* `load` consumes an Array of data and constructs matching `model` instances
+
+```ruby
+class Foo::Client::Bars < Cistern::Collection
+
+  attribute :count, type: :integer
+
+  model Foo::Client::Bar
+
+  def all(params = {})
+    response = service.get_bars(params)
+
+    data = response.body
+
+    self.load(data["bars"])     # store bar records in collection
+    self.merge_attributes(data) # store any other attributes of the response on the collection
+  end
+
+  def discover(provisioned_id, options={})
+    params = {
+      "provisioned_id" => provisioned_id,
+    }
+    params.merge!("location" => options[:location]) if options.key?(:location)
+
+    service.requests.new(service.discover_bar(params).body["request"])
+  end
+
+  def get(id)
+    if data = service.get_bar("id" => id).body["bar"]
+      new(data)
+    else
+      nil
+    end
+  end
+end
 ```
 
 #### Data
@@ -159,34 +240,6 @@ class Foo::Client < Cistern::Service
 end
 ```
 
-
-#### Requests
-
-Mock requests should be defined within the contextual `Mock` module and interact with the `data` object directly.
-
-```ruby
-# lib/foo/requests/create_bar.rb
-class Foo::Client
-  class Mock
-    def create_bar(options={})
-      id = Foo.random_hex(6)
-
-      bar = {
-        "id" => id
-      }.merge(options)
-
-      self.data[:bars][id] = bar
-
-      response(
-        :body   => {"bar" => bar},
-        :status => 201,
-        :path => '/bar',
-      )
-    end
-  end # Mock
-end # Foo::Client
-```
-
 #### Storage
 
 Currently supported storage backends are:
@@ -206,48 +259,6 @@ Patient::Mock.store_in(:redis, client: Redis::Namespace.new("cistern", redis: Re
 Patient::Mock.store_in(:hash)
 ```
 
-### Model
-
-* `connection` represents the associated `Foo::Client` instance.
-* `collection` represents the related collection (if applicable)
-
-Example
-
-```ruby
-class Foo::Client::Bar < Cistern::Model
-  identity :id
-
-  attribute :flavor
-  attribute :keypair_id, aliases: "keypair",  squash: "id"
-  attribute :private_ips, type: :array
-
-  def destroy
-    params  = {
-      "id" => self.identity
-    }
-    self.connection.destroy_bar(params).body["request"]
-  end
-
-  def save
-    requires :keypair_id
-
-    params = {
-      "keypair" => self.keypair_id,
-      "bar"     => {
-        "flavor" => self.flavor,
-      },
-    }
-
-    if new_record?
-      merge_attributes(connection.create_bar(params).body["bar"])
-    else
-      requires :identity
-
-      merge_attributes(connection.update_bar(params).body["bar"])
-    end
-  end
-end
-```
 
 #### Dirty
 
@@ -274,79 +285,6 @@ bar.save
 bar.dirty?           # => false
 bar.changed          # => {}
 bar.dirty_attributes # => {}
-```
-
-### Collection
-
-`model` tells Cistern which class is contained within the collection.  `Cistern::Collection` inherits from `Array` and lazy loads where applicable.
-
-```ruby
-class Foo::Client::Bars < Cistern::Collection
-
-  model Foo::Client::Bar
-
-  def all(params = {})
-    response = connection.get_bars(params)
-
-    data = response.body
-
-    self.load(data["bars"])     # store bar records in collection
-    self.merge_attributes(data) # store any other attributes of the response on the collection
-  end
-
-  def discover(provisioned_id, options={})
-    params = {
-      "provisioned_id" => provisioned_id,
-    }
-    params.merge!("location" => options[:location]) if options.key?(:location)
-
-    connection.requests.new(connection.discover_bar(params).body["request"])
-  end
-
-  def get(id)
-    if data = connection.get_bar("id" => id).body["bar"]
-      new(data)
-    else
-      nil
-    end
-  end
-end
-```
-
-### Request
-
-```ruby
-module Foo
-  class Client
-    class Real
-      def create_bar(options={})
-        request(
-          :body     => {"bar" => options},
-          :method   => :post,
-          :path     => '/bar'
-        )
-      end
-    end # Real
-
-    class Mock
-      def create_bar(options={})
-        id = Foo.random_hex(6)
-
-        bar = {
-          "id" => id
-        }.merge(options)
-
-        self.data[:bars][id]= bar
-
-        response(
-          :body   => {"bar" => bar},
-          :status => 201,
-          :path => '/bar',
-        )
-      end
-    end # Mock
-  end # Client
-end # Foo
 ```
 
 ## Examples

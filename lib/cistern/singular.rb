@@ -2,7 +2,7 @@ class Cistern::Singular
   extend Cistern::Attributes::ClassMethods
   include Cistern::Attributes::InstanceMethods
 
-  attr_accessor :connection
+  attr_accessor :service
 
   def inspect
     if Cistern.formatter
