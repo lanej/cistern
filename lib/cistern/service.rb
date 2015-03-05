@@ -151,7 +151,8 @@ class Cistern::Service
       return true if @_setup
 
       requests.each do |klass|
-        name = klass.service_method || Cistern::String.camelize(Cistern::String.demodulize(klass.name))
+        name = klass.service_method ||
+          Cistern::String.camelize(Cistern::String.demodulize(klass.name))
 
         Cistern::Request.service_request(self, klass, name)
       end
@@ -160,14 +161,14 @@ class Cistern::Service
         name = klass.service_method ||
           Cistern::String.underscore(klass.name.gsub("#{self.name}::", "").gsub("::", ""))
 
-        Cistern::Collection.service_collection(service, klass, name)
+        Cistern::Collection.service_collection(self, klass, name)
       end
 
       models.each do |klass|
         name = klass.service_method ||
           Cistern::String.underscore(klass.name.gsub("#{self.name}::", "").gsub("::", ""))
 
-        Cistern::Model.service_model(service, klass, name)
+        Cistern::Model.service_model(self, klass, name)
       end
 
       @_setup = true

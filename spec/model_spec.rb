@@ -20,6 +20,30 @@ describe "Cistern::Model" do
     end
   end
 
+  it "should set singular resource service method" do
+    class ModelService < Cistern::Service
+    end
+
+    class ModelService::Jimbob < ModelService::Model
+    end
+
+    expect(ModelService.new).to respond_to(:jimbob)
+    expect(ModelService.new.jimbob).to be_a(ModelService::Jimbob)
+  end
+
+  it "should set specific singular resource service method" do
+    class SpecificModelService < Cistern::Service
+    end
+
+    class SpecificModelService::Jimbob < SpecificModelService::Model
+      service_method :john_boy
+    end
+
+    expect(SpecificModelService.new).not_to respond_to(:jimbob)
+    expect(SpecificModelService.new).to respond_to(:john_boy)
+    expect(SpecificModelService.new.john_boy).to be_a(SpecificModelService::Jimbob)
+  end
+
   it "should duplicate a model" do
     class DupSpec < Sample::Model
       identity :id

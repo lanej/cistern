@@ -8,7 +8,7 @@ module Cistern::Model
   end
 
   def self.service_model(service, klass, name)
-    service.class_eval <<-EOS, __FILE__, __LINE__
+    service.const_get(:Collections).module_eval <<-EOS, __FILE__, __LINE__
       def #{name}(attributes={})
         #{klass.name}.new(attributes.merge(service: self))
       end
