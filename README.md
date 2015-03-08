@@ -3,6 +3,7 @@
 [![Build Status](https://secure.travis-ci.org/lanej/cistern.png)](http://travis-ci.org/lanej/cistern)
 [![Dependencies](https://gemnasium.com/lanej/cistern.png)](https://gemnasium.com/lanej/cistern.png)
 [![Gem Version](https://badge.fury.io/rb/cistern.svg)](http://badge.fury.io/rb/cistern)
+[![Code Climate](https://codeclimate.com/github/lanej/cistern/badges/gpa.svg)](https://codeclimate.com/github/lanej/cistern)
 
 Cistern helps you consistenly build your API clients and faciliates building mock support.
 
