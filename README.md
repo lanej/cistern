@@ -5,7 +5,7 @@
 [![Gem Version](https://badge.fury.io/rb/cistern.svg)](http://badge.fury.io/rb/cistern)
 [![Code Climate](https://codeclimate.com/github/lanej/cistern/badges/gpa.svg)](https://codeclimate.com/github/lanej/cistern)
 
-Cistern helps you consistenly build your API clients and faciliates building mock support.
+Cistern helps you consistently build your API clients and faciliates building mock support.
 
 ## Usage
 
