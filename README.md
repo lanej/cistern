@@ -83,6 +83,7 @@ end
 
 Foo::Client.new.respond_to?(:get_bars) # false
 Foo::Client.new.get_all_the_bars       # "all the bars"
+```
 
 All declared requests can be listed via `Cistern::Service#requests`.
 
