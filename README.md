@@ -293,6 +293,7 @@ bar.dirty_attributes # => {}
 ## Examples
 
 * [zendesk2](https://github.com/lanej/zendesk2)
+* [you_track](https://github.com/lanej/you_track)
 
 ## Releasing
 
