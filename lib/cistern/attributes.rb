@@ -123,7 +123,13 @@ module Cistern::Attributes
       # record the attribute was accessed
       self.class.attributes[name.to_s.to_sym][:coverage_hits] += 1 rescue  nil
 
-      attributes.fetch(name.to_s.to_sym, options[:default])
+      default = options[:default]
+
+      unless default.nil?
+        default = Marshal.load(Marshal.dump(default))
+      end
+
+      attributes.fetch(name.to_s.to_sym, default)
     end
 
     def write_attribute(name, value)
