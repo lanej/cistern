@@ -11,9 +11,9 @@ Cistern helps you consistently build your API clients and faciliates building mo
 
 ### Service
 
-This represents the remote service that you are wrapping. If the service name is 'foo' then a good name is 'Foo::Client'.
+This represents the remote service that you are wrapping. If the service name is `foo` then a good name is `Foo::Client`.
 
-Service initialization parameters are enumerated by `requires` and `recognizes`.  `recognizes` parameters are optional.
+Service initialization parameters are enumerated by `requires` and `recognizes`. Parameters defined using `recognizes` are optional.
 
 ```ruby
 class Foo::Client < Cistern::Service
@@ -34,7 +34,7 @@ Cistern will define for you two classes, `Mock` and `Real`.
 
 ### Mocking
 
-Cistern strongly encourages you to generate mock support for service. Mocking can be enabled using `mock!`.
+Cistern strongly encourages you to generate mock support for your service. Mocking can be enabled using `mock!`.
 
 ```ruby
 Foo::Client.mocking?          # falsey
@@ -70,7 +70,7 @@ end
 Foo::Client.new.get_bar # "i'm real"
 ```
 
-The `#service_method` function allows you to specific the name of generated method.
+The `#service_method` function allows you to specify the name of the generated method.
 
 ```ruby
 class Foo::Client::GetBars < Foo::Client::Request
@@ -224,8 +224,7 @@ client.data["bars"] += ["y"] # ["y"]
 client.data.object_id        # 70199868378300
 client.clear
 client.data["bars"]          # []
-
-client.data.object_id        # 70199868566840
+client.data.object_id        # 70199868378300
 ```
 
 * `store` and `[]=` write
