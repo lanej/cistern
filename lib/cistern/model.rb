@@ -5,11 +5,7 @@ class Cistern::Model
   attr_accessor :collection, :connection
 
   def inspect
-    if Cistern.formatter
-      Cistern.formatter.call(self)
-    else
-      "#<#{self.class} #{self.identity}"
-    end
+    Cistern.formatter.call(self)
   end
 
   def initialize(attributes={})
