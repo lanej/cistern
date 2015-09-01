@@ -163,11 +163,34 @@ class Cistern::Service
 
         # setup requests
         requests.each do |request, options|
-          unless options[:require] == false || service::Real.method_defined?(request.to_s)
+          unless (options[:require] == false) || options[:new] || service::Real.method_defined?(request.to_s)
             require(options[:require] || File.join(@request_path, request.to_s))
           end
 
-          if service::Mock.method_defined?(request)
+          if options[:new]
+            klass  = options.fetch(:class)
+            method = options.fetch(:method)
+
+            unless klass.instance_methods.include?(:mock)
+              klass.class_eval <<-EOS, __FILE__, __LINE__
+                def #{method}(*args)
+                  Cistern::Mock.not_implemented(request)
+                end
+              EOS
+            end
+
+            service::Real.module_eval <<-EOS, __FILE__, __LINE__
+              def #{method}(*args)
+                #{klass}.new(self).real(*args)
+              end
+            EOS
+
+            service::Mock.module_eval <<-EOS, __FILE__, __LINE__
+              def #{method}(*args)
+                #{klass}.new(self).mock(*args)
+              end
+            EOS
+          elsif service::Mock.method_defined?(request)
             mocked_requests << request
           else
             service::Mock.module_eval <<-EOS, __FILE__, __LINE__
@@ -180,11 +203,13 @@ class Cistern::Service
 
         # setup collections
         collections.each do |collection, options|
-          unless options[:require] == false
+          unless false == options[:require]
             require(options[:require] || File.join(@collection_path || @model_path, collection.to_s))
           end
 
-          class_name = collection.to_s.split("/").map(&:capitalize).join("::").split("_").map { |s| "#{s[0].upcase}#{s[1..-1]}" }.join
+          class_name = collection.to_s.
+            split("/").map(&:capitalize).join("::").split("_").
+            map { |s| "#{s[0].upcase}#{s[1..-1]}" }.join
           plural_name = options[:collection] || collection.to_s.gsub("/", "_")
 
           self.const_get(:Collections).module_eval <<-EOS, __FILE__, __LINE__

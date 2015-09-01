@@ -19,6 +19,8 @@ module Cistern
   require 'cistern/data'
   require 'cistern/data/hash'
   require 'cistern/data/redis'
+  require 'cistern/request'
+  require 'cistern/string'
 
   extend WaitFor
 
