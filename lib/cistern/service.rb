@@ -181,13 +181,13 @@ class Cistern::Service
 
             service::Real.module_eval <<-EOS, __FILE__, __LINE__
               def #{method}(*args)
-                #{klass}.new(self).real(*args)
+                #{klass}.new(self)._real(*args)
               end
             EOS
 
             service::Mock.module_eval <<-EOS, __FILE__, __LINE__
               def #{method}(*args)
-                #{klass}.new(self).mock(*args)
+                #{klass}.new(self)._mock(*args)
               end
             EOS
           elsif service::Mock.method_defined?(request)
