@@ -58,6 +58,26 @@ All declared requests can be listed via `Cistern::Service#requests`.
 Foo::Client.requests # => [:get_bar, :get_bars]
 ```
 
+##### Forward Compatible
+
+Ish.
+
+```ruby
+# client/requests/get_bar.rb
+class Client::GetBar
+  def real(bar_id)
+    connection.request("http://example.org/bar/#{bar_id}")
+  end
+
+  def mock
+    # do some mock things
+  end
+end
+```
+
+In this context, `connection` is reference to the `Cistern::Service`.
+
+
 #### Models and Collections
 
 Models and collections have declaration semantics similar to requests.  Models and collections are enumerated via `model` and `collection` respectively.
