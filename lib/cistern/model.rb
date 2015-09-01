@@ -4,6 +4,8 @@ class Cistern::Model
 
   attr_accessor :collection, :connection
 
+  alias service connection
+
   def inspect
     Cistern.formatter.call(self)
   end

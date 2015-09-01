@@ -10,6 +10,8 @@ class Cistern::Collection
 
   attr_accessor :records, :loaded, :connection
 
+  alias service connection
+
   def self.model(new_model=nil)
     if new_model == nil
       @model
