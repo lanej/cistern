@@ -64,7 +64,10 @@ Ish.
 
 ```ruby
 # client/requests/get_bar.rb
-class Client::GetBar
+class Foo:Client::GetBar
+
+  service Foo::Client
+
   def real(bar_id)
     connection.request("http://example.org/bar/#{bar_id}")
   end
