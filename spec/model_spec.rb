@@ -20,6 +20,23 @@ describe "Cistern::Model" do
     end
   end
 
+  context "#new_record?" do
+    it "does not require identity" do
+      identity_less = Class.new(Sample::Model)
+
+      expect(identity_less.new.new_record?).to eq(true)
+    end
+
+    it "is false if identity is set" do
+      identity_full = Class.new(Sample::Model) {
+        identity :id
+      }
+
+      expect(identity_full.new.new_record?).to eq(true)
+      expect(identity_full.new(id: 1).new_record?).to eq(false)
+    end
+  end
+
   it "should set singular resource service method" do
     class ModelService < Cistern::Service
     end

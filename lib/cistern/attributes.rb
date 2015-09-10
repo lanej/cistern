@@ -173,11 +173,21 @@ module Cistern::Attributes
     end
 
     def identity
-      send(self.class.instance_variable_get('@identity'))
+      key = self.class.instance_variable_get('@identity')
+
+      if key
+        public_send(key)
+      end
     end
 
     def identity=(new_identity)
-      send("#{self.class.instance_variable_get('@identity')}=", new_identity)
+      key = self.class.instance_variable_get('@identity')
+
+      if key
+        public_send("#{key}=", new_identity)
+      else
+        raise ArgumentError, "Identity not specified"
+      end
     end
 
     def merge_attributes(new_attributes = {})
@@ -222,7 +232,7 @@ module Cistern::Attributes
     end
 
     def new_record?
-      !identity
+      identity.nil?
     end
 
     # check that the attributes specified in args exist and is not nil
@@ -257,7 +267,7 @@ module Cistern::Attributes
     protected
 
     def missing_attributes(args)
-      ([:service] | args).select{|arg| send("#{arg}").nil?}
+      ([:service] | args).select { |arg| send("#{arg}").nil? }
     end
 
     def changed!(attribute, from, to)
