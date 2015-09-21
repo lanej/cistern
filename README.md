@@ -157,7 +157,7 @@ end
 * `load` consumes an Array of data and constructs matching `model` instances
 
 ```ruby
-class Foo::Client::Bars < Cistern::Collection
+class Foo::Client::Bars < Foo::Client::Collection
 
   attribute :count, type: :integer
 
