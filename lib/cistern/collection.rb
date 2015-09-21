@@ -32,7 +32,7 @@ module Cistern::Collection
     merge_attributes(attributes)
   end
 
-  def all(identity)
+  def all(_={})
     raise NotImplementedError
   end
 
