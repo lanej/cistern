@@ -8,6 +8,8 @@ Dir[File.expand_path("../{support,shared,matchers,fixtures}/*.rb", __FILE__)].ea
 
 Bundler.require(:test)
 
+Cistern.deprecation_warnings = false
+
 RSpec.configure do |c|
   c.treat_symbols_as_metadata_keys_with_true_values = true
 

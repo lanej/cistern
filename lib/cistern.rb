@@ -1,7 +1,7 @@
 require 'cistern/version'
 
+# stdlib
 require 'time'
-require 'set'
 
 module Cistern
 
@@ -16,6 +16,7 @@ module Cistern
   require 'cistern/collection'
   require 'cistern/model'
   require 'cistern/service'
+  require 'cistern/client'
   require 'cistern/singular'
   require 'cistern/request'
   require 'cistern/data'
@@ -30,6 +31,20 @@ module Cistern
 
   def self.formatter
     @formatter ||= Cistern::Formatter.default
+  end
+
+  def self.deprecation_warnings?
+    @deprecation_warnings.nil? ? true : !!@deprecation_warnings
+  end
+
+  def self.deprecation_warnings=(status)
+    @deprecation_warnings = status
+  end
+
+  def self.deprecation(message, source=caller[1])
+    if deprecation_warnings?
+      STDERR.puts("#{message}. (#{source})")
+    end
   end
 end
 

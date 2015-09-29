@@ -38,7 +38,8 @@ describe "Cistern::Model" do
   end
 
   it "should set singular resource service method" do
-    class ModelService < Cistern::Service
+    class ModelService
+      include Cistern::Client
     end
 
     class ModelService::Jimbob < ModelService::Model
@@ -49,7 +50,8 @@ describe "Cistern::Model" do
   end
 
   it "should set specific singular resource service method" do
-    class SpecificModelService < Cistern::Service
+    class SpecificModelService
+      include Cistern::Client
     end
 
     class SpecificModelService::Jimbob < SpecificModelService::Model

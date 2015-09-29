@@ -1,1 +1,1 @@
-class Sample < Cistern::Service; end
+class Sample; include Cistern::Client; end
