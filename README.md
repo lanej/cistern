@@ -16,7 +16,9 @@ This represents the remote service that you are wrapping. If the service name is
 Service initialization parameters are enumerated by `requires` and `recognizes`. Parameters defined using `recognizes` are optional.
 
 ```ruby
-class Foo::Client < Cistern::Service
+class Foo::Client
+  include Cistern::Client
+
   requires :hmac_id, :hmac_secret
   recognizes :url
 end
@@ -85,7 +87,7 @@ Foo::Client.new.respond_to?(:get_bars) # false
 Foo::Client.new.get_all_the_bars       # "all the bars"
 ```
 
-All declared requests can be listed via `Cistern::Service#requests`.
+All declared requests can be listed via `Cistern::Client#requests`.
 
 ```ruby
 Foo::Client.requests # => [Foo::Client::GetBars, Foo::Client::GetBar]
@@ -233,7 +235,9 @@ client.data.object_id        # 70199868378300
 You can make the service bypass Cistern's mock data structures by simply creating a `self.data` function in your service `Mock` declaration.
 
 ```ruby
-class Foo::Client < Cistern::Service
+class Foo::Client
+  include Cistern::Client
+
   class Mock
     def self.data
       @data ||= {}
