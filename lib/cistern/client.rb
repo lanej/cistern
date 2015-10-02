@@ -70,10 +70,10 @@ module Cistern::Client
       end
 
       #{interface} #{model_class}
-        include ::Cistern::Model
-
         def self.#{interface_callback}(klass)
           service.models << klass
+
+          klass.send(:include, ::Cistern::Model)
 
           super
         end
