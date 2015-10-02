@@ -10,79 +10,120 @@ module Cistern::Client
     end
   end
 
-  def self.included(klass)
-    klass.class_eval <<-EOS, __FILE__, __LINE__
-        module Collections
-          include Cistern::Client::Collections
+  # custom include
+  def self.with(options={})
+    client_module = Module.new
 
-          def service
-    #{klass.name}
-          end
+    custom_include = <<-EOS
+      def self.included(klass)
+        Cistern::Client.setup(klass, #{options.inspect})
+
+        super
+      end
+    EOS
+
+    client_module.class_eval(custom_include, __FILE__, __LINE__)
+
+    client_module
+  end
+
+  # vanilla include
+  def self.included(klass)
+    self.setup(klass)
+
+    super
+  end
+
+  def self.setup(klass, options={})
+    request_class    = options[:request]    || "Request"
+    collection_class = options[:collection] || "Collection"
+    model_class      = options[:model]      || "Model"
+
+    interface = options[:interface] || :class
+    interface_callback = (:class == interface) ? :inherited : :included
+
+    unless klass.name
+      raise ArgumentError, "can't turn anonymous class into a Cistern service"
+    end
+
+    klass.class_eval <<-EOS, __FILE__, __LINE__
+      module Collections
+        include Cistern::Client::Collections
+
+        def service
+          #{klass.name}
+        end
+      end
+
+      def self.service
+        #{klass.name}
+      end
+
+      class Real
+        def initialize(options={})
+        end
+      end
+
+      class Mock
+        def initialize(options={})
+        end
+      end
+
+      #{interface} #{model_class}
+        include Cistern::Model
+
+        def self.#{interface_callback}(klass)
+          service.models << klass
+
+          super
         end
 
         def self.service
-    #{klass.name}
+          #{klass.name}
+        end
+      end
+
+      #{interface} #{collection_class}
+        include Cistern::Collection
+
+        def self.#{interface_callback}(klass)
+          klass.send(:extend, Cistern::Attributes::ClassMethods)
+          klass.send(:extend, Cistern::Collection::ClassMethods)
+          klass.send(:include, Cistern::Attributes::InstanceMethods)
+
+          service.collections << klass
+
+          super
         end
 
-        class Real
-          def initialize(options={})
-          end
+        def self.service
+          #{klass.name}
+        end
+      end
+
+      #{interface} #{request_class}
+        include Cistern::Request
+
+        def self.service
+          #{klass.name}
         end
 
-        class Mock
-          def initialize(options={})
-          end
+        def self.#{interface_callback}(klass)
+          klass.extend(Cistern::Request::ClassMethods)
+
+          service.requests << klass
+
+          super
         end
 
-        class Model
-          include Cistern::Model
-
-          def self.inherited(klass)
-            service.models << klass
-          end
-
-          def self.service
-    #{klass.name}
-          end
+        def _mock(*args)
+          mock(*args)
         end
 
-        class Collection
-          include Cistern::Collection
-
-          def self.inherited(klass)
-            klass.send(:extend, Cistern::Attributes::ClassMethods)
-            klass.send(:extend, Cistern::Collection::ClassMethods)
-            klass.send(:include, Cistern::Attributes::InstanceMethods)
-
-            service.collections << klass
-          end
-
-          def self.service
-    #{klass.name}
-          end
+        def _real(*args)
+          real(*args)
         end
-
-        class Request
-          include Cistern::Request
-
-          def self.inherited(klass)
-            klass.extend(Cistern::Request::ClassMethods)
-
-            service.requests << klass
-          end
-
-          def self.service
-    #{klass.name}
-          end
-
-          def _mock(*args)
-            mock(*args)
-          end
-
-          def _real(*args)
-            real(*args)
-          end
-        end
+      end
     EOS
 
     klass.send(:extend, Cistern::Client::ClassMethods)
@@ -97,8 +138,6 @@ module Cistern::Client
     klass::Real.send(:include, klass::Collections)
     klass::Real.send(:extend, Cistern::WaitFor)
     klass::Real.timeout_error = klass::Timeout
-
-    super
   end
 
   module ClassMethods
