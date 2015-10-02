@@ -19,5 +19,21 @@ RSpec.describe "client" do
         ModuleClient.new.mod_request(9)
       ).to eq(0)
     end
+
+    it "allows custom request class" do
+      class AskClient
+        include Cistern::Client.with(request: "Ask")
+      end
+
+      class AskClient::ModRequest < AskClient::Ask
+        def real(mod)
+          9 % mod
+        end
+      end
+
+      expect(
+        AskClient.new.mod_request(9)
+      ).to eq(0)
+    end
   end
 end

@@ -48,7 +48,7 @@ module Cistern::Client
 
     klass.class_eval <<-EOS, __FILE__, __LINE__
       module Collections
-        include Cistern::Client::Collections
+        include ::Cistern::Client::Collections
 
         def service
           #{klass.name}
@@ -70,7 +70,7 @@ module Cistern::Client
       end
 
       #{interface} #{model_class}
-        include Cistern::Model
+        include ::Cistern::Model
 
         def self.#{interface_callback}(klass)
           service.models << klass
@@ -84,7 +84,7 @@ module Cistern::Client
       end
 
       #{interface} #{collection_class}
-        include Cistern::Collection
+        include ::Cistern::Collection
 
         def self.#{interface_callback}(klass)
           klass.send(:extend, Cistern::Attributes::ClassMethods)
@@ -102,14 +102,14 @@ module Cistern::Client
       end
 
       #{interface} #{request_class}
-        include Cistern::Request
+        include ::Cistern::Request
 
         def self.service
           #{klass.name}
         end
 
         def self.#{interface_callback}(klass)
-          klass.extend(Cistern::Request::ClassMethods)
+          klass.extend(::Cistern::Request::ClassMethods)
 
           service.requests << klass
 
