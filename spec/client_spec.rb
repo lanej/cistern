@@ -1,8 +1,8 @@
 require 'spec_helper'
 
 RSpec.describe "client" do
-  context "with specific semantics" do
-    it "allows module-based semantics" do
+  context "with specific architecture" do
+    it "allows module-based interfaces" do
       class ModuleClient
         include Cistern::Client.with(interface: :module)
       end
@@ -20,7 +20,7 @@ RSpec.describe "client" do
       ).to eq(0)
     end
 
-    it "allows custom request class" do
+    it "allows custom request interface" do
       class AskClient
         include Cistern::Client.with(request: "Ask")
       end
