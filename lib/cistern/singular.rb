@@ -1,10 +1,20 @@
 module Cistern::Singular
-  attr_accessor :service
+
+  def self.service_singular(service, klass, name)
+    service.const_get(:Collections).module_eval <<-EOS, __FILE__, __LINE__
+      def #{name}(attributes={})
+        #{klass.name}.new(attributes.merge(service: self))
+      end
+    EOS
+  end
 
   def self.included(klass)
     klass.send(:extend, Cistern::Attributes::ClassMethods)
     klass.send(:include, Cistern::Attributes::InstanceMethods)
+    klass.send(:extend, Cistern::Model::ClassMethods)
   end
+
+  attr_accessor :service
 
   def inspect
     Cistern.formatter.call(self)

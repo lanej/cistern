@@ -2,6 +2,7 @@ require 'spec_helper'
 
 describe "Cistern::Singular" do
   class SampleSingular < Sample::Singular
+
     attribute :name
     attribute :count, type: :number
 
@@ -16,11 +17,11 @@ describe "Cistern::Singular" do
   end
 
   it "should work" do
-    expect(SampleSingular.new(service: :fake).name).to eq("amazing")
+    expect(Sample.new.sample_singular.name).to eq("amazing")
   end
 
   it "should reload" do
-    singular = SampleSingular.new(service: :fake)
+    singular = Sample.new.sample_singular
     old_count = singular.count
     expect(singular.count).to eq(old_count)
     expect(singular.reload.count).to be > old_count

@@ -86,6 +86,8 @@ module Cistern::Client
 
       #{interface} #{singular_class}
         def self.#{interface_callback}(klass)
+          service.singularities << klass
+
           klass.send(:include, ::Cistern::Singular)
 
           super
@@ -167,6 +169,10 @@ module Cistern::Client
       @_models ||= []
     end
 
+    def singularities
+      @_singularities ||= []
+    end
+
     def recognized_arguments
       @_recognized_arguments ||= []
     end
@@ -225,6 +231,13 @@ module Cistern::Client
           Cistern::String.underscore(klass.name.gsub("#{self.name}::", "").gsub("::", ""))
 
         Cistern::Model.service_model(self, klass, name)
+      end
+
+      singularities.each do |klass|
+        name = klass.service_method ||
+          Cistern::String.underscore(klass.name.gsub("#{self.name}::", "").gsub("::", ""))
+
+        Cistern::Singular.service_singular(self, klass, name)
       end
 
       @_setup = true
