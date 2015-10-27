@@ -38,6 +38,7 @@ module Cistern::Client
     request_class    = options[:request]    || "Request"
     collection_class = options[:collection] || "Collection"
     model_class      = options[:model]      || "Model"
+    singular_class   = options[:singular]   || "Singular"
 
     interface = options[:interface] || :class
     interface_callback = (:class == interface) ? :inherited : :included
@@ -74,6 +75,18 @@ module Cistern::Client
           service.models << klass
 
           klass.send(:include, ::Cistern::Model)
+
+          super
+        end
+
+        def self.service
+          #{klass.name}
+        end
+      end
+
+      #{interface} #{singular_class}
+        def self.#{interface_callback}(klass)
+          klass.send(:include, ::Cistern::Singular)
 
           super
         end

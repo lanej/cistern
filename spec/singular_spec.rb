@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 describe "Cistern::Singular" do
-  class SampleSingular < Cistern::Singular
+  class SampleSingular < Sample::Singular
     attribute :name
     attribute :count, type: :number
 

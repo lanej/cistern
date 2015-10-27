@@ -1,15 +1,13 @@
-class Cistern::Singular
-  extend Cistern::Attributes::ClassMethods
-  include Cistern::Attributes::InstanceMethods
-
+module Cistern::Singular
   attr_accessor :service
 
+  def self.included(klass)
+    klass.send(:extend, Cistern::Attributes::ClassMethods)
+    klass.send(:include, Cistern::Attributes::InstanceMethods)
+  end
+
   def inspect
-    if Cistern.formatter
-      Cistern.formatter.call(self)
-    else
-      "#<#{self.class}>"
-    end
+    Cistern.formatter.call(self)
   end
 
   def initialize(options)
@@ -18,7 +16,9 @@ class Cistern::Singular
   end
 
   def reload
-    if new_attributes = fetch_attributes
+    new_attributes = fetch_attributes
+
+    if new_attributes
       merge_attributes(new_attributes)
     end
   end
