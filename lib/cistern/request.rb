@@ -1,7 +1,7 @@
 module Cistern::Request
   def self.service_request(service, klass, name)
     unless klass.name
-      raise ArgumentError, "can't turn anonymous class into a Cistern request"
+      fail ArgumentError, "can't turn anonymous class into a Cistern request"
     end
 
     service::Mock.module_eval <<-EOS, __FILE__, __LINE__
@@ -24,7 +24,7 @@ module Cistern::Request
   end
 
   module ClassMethods
-    def service_method(name=nil)
+    def service_method(name = nil)
       @_service_method ||= name
     end
   end

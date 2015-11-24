@@ -1,5 +1,4 @@
 module Cistern::Singular
-
   def self.service_singular(service, klass, name)
     service.const_get(:Collections).module_eval <<-EOS, __FILE__, __LINE__
       def #{name}(attributes={})
@@ -28,12 +27,10 @@ module Cistern::Singular
   def reload
     new_attributes = fetch_attributes
 
-    if new_attributes
-      merge_attributes(new_attributes)
-    end
+    merge_attributes(new_attributes) if new_attributes
   end
 
   def fetch_attributes
-    raise NotImplementedError
+    fail NotImplementedError
   end
 end

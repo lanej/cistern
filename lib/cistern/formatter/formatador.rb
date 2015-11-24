@@ -29,14 +29,14 @@ module Cistern::Formatter::Formatador
     Thread.current[:formatador].indent do
       unless collection.class.attributes.empty?
         data << "#{Thread.current[:formatador].indentation}"
-        data << collection.class.attributes.map {|attribute| "#{attribute}=#{send(attribute).inspect}"}.join(",\n#{Thread.current[:formatador].indentation}")
+        data << collection.class.attributes.map { |attribute| "#{attribute}=#{send(attribute).inspect}" }.join(",\n#{Thread.current[:formatador].indentation}")
         data << "\n"
       end
       data << "#{Thread.current[:formatador].indentation}["
       unless collection.empty?
         data << "\n"
         Thread.current[:formatador].indent do
-          data << collection.map {|member| member.inspect}.join(",\n")
+          data << collection.map(&:inspect).join(",\n")
           data << "\n"
         end
         data << Thread.current[:formatador].indentation
@@ -48,6 +48,6 @@ module Cistern::Formatter::Formatador
   end
 
   def table(attributes = nil)
-    Formatador.display_table(self.map {|instance| instance.attributes}, attributes)
+    Formatador.display_table(map(&:attributes), attributes)
   end
 end

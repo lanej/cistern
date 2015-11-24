@@ -23,10 +23,10 @@ module Cistern
     end
 
     def timeout_error
-      @timeout_error || self.const_defined?(:Timeout) && self.const_get(:Timeout) || ::Timeout::Error
+      @timeout_error || self.const_defined?(:Timeout) && const_get(:Timeout) || ::Timeout::Error
     end
 
-    def wait_for(timeout = self.timeout, interval = self.poll_interval, &block)
+    def wait_for(timeout = self.timeout, interval = poll_interval, &_block)
       duration = 0
       start    = Time.now
 
@@ -38,8 +38,8 @@ module Cistern
       duration > timeout ? false : duration
     end
 
-    def wait_for!(timeout = self.timeout, interval = self.poll_interval, &block)
-      wait_for(timeout, interval, &block) || raise(timeout_error, "wait_for(#{timeout}) exceeded")
+    def wait_for!(timeout = self.timeout, interval = poll_interval, &block)
+      wait_for(timeout, interval, &block) || fail(timeout_error, "wait_for(#{timeout}) exceeded")
     end
   end
 end

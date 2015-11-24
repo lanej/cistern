@@ -1,8 +1,8 @@
 require 'spec_helper'
 
-RSpec.describe "client" do
-  context "with specific architecture" do
-    it "allows module-based interfaces" do
+RSpec.describe 'client' do
+  context 'with specific architecture' do
+    it 'allows module-based interfaces' do
       class ModuleClient
         include Cistern::Client.with(interface: :module)
       end
@@ -21,7 +21,7 @@ RSpec.describe "client" do
         identity :on
 
         def save
-          self.identity % 3
+          identity % 3
         end
       end
 
@@ -29,7 +29,6 @@ RSpec.describe "client" do
         include ModuleClient::Collection
 
         model ModuleClient::Moon
-
       end
 
       expect(
@@ -37,17 +36,17 @@ RSpec.describe "client" do
       ).to eq(3)
 
       expect(ModuleClient.collections).to contain_exactly(ModuleClient::Moons)
-      expect(ModuleClient.models).to      contain_exactly(ModuleClient::Moon)
-      expect(ModuleClient.requests).to    contain_exactly(ModuleClient::Shoot)
+      expect(ModuleClient.models).to contain_exactly(ModuleClient::Moon)
+      expect(ModuleClient.requests).to contain_exactly(ModuleClient::Shoot)
 
       expect(
         ModuleClient.new.moons.new(on: 5).save
       ).to eq(2)
     end
 
-    it "allows custom model interface" do
+    it 'allows custom model interface' do
       class AskClient
-        include Cistern::Client.with(model: "Ask", interface: :module)
+        include Cistern::Client.with(model: 'Ask', interface: :module)
       end
 
       class AskClient::Model

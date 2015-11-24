@@ -16,7 +16,7 @@ module Cistern::Model
   end
 
   module ClassMethods
-    def service_method(name=nil)
+    def service_method(name = nil)
       @_service_method ||= name
     end
   end
@@ -27,7 +27,7 @@ module Cistern::Model
     Cistern.formatter.call(self)
   end
 
-  def initialize(attributes={})
+  def initialize(attributes = {})
     merge_attributes(attributes)
   end
 
@@ -37,7 +37,7 @@ module Cistern::Model
   end
 
   def save
-    raise NotImplementedError
+    fail NotImplementedError
   end
 
   def reload
@@ -53,29 +53,29 @@ module Cistern::Model
   def ==(comparison_object)
     super ||
       (comparison_object.is_a?(self.class) &&
-       comparison_object.identity == self.identity &&
+       comparison_object.identity == identity &&
        !comparison_object.new_record?)
   end
 
-  alias :eql? :==
+  alias_method :eql?, :==
 
   def hash
-    if self.identity
-      [self.class, self.identity].join(":").hash
+    if identity
+      [self.class, identity].join(':').hash
     else
       super
     end
   end
 
-  def wait_for(timeout = self.service_class.timeout, interval = self.service_class.poll_interval, &block)
+  def wait_for(timeout = service_class.timeout, interval = service_class.poll_interval, &block)
     service_class.wait_for(timeout, interval) { reload && block.call(self) }
   end
 
-  def wait_for!(timeout = self.service_class.timeout, interval = self.service_class.poll_interval, &block)
+  def wait_for!(timeout = service_class.timeout, interval = service_class.poll_interval, &block)
     service_class.wait_for!(timeout, interval) { reload && block.call(self) }
   end
 
   def service_class
-    self.service ? self.service.class : Cistern
+    service ? service.class : Cistern
   end
 end

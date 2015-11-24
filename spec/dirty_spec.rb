@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe "Cistern::Model#dirty" do
+describe 'Cistern::Model#dirty' do
   class DirtySpec < Sample::Model
     identity :id
 
@@ -12,25 +12,25 @@ describe "Cistern::Model#dirty" do
     end
   end
 
-  it "should mark a existing record as dirty" do
-    model = DirtySpec.new(id: 1, name: "steve")
+  it 'should mark a existing record as dirty' do
+    model = DirtySpec.new(id: 1, name: 'steve')
     expect(model.changed).to be_empty
 
-    expect {
+    expect do
       model.properties = [1]
-    }.to change { model.dirty? }.to(true)
+    end.to change { model.dirty? }.to(true)
 
     expect(model.changed).to eq(properties: [nil, [1]])
     expect(model.dirty_attributes).to eq(properties: [1])
 
-    expect {
+    expect do
       model.properties = [2]
-    }.to change { model.changed }.to(properties: [nil, [2]])
+    end.to change { model.changed }.to(properties: [nil, [2]])
     expect(model.dirty_attributes).to eq(properties: [2])
 
-    expect {
+    expect do
       model.save
-    }.to change { model.dirty? }.to(false)
+    end.to change { model.dirty? }.to(false)
 
     expect(model.changed).to eq({})
     expect(model.dirty_attributes).to eq({})

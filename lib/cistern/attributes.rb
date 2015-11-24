@@ -1,18 +1,18 @@
 module Cistern::Attributes
   def self.parsers
     @parsers ||= {
-      :string  => lambda { |v, _| v.to_s },
-      :time    => lambda { |v, _| v.is_a?(Time) ? v : v && Time.parse(v.to_s) },
-      :integer => lambda { |v, _| v && v.to_i },
-      :float   => lambda { |v, _| v && v.to_f },
-      :array   => lambda { |v, _| [*v] },
-      :boolean => lambda { |v, _| ['true', '1'].include?(v.to_s.downcase) }
+      string: ->(v, _) { v.to_s },
+      time: ->(v, _) { v.is_a?(Time) ? v : v && Time.parse(v.to_s) },
+      integer: ->(v, _) { v && v.to_i },
+      float: ->(v, _) { v && v.to_f },
+      array: ->(v, _) { [*v] },
+      boolean: ->(v, _) { %w(true 1).include?(v.to_s.downcase) }
     }
   end
 
   def self.transforms
     @transforms ||= {
-      :squash  => Proc.new do |k, _v, options|
+      squash: proc do |_k, _v, options|
         v      = Cistern::Hash.stringify_keys(_v)
         squash = options[:squash]
 
@@ -20,7 +20,8 @@ module Cistern::Attributes
           travel = lambda do |tree, path|
             if tree.is_a?(::Hash)
               travel.call(tree[path.shift], path)
-            else tree
+            else
+              tree
             end
           end
 
@@ -30,7 +31,7 @@ module Cistern::Attributes
 
           if v.key?(key = squash_s.to_sym)
             v[key]
-          elsif v.has_key?(squash_s)
+          elsif v.key?(squash_s)
             v[squash_s]
           else
             v
@@ -38,12 +39,12 @@ module Cistern::Attributes
         else v
         end
       end,
-      :none => lambda { |k, v, opts| v },
+      none: ->(_, v, _) { v }
     }
   end
 
   def self.default_parser
-    @default_parser ||= lambda { |v, opts| v }
+    @default_parser ||= ->(v, _opts) { v }
   end
 
   module ClassMethods
@@ -52,7 +53,7 @@ module Cistern::Attributes
     end
 
     def aliases
-      @aliases ||= Hash.new { |h,k| h[k] = [] }
+      @aliases ||= Hash.new { |h, k| h[k] = [] }
     end
 
     def attributes
@@ -61,10 +62,10 @@ module Cistern::Attributes
 
     def attribute(_name, options = {})
       if defined? Cistern::Coverage
-        attribute_call = Cistern::Coverage.find_caller_before("cistern/attributes.rb")
+        attribute_call = Cistern::Coverage.find_caller_before('cistern/attributes.rb')
 
         # Only use DSL attribute calls from within a model
-        if attribute_call and attribute_call.label.start_with? "<class:"
+        if attribute_call && attribute_call.label.start_with?('<class:')
           options[:coverage_file] = attribute_call.absolute_path
           options[:coverage_line] = attribute_call.lineno
           options[:coverage_hits] = 0
@@ -73,25 +74,23 @@ module Cistern::Attributes
 
       name = _name.to_s.to_sym
 
-      self.send(:define_method, name) do
+      send(:define_method, name) do
         read_attribute(name)
-      end unless self.instance_methods.include?(name)
+      end unless instance_methods.include?(name)
 
-      if options[:type] == :boolean
-        self.send(:alias_method, "#{name}?", name)
-      end
+      send(:alias_method, "#{name}?", name) if options[:type] == :boolean
 
-      self.send(:define_method, "#{name}=") do |value|
+      send(:define_method, "#{name}=") do |value|
         write_attribute(name, value)
-      end unless self.instance_methods.include?("#{name}=".to_sym)
+      end unless instance_methods.include?("#{name}=".to_sym)
 
-      if self.attributes[name]
-        raise(ArgumentError, "#{self.name} attribute[#{_name}] specified more than once")
+      if attributes[name]
+        fail(ArgumentError, "#{self.name} attribute[#{_name}] specified more than once")
       else
         if options[:squash]
           options[:squash] = Array(options[:squash]).map(&:to_s)
         end
-        self.attributes[name] = options
+        attributes[name] = options
       end
 
       options[:aliases] = Array(options[:aliases] || options[:alias]).map { |a| a.to_s.to_sym }
@@ -103,7 +102,7 @@ module Cistern::Attributes
 
     def identity(name, options = {})
       @identity = name
-      self.attribute(name, options)
+      attribute(name, options)
     end
 
     def ignore_attributes(*args)
@@ -116,7 +115,7 @@ module Cistern::Attributes
   end
 
   module InstanceMethods
-    def _dump(level)
+    def dump
       Marshal.dump(attributes)
     end
 
@@ -139,11 +138,11 @@ module Cistern::Attributes
       options = self.class.attributes[name] || {}
 
       transform = Cistern::Attributes.transforms[options[:squash] ? :squash : :none] ||
-        Cistern::Attributes.default_transform
+                  Cistern::Attributes.default_transform
 
       parser = Cistern::Attributes.parsers[options[:type]] ||
-        options[:parser] ||
-        Cistern::Attributes.default_parser
+               options[:parser] ||
+               Cistern::Attributes.default_parser
 
       transformed = transform.call(name, value, options)
 
@@ -176,9 +175,7 @@ module Cistern::Attributes
     def identity
       key = self.class.instance_variable_get('@identity')
 
-      if key
-        public_send(key)
-      end
+      public_send(key) if key
     end
 
     def identity=(new_identity)
@@ -187,7 +184,7 @@ module Cistern::Attributes
       if key
         public_send("#{key}=", new_identity)
       else
-        raise ArgumentError, "Identity not specified"
+        fail ArgumentError, 'Identity not specified'
       end
     end
 
@@ -198,37 +195,40 @@ module Cistern::Attributes
       class_aliases      = self.class.aliases
 
       new_attributes.each do |_key, value|
-        string_key = _key.kind_of?(String) ? _key : _key.to_s
+        string_key = _key.is_a?(String) ? _key : _key.to_s
         symbol_key = case _key
-              when String
-                _key.to_sym
-              when Symbol
-                _key
-              else
-                string_key.to_sym
+                     when String
+                       _key.to_sym
+                     when Symbol
+                       _key
+                     else
+                       string_key.to_sym
               end
 
         # find nested paths
         value.is_a?(::Hash) && class_attributes.each do |name, options|
           if options[:squash] && options[:squash].first == string_key
-            send("#{name}=", {symbol_key => value})
+            send("#{name}=", symbol_key => value)
           end
         end
 
-        unless ignored_attributes.include?(symbol_key)
-          if class_aliases.has_key?(symbol_key)
-            class_aliases[symbol_key].each do |aliased_key|
-              send("#{aliased_key}=", value)
-            end
-          end
+        next if ignored_attributes.include?(symbol_key)
 
-          assignment_method = "#{string_key}="
-          if !protected_methods.include?(symbol_key) && self.respond_to?(assignment_method, true)
-            send(assignment_method, value)
+        if class_aliases.key?(symbol_key)
+          class_aliases[symbol_key].each do |aliased_key|
+            send("#{aliased_key}=", value)
           end
+        end
+
+        assignment_method = "#{string_key}="
+
+        if !protected_methods.include?(symbol_key) && self.respond_to?(assignment_method, true)
+          send(assignment_method, value)
         end
       end
+
       changed.clear
+
       self
     end
 
@@ -240,16 +240,16 @@ module Cistern::Attributes
     def requires(*args)
       missing = missing_attributes(args)
       if missing.length == 1
-        raise(ArgumentError, "#{missing.first} is required for this operation")
+        fail(ArgumentError, "#{missing.first} is required for this operation")
       elsif missing.any?
-        raise(ArgumentError, "#{missing[0...-1].join(", ")} and #{missing[-1]} are required for this operation")
+        fail(ArgumentError, "#{missing[0...-1].join(', ')} and #{missing[-1]} are required for this operation")
       end
     end
 
     def requires_one(*args)
       missing = missing_attributes(args)
       if missing.length == args.length
-        raise(ArgumentError, "#{missing[0...-1].join(", ")} or #{missing[-1]} are required for this operation")
+        fail(ArgumentError, "#{missing[0...-1].join(', ')} or #{missing[-1]} are required for this operation")
       end
     end
 
@@ -258,7 +258,7 @@ module Cistern::Attributes
     end
 
     def dirty_attributes
-      changed.inject({}) { |r,(k,(_,v))| r.merge(k => v) }
+      changed.inject({}) { |r, (k, (_, v))| r.merge(k => v) }
     end
 
     def changed

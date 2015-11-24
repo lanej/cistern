@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe "Cistern::Request" do
+describe 'Cistern::Request' do
   class SampleService < Cistern::Service
     recognizes :key
 
@@ -18,20 +18,20 @@ describe "Cistern::Request" do
     service_method :list_all_samples
 
     def real(*args)
-      service.service_args + args + ["real"]
+      service.service_args + args + ['real']
     end
 
     def mock(*args)
-      args + ["mock"]
+      args + ['mock']
     end
   end
 
-  it "should execute a new-style request" do
-    expect(SampleService.new.list_all_samples("sample1")).to eq([{}, "sample1", "real"])
-    expect(SampleService::Real.new.list_all_samples("sample2")).to eq(["sample2", "real"])
-    expect(SampleService::Mock.new.list_all_samples("sample3")).to eq(["sample3", "mock"])
+  it 'should execute a new-style request' do
+    expect(SampleService.new.list_all_samples('sample1')).to eq([{}, 'sample1', 'real'])
+    expect(SampleService::Real.new.list_all_samples('sample2')).to eq(%w(sample2 real))
+    expect(SampleService::Mock.new.list_all_samples('sample3')).to eq(%w(sample3 mock))
 
     # service access
-    expect(SampleService.new(:key => "value").list_all_samples("stat")).to eq([{:key => "value"}, "stat", "real"])
+    expect(SampleService.new(key: 'value').list_all_samples('stat')).to eq([{ key: 'value' }, 'stat', 'real'])
   end
 end

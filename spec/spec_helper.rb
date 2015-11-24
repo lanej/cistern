@@ -1,10 +1,10 @@
-if ENV["TRAVIS"]
-  require "codeclimate-test-reporter"
+if ENV['TRAVIS']
+  require 'codeclimate-test-reporter'
   CodeClimate::TestReporter.start
 end
 
 require File.expand_path('../../lib/cistern', __FILE__)
-Dir[File.expand_path("../{support,shared,matchers,fixtures}/*.rb", __FILE__)].each{|f| require(f)}
+Dir[File.expand_path('../{support,shared,matchers,fixtures}/*.rb', __FILE__)].each { |f| require(f) }
 
 Bundler.require(:test)
 

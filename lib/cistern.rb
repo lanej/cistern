@@ -4,7 +4,6 @@ require 'cistern/version'
 require 'time'
 
 module Cistern
-
   Error   = Class.new(StandardError)
   Timeout = Class.new(Error)
 
@@ -27,7 +26,9 @@ module Cistern
 
   require 'cistern/formatter'
 
-  def self.formatter=(formatter); @formatter = formatter; end
+  def self.formatter=(formatter)
+    @formatter = formatter
+  end
 
   def self.formatter
     @formatter ||= Cistern::Formatter.default
@@ -41,10 +42,8 @@ module Cistern
     @deprecation_warnings = status
   end
 
-  def self.deprecation(message, source=caller[1])
-    if deprecation_warnings?
-      STDERR.puts("#{message}. (#{source})")
-    end
+  def self.deprecation(message, source = caller[1])
+    STDERR.puts("#{message}. (#{source})") if deprecation_warnings?
   end
 end
 

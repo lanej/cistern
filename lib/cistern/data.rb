@@ -16,7 +16,7 @@ module Cistern::Data
 
   module ClassMethods
     def data
-      @data ||= Cistern::Data.backend(*storage) { |d,k| d[k] = [] }
+      @data ||= Cistern::Data.backend(*storage) { |d, k| d[k] = [] }
     end
 
     def reset!
@@ -25,7 +25,7 @@ module Cistern::Data
     end
 
     def clear!
-      self.data.clear
+      data.clear
     end
 
     def store_in(*args)

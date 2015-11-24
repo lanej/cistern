@@ -11,17 +11,17 @@ class Cistern::Data::Redis
                  end
   end
 
-  def self.marshal=(marshal)
-    @marshal = marshal
+  class << self
+    attr_writer :marshal
   end
 
-  def initialize(options={}, &block)
+  def initialize(options = {}, &block)
     @client  = options[:client] || ::Redis.new
     @default = block
   end
 
   def clear
-    unless (keys = client.keys("*")).empty?
+    unless (keys = client.keys('*')).empty?
       client.del(*keys)
     end
   end
@@ -32,7 +32,7 @@ class Cistern::Data::Redis
     client.set(key, Cistern::Data::Redis.marshal.dump(value), *args)
   end
 
-  alias []= store
+  alias_method :[]=, :store
 
   def fetch(key, *args)
     assign_default(key)
@@ -40,15 +40,13 @@ class Cistern::Data::Redis
     Cistern::Data::Redis.marshal.load(client.get(key, *args))
   end
 
-  alias [] fetch
+  alias_method :[], :fetch
 
   protected
 
   attr_reader :client, :default
 
   def assign_default(key)
-    if client.keys(key).empty? && default
-      default.call(client, key)
-    end
+    default.call(client, key) if client.keys(key).empty? && default
   end
 end

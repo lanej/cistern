@@ -27,7 +27,7 @@ module AwesomePrint::Cistern
   # Format Cistern::Model
   #------------------------------------------------------------------------------
   def awesome_cistern_model(object)
-    data = object.attributes.keys.inject({}){|r,k| r.merge(k => object.send(k))}
+    data = object.attributes.keys.inject({}) { |r, k| r.merge(k => object.send(k)) }
     "#{object} " << awesome_hash(data)
   end
 

@@ -1,8 +1,8 @@
 class Cistern::Data::Hash
   Cistern::Data.backends[:hash] = self
 
-  def initialize(options={}, &default)
-    @hash    = Hash.new
+  def initialize(_options = {}, &default)
+    @hash    = {}
     @default = default
   end
 
@@ -16,7 +16,7 @@ class Cistern::Data::Hash
     hash.store(key, *args)
   end
 
-  alias []= store
+  alias_method :[]=, :store
 
   def fetch(key, *args)
     assign_default(key)
@@ -24,15 +24,13 @@ class Cistern::Data::Hash
     hash.fetch(key, *args)
   end
 
-  alias [] fetch
+  alias_method :[], :fetch
 
   protected
 
   attr_reader :hash, :default
 
   def assign_default(key)
-    if !hash.key?(key) && default
-      default.call(hash, key)
-    end
+    default.call(hash, key) if !hash.key?(key) && default
   end
 end

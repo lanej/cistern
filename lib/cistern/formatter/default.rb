@@ -12,11 +12,11 @@ module Cistern::Formatter::Default
     end
 
     def format_model(model)
-      "#{model.to_s} #{model.attributes.inspect}"
+      "#{model} #{model.attributes.inspect}"
     end
 
     def format_collection(collection)
-      "#{collection.to_s} #{collection.attributes.inspect} records=[#{collection.records.map { |m| format_model(m) }.join(", ")}]"
+      "#{collection} #{collection.attributes.inspect} records=[#{collection.records.map { |m| format_model(m) }.join(', ')}]"
     end
   end
 end

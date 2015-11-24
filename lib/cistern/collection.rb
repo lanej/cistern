@@ -1,5 +1,4 @@
 module Cistern::Collection
-
   BLACKLISTED_ARRAY_METHODS = [
     :compact!, :flatten!, :reject!, :reverse!, :rotate!, :map!,
     :shuffle!, :slice!, :sort!, :sort_by!, :delete_if,
@@ -17,31 +16,31 @@ module Cistern::Collection
   attr_accessor :records, :loaded, :service
 
   module ClassMethods
-    def model(new_model=nil)
+    def model(new_model = nil)
       @_model ||= new_model
     end
 
-    def service_method(name=nil)
+    def service_method(name = nil)
       @_service_method ||= name
     end
   end
 
-  alias build initialize
+  alias_method :build, :initialize
 
   def initialize(attributes = {})
     merge_attributes(attributes)
   end
 
-  def all(_={})
-    raise NotImplementedError
+  def all(_ = {})
+    fail NotImplementedError
   end
 
-  def create(attributes={})
-    self.new(attributes).save
+  def create(attributes = {})
+    new(attributes).save
   end
 
-  def get(identity)
-    raise NotImplementedError
+  def get(_identity)
+    fail NotImplementedError
   end
 
   def clear
@@ -58,7 +57,7 @@ module Cistern::Collection
 
   # @api private
   def load_records
-    self.all unless self.loaded
+    all unless loaded
   end
 
   # Should be called within #all to load records into the collection
@@ -76,12 +75,12 @@ module Cistern::Collection
 
   def new(attributes = {})
     unless attributes.is_a?(::Hash)
-      raise(ArgumentError.new("Initialization parameters must be an attributes hash, got #{attributes.class} #{attributes.inspect}"))
+      fail(ArgumentError.new("Initialization parameters must be an attributes hash, got #{attributes.class} #{attributes.inspect}"))
     end
     model.new(
       {
-        :collection => self,
-        :service    => service,
+        collection: self,
+        service: service
       }.merge(attributes)
     )
   end
@@ -94,7 +93,7 @@ module Cistern::Collection
 
   def to_a
     load_records
-    self.records || []
+    records || []
   end
 
   def respond_to?(method, include_private = false)
@@ -104,7 +103,7 @@ module Cistern::Collection
   def ==(comparison_object)
     comparison_object.equal?(self) ||
       (comparison_object.is_a?(self.class) &&
-       comparison_object.to_a == self.to_a)
+       comparison_object.to_a == to_a)
   end
 
   protected

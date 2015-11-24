@@ -1,10 +1,13 @@
 module Cistern::Coverage
-
   unless Kernel.respond_to? :caller_locations
     abort <<-ABORT
 Cannot enable Cistern coverage reporting
 
-Your ruby version ruby is: #{RUBY_VERSION rescue 'unknown'}
+Your ruby version ruby is: #{begin
+                               RUBY_VERSION
+                             rescue
+                               'unknown'
+                             end}
 `Kernel` does not have the required method `caller_locations`
 
 Try a newer ruby (should be > 2.0)
@@ -18,17 +21,16 @@ Try a newer ruby (should be > 2.0)
     call = nil
 
     # seek to the first entry from within `file`
-    while(call = enum.next) do
+    while (call = enum.next)
       break if call.path.end_with? file
     end
 
     # seek to the first entry thats not within `file`
-    while(call = enum.next) do
+    while (call = enum.next)
       break unless call.path.end_with? file
     end
 
     # the call location that called in to `file`
     call
   end
-
 end

@@ -1,5 +1,4 @@
 module Cistern::Client
-
   module Collections
     def collections
       service.collections
@@ -11,7 +10,7 @@ module Cistern::Client
   end
 
   # custom include
-  def self.with(options={})
+  def self.with(options = {})
     client_module = Module.new
 
     custom_include = <<-EOS
@@ -29,22 +28,22 @@ module Cistern::Client
 
   # vanilla include
   def self.included(klass)
-    self.setup(klass)
+    setup(klass)
 
     super
   end
 
-  def self.setup(klass, options={})
-    request_class    = options[:request]    || "Request"
-    collection_class = options[:collection] || "Collection"
-    model_class      = options[:model]      || "Model"
-    singular_class   = options[:singular]   || "Singular"
+  def self.setup(klass, options = {})
+    request_class    = options[:request] || 'Request'
+    collection_class = options[:collection] || 'Collection'
+    model_class      = options[:model] || 'Model'
+    singular_class   = options[:singular] || 'Singular'
 
     interface = options[:interface] || :class
     interface_callback = (:class == interface) ? :inherited : :included
 
     unless klass.name
-      raise ArgumentError, "can't turn anonymous class into a Cistern service"
+      fail ArgumentError, "can't turn anonymous class into a Cistern service"
     end
 
     klass.class_eval <<-EOS, __FILE__, __LINE__
@@ -156,10 +155,17 @@ module Cistern::Client
   end
 
   module ClassMethods
+    def mock!
+      @mocking = true
+    end
 
-    def mock!;    @mocking = true; end
-    def mocking?; @mocking; end
-    def unmock!;  @mocking = false; end
+    def mocking?
+      @mocking
+    end
+
+    def unmock!
+      @mocking = false
+    end
 
     def collections
       @collections ||= []
@@ -186,26 +192,26 @@ module Cistern::Client
     end
 
     def requires(*args)
-      self.required_arguments.concat(args)
+      required_arguments.concat(args)
     end
 
     def recognizes(*args)
-      self.recognized_arguments.concat(args)
+      recognized_arguments.concat(args)
     end
 
-    def validate_options(options={})
+    def validate_options(options = {})
       required_options = Cistern::Hash.slice(options, *required_arguments)
 
       missing_required_options = required_arguments - required_options.keys
 
       unless missing_required_options.empty?
-        raise "Missing required options: #{missing_required_options.inspect}"
+        fail "Missing required options: #{missing_required_options.inspect}"
       end
 
       unrecognized_options = options.keys - (required_arguments + recognized_arguments)
 
       unless unrecognized_options.empty?
-        raise "Unrecognized options: #{unrecognized_options.inspect}"
+        fail "Unrecognized options: #{unrecognized_options.inspect}"
       end
     end
 
@@ -214,28 +220,28 @@ module Cistern::Client
 
       requests.each do |klass|
         name = klass.service_method ||
-          Cistern::String.camelize(Cistern::String.demodulize(klass.name))
+               Cistern::String.camelize(Cistern::String.demodulize(klass.name))
 
         Cistern::Request.service_request(self, klass, name)
       end
 
       collections.each do |klass|
         name = klass.service_method ||
-          Cistern::String.underscore(klass.name.gsub("#{self.name}::", "").gsub("::", ""))
+               Cistern::String.underscore(klass.name.gsub("#{self.name}::", '').gsub('::', ''))
 
         Cistern::Collection.service_collection(self, klass, name)
       end
 
       models.each do |klass|
         name = klass.service_method ||
-          Cistern::String.underscore(klass.name.gsub("#{self.name}::", "").gsub("::", ""))
+               Cistern::String.underscore(klass.name.gsub("#{self.name}::", '').gsub('::', ''))
 
         Cistern::Model.service_model(self, klass, name)
       end
 
       singularities.each do |klass|
         name = klass.service_method ||
-          Cistern::String.underscore(klass.name.gsub("#{self.name}::", "").gsub("::", ""))
+               Cistern::String.underscore(klass.name.gsub("#{self.name}::", '').gsub('::', ''))
 
         Cistern::Singular.service_singular(self, klass, name)
       end
@@ -243,15 +249,15 @@ module Cistern::Client
       @_setup = true
     end
 
-    def new(options={})
+    def new(options = {})
       setup
       validate_options(options)
 
-      self.const_get(self.mocking? ? :Mock : :Real).new(options)
+      const_get(self.mocking? ? :Mock : :Real).new(options)
     end
 
     def reset!
-      self.const_get(:Mock).reset!
+      const_get(:Mock).reset!
     end
   end
 end

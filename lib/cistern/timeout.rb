@@ -1,6 +1,6 @@
 module Cistern
   module WaitFor
-    def self.wait_for(timeout = Cistern.timeout, interval = Cistern.poll_interval, &block)
+    def self.wait_for(timeout = Cistern.timeout, interval = Cistern.poll_interval, &_block)
       duration = 0
       start    = Time.now
 
@@ -12,11 +12,11 @@ module Cistern
       if duration > timeout
         false
       else
-        { :duration => duration }
+        { duration: duration }
       end
     end
 
-    def self.wait_for!(*arg)
+    def self.wait_for!(*_arg)
       wait_for
     end
   end
