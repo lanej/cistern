@@ -121,17 +121,18 @@ module Cistern::Attributes
     end
 
     def read_attribute(name)
-      options = self.class.attributes[name] || {}
-      # record the attribute was accessed
-      self.class.attributes[name.to_s.to_sym][:coverage_hits] += 1 rescue nil
-
+      key = name.to_s.to_sym
+      options = self.class.attributes[key]
       default = options[:default]
 
-      unless default.nil?
-        default = Marshal.load(Marshal.dump(default))
+      # record the attribute was accessed
+      if defined?(Cistern::Coverage) && options[:coverage_hits]
+        options[:coverage_hits] += 1
       end
 
-      attributes.fetch(name.to_s.to_sym, default)
+      default = Marshal.load(Marshal.dump(default)) unless default.nil?
+
+      attributes.fetch(key, default)
     end
 
     def write_attribute(name, value)
