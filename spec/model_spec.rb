@@ -95,6 +95,7 @@ describe 'Cistern::Model' do
       attribute :vegetable, aliases: 'squash'
       attribute :custom, parser: lambda { |v, _| "X!#{v}" }
       attribute :default, default: 'im a squash'
+      attribute :string_allow_nil, type: :string, allow_nil: true
 
       attribute :same_alias_1, aliases: 'nested'
       attribute :same_alias_2, aliases: 'nested'
@@ -111,8 +112,13 @@ describe 'Cistern::Model' do
 
     it 'should parse string' do
       expect(TypeSpec.new(name: 1).name).to eq('1')
+      expect(TypeSpec.new(name: "b").name).to eq('b')
+      expect(TypeSpec.new(name: nil).name).to eq("")
     end
 
+    it 'should allow nils in string types' do
+      expect(TypeSpec.new(string_allow_nil: nil).string_allow_nil).to eq(nil)
+    end
     it "should handle a 'attributes' aliased attribute" do
       expect(TypeSpec.new(attributes: 'x').adam_attributes).to eq('x')
     end

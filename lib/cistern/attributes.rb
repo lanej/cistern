@@ -1,7 +1,7 @@
 module Cistern::Attributes
   def self.parsers
     @parsers ||= {
-      string: ->(v, _) { v.to_s },
+      string: ->(v, opts) { (opts[:allow_nil] && v.nil?) ? v : v.to_s },
       time: ->(v, _) { v.is_a?(Time) ? v : v && Time.parse(v.to_s) },
       integer: ->(v, _) { v && v.to_i },
       float: ->(v, _) { v && v.to_f },
