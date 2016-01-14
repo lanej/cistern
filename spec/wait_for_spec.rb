@@ -45,7 +45,7 @@ describe 'WaitForModel#timeout' do
 
     elapsed = 0
 
-    timeout(2) do
+    Timeout.timeout(2) do
       expect do
         model.wait_for! { sleep(0.2); elapsed += 0.2; elapsed > 0.2 }
       end.to raise_exception(Sample::Timeout)
@@ -58,7 +58,7 @@ describe 'WaitForModel#timeout' do
 
     elapsed = 0
 
-    timeout(2) do
+    Timeout.timeout(2) do
       expect do
         model.wait_for!(0.1) { sleep(0.2); elapsed += 0.2; elapsed > 0.2 }
       end.to raise_exception(Sample::Timeout)
