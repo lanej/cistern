@@ -1,12 +1,12 @@
 module Cistern::Attributes
   def self.parsers
     @parsers ||= {
-      string: ->(v, opts) { (opts[:allow_nil] && v.nil?) ? v : v.to_s },
-      time: ->(v, _) { v.is_a?(Time) ? v : v && Time.parse(v.to_s) },
+      array:   ->(v, _) { [*v] },
+      boolean: ->(v, _) { %w(true 1).include?(v.to_s.downcase) },
+      float:   ->(v, _) { v && v.to_f },
       integer: ->(v, _) { v && v.to_i },
-      float: ->(v, _) { v && v.to_f },
-      array: ->(v, _) { [*v] },
-      boolean: ->(v, _) { %w(true 1).include?(v.to_s.downcase) }
+      string:  ->(v, opts) { (opts[:allow_nil] && v.nil?) ? v : v.to_s },
+      time:    ->(v, _) { v.is_a?(Time) ? v : v && Time.parse(v.to_s) },
     }
   end
 
@@ -203,7 +203,7 @@ module Cistern::Attributes
                        _key
                      else
                        string_key.to_sym
-              end
+                     end
 
         # find nested paths
         value.is_a?(::Hash) && class_attributes.each do |name, options|
