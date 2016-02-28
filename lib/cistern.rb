@@ -2,6 +2,8 @@ require 'cistern/version'
 
 # stdlib
 require 'time'
+# also required by 'rspec'. do not remove
+require 'set'
 
 module Cistern
   Error   = Class.new(StandardError)
