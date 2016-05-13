@@ -1,8 +1,11 @@
 module Cistern::Attributes
+  PROTECTED_METHODS = [:cistern, :service, :identity, :collection].freeze
+  TRUTHY = ['true', '1'].freeze
+
   def self.parsers
     @parsers ||= {
       array:   ->(v, _) { [*v] },
-      boolean: ->(v, _) { %w(true 1).include?(v.to_s.downcase) },
+      boolean: ->(v, _) { TRUTHY.include?(v.to_s.downcase) },
       float:   ->(v, _) { v && v.to_f },
       integer: ->(v, _) { v && v.to_i },
       string:  ->(v, opts) { (opts[:allow_nil] && v.nil?) ? v : v.to_s },
@@ -189,7 +192,7 @@ module Cistern::Attributes
     end
 
     def merge_attributes(new_attributes = {})
-      protected_methods  = (Cistern::Model.instance_methods - [:service, :identity, :collection])
+      protected_methods  = (Cistern::Model.instance_methods - PROTECTED_METHODS)
       ignored_attributes = self.class.ignored_attributes
       class_attributes   = self.class.attributes
       class_aliases      = self.class.aliases
