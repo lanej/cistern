@@ -268,7 +268,7 @@ module Cistern::Attributes
     protected
 
     def missing_attributes(args)
-      ([:service] | args).select { |arg| send("#{arg}").nil? }
+      args.select { |arg| send("#{arg}").nil? }
     end
 
     def changed!(attribute, from, to)
