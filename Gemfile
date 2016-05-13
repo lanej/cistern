@@ -9,6 +9,7 @@ group :test do
   gem "pry-nav"
   gem "rake"
   gem "rspec", "~> 3.3"
+  gem "listen", "~> 3.0.5"
   gem "redis-namespace", "~> 1.4", "< 1.5"
   gem "codeclimate-test-reporter", require: false
 end
