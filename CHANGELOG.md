@@ -1,5 +1,43 @@
 # Change Log
 
+## [v2.2.7](https://github.com/lanej/cistern/tree/v2.2.7) (2016-05-13)
+[Full Changelog](https://github.com/lanej/cistern/compare/v2.2.6...v2.2.7)
+
+**Merged pull requests:**
+
+- service is not required to determine \#missing\_attributes [\#51](https://github.com/lanej/cistern/pull/51) ([lanej](https://github.com/lanej))
+
+## [v2.2.6](https://github.com/lanej/cistern/tree/v2.2.6) (2016-02-28)
+[Full Changelog](https://github.com/lanej/cistern/compare/v2.2.5...v2.2.6)
+
+## [v2.2.5](https://github.com/lanej/cistern/tree/v2.2.5) (2016-01-14)
+[Full Changelog](https://github.com/lanej/cistern/compare/v2.2.4...v2.2.5)
+
+## [v2.2.4](https://github.com/lanej/cistern/tree/v2.2.4) (2015-11-27)
+[Full Changelog](https://github.com/lanej/cistern/compare/v2.2.3...v2.2.4)
+
+**Closed issues:**
+
+- Optional coverage feature creates too many NoMethodErrors [\#49](https://github.com/lanej/cistern/issues/49)
+
+## [v2.2.3](https://github.com/lanej/cistern/tree/v2.2.3) (2015-10-27)
+[Full Changelog](https://github.com/lanej/cistern/compare/v2.2.2...v2.2.3)
+
+## [v2.2.2](https://github.com/lanej/cistern/tree/v2.2.2) (2015-10-27)
+[Full Changelog](https://github.com/lanej/cistern/compare/v2.2.1...v2.2.2)
+
+## [v2.2.1](https://github.com/lanej/cistern/tree/v2.2.1) (2015-10-02)
+[Full Changelog](https://github.com/lanej/cistern/compare/v2.2.0...v2.2.1)
+
+## [v2.2.0](https://github.com/lanej/cistern/tree/v2.2.0) (2015-10-02)
+[Full Changelog](https://github.com/lanej/cistern/compare/v2.1.0...v2.2.0)
+
+## [v2.1.0](https://github.com/lanej/cistern/tree/v2.1.0) (2015-09-29)
+[Full Changelog](https://github.com/lanej/cistern/compare/v2.0.5...v2.1.0)
+
+## [v2.0.5](https://github.com/lanej/cistern/tree/v2.0.5) (2015-09-21)
+[Full Changelog](https://github.com/lanej/cistern/compare/v2.0.4...v2.0.5)
+
 ## [v2.0.4](https://github.com/lanej/cistern/tree/v2.0.4) (2015-09-10)
 [Full Changelog](https://github.com/lanej/cistern/compare/v0.12.2...v2.0.4)
 
