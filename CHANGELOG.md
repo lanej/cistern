@@ -1,5 +1,24 @@
 # Change Log
 
+## [Unreleased](https://github.com/lanej/cistern/tree/HEAD)
+
+[Full Changelog](https://github.com/lanej/cistern/compare/v2.2.7...HEAD)
+
+**Implemented enhancements:**
+
+- 'requires' function should return a hash of matching requirements [\#45](https://github.com/lanej/cistern/issues/45)
+
+**Closed issues:**
+
+- rename `service` to `cistern` [\#50](https://github.com/lanej/cistern/issues/50)
+
+**Merged pull requests:**
+
+- add return values for \#requires and \#requires\_one [\#55](https://github.com/lanej/cistern/pull/55) ([lanej](https://github.com/lanej))
+- officially deprecate class interface [\#54](https://github.com/lanej/cistern/pull/54) ([lanej](https://github.com/lanej))
+- use \#stage\_attributes to make \#dirty\_attributes available on \#update [\#53](https://github.com/lanej/cistern/pull/53) ([lanej](https://github.com/lanej))
+- deprecate \#service, use \#cistern [\#52](https://github.com/lanej/cistern/pull/52) ([lanej](https://github.com/lanej))
+
 ## [v2.2.7](https://github.com/lanej/cistern/tree/v2.2.7) (2016-05-13)
 [Full Changelog](https://github.com/lanej/cistern/compare/v2.2.6...v2.2.7)
 
