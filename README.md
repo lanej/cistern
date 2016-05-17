@@ -11,7 +11,7 @@ Cistern helps you consistently build your API clients and faciliates building mo
 
 ### Custom Architecture
 
-By default a service's `Request`, `Collection`, and `Model` are all classes. In Cistern ~> 3.0, the default will be modules.
+By default a service's `Request`, `Collection`, and `Model` are all classes. In cistern `~> 3.0`, the default will be modules.
 
 You can modify your client's architecture to be forwards compatible by using `Cistern::Client.with`
 
