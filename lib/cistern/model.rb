@@ -31,8 +31,10 @@ module Cistern::Model
     merge_attributes(attributes)
   end
 
+  # Merge #attributes and call {#save}.  Valid and change attributes are available in {#dirty_attributes}
+  # @param attributes [Hash]
   def update(attributes)
-    merge_attributes(attributes)
+    stage_attributes(attributes)
     save
   end
 

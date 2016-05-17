@@ -8,11 +8,11 @@ describe 'Cistern::Model' do
       attribute :properties
 
       def save
-        attributes
+        dirty_attributes
       end
     end
 
-    it 'should merge and save attributes' do
+    it 'should merge and save dirty attributes' do
       model = UpdateSpec.new(name: 'steve')
       model.save
 
