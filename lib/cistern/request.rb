@@ -6,13 +6,13 @@ module Cistern::Request
 
     cistern::Mock.module_eval <<-EOS, __FILE__, __LINE__
       def #{name}(*args)
-    #{klass}.new(self)._mock(*args)
+        #{klass}.new(self)._mock(*args)
       end
     EOS
 
     cistern::Real.module_eval <<-EOS, __FILE__, __LINE__
       def #{name}(*args)
-    #{klass}.new(self)._real(*args)
+        #{klass}.new(self)._real(*args)
       end
     EOS
   end
