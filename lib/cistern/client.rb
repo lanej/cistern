@@ -42,6 +42,13 @@ module Cistern::Client
     interface = options[:interface] || :class
     interface_callback = (:class == interface) ? :inherited : :included
 
+    if interface == :class
+      Cistern.deprecation(
+        %q{class' interface is deprecated. Use `include Cistern::Client.with(interface: :module). See https://github.com/lanej/cistern#custom-architecture},
+        caller[2],
+      )
+    end
+
     unless klass.name
       fail ArgumentError, "can't turn anonymous class into a Cistern cistern"
     end
