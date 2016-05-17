@@ -32,6 +32,14 @@ module Cistern::Model
 
   attr_accessor :collection, :cistern
 
+  def service=(service)
+    Cistern.deprecation(
+      '#service= is deprecated.  Please use #cistern=',
+      caller[0]
+    )
+    @cistern = service
+  end
+
   def service
     Cistern.deprecation(
       '#service is deprecated.  Please use #cistern',
