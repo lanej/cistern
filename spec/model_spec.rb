@@ -55,7 +55,7 @@ describe 'Cistern::Model' do
     end
 
     class SpecificModelService::Jimbob < SpecificModelService::Model
-      service_method :john_boy
+      cistern_method :john_boy
     end
 
     expect(SpecificModelService.new).not_to respond_to(:jimbob)
@@ -244,6 +244,21 @@ describe 'Cistern::Model' do
     it "should store how many times an attribute's reader is called" do
       expect(CoverageSpec.attributes[:used][:coverage_hits]).to eq(2)
       expect(CoverageSpec.attributes[:unused][:coverage_hits]).to eq(0)
+    end
+  end
+
+  describe 'deprecation', :deprecated do
+    class DeprecatedModelService
+      include Cistern::Client
+    end
+
+    it 'responds to #service' do
+      class Deprecation < DeprecatedModelService::Model
+        service_method :deprecator
+      end
+
+      sample = DeprecatedModelService.new.deprecator
+      expect(sample.service).to eq(sample.cistern)
     end
   end
 end

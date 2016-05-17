@@ -6,8 +6,8 @@ describe 'Cistern::Singular' do
     attribute :count, type: :number
 
     def fetch_attributes
-      # test that initialize waits for service to be defined
-      fail 'missing service' unless service
+      # test that initialize waits for cistern to be defined
+      fail 'missing cistern' unless cistern
 
       @counter ||= 0
       @counter += 1
@@ -17,6 +17,13 @@ describe 'Cistern::Singular' do
 
   it 'should work' do
     expect(Sample.new.sample_singular.name).to eq('amazing')
+  end
+
+  describe 'deprecation', :deprecated do
+    it 'responds to #service' do
+      sample = Sample.new.sample_singular
+      expect(sample.service).to eq(sample.cistern)
+    end
   end
 
   it 'should reload' do

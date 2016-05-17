@@ -11,7 +11,7 @@ Cistern helps you consistently build your API clients and faciliates building mo
 
 ### Custom Architecture
 
-By default a service's `Request`, `Collection`, and `Model` are all classes. In Cistern ~> 3.0, the default will be modules.
+By default a service's `Request`, `Collection`, and `Model` are all classes. In cistern `~> 3.0`, the default will be modules.
 
 You can modify your client's architecture to be forwards compatible by using `Cistern::Client.with`
 
@@ -58,7 +58,7 @@ while living on a `Prayer`
 ```ruby
 class Foo::GetBar < Foo::Prayer
   def real
-    service.request.get("/wing")
+    cistern.request.get("/wing")
   end
 end
 ```
@@ -109,7 +109,7 @@ fake.is_a?(Foo::Client::Mock) # true
 
 Requests are defined by subclassing `#{service}::Request`.
 
-* `service` represents the associated `Foo::Client` instance.
+* `cistern` represents the associated `Foo::Client` instance.
 
 ```ruby
 class Foo::Client::GetBar < Foo::Client::Request
@@ -127,11 +127,11 @@ end
 Foo::Client.new.get_bar # "i'm real"
 ```
 
-The `#service_method` function allows you to specify the name of the generated method.
+The `#cistern_method` function allows you to specify the name of the generated method.
 
 ```ruby
 class Foo::Client::GetBars < Foo::Client::Request
-  service_method :get_all_the_bars
+  cistern_method :get_all_the_bars
 
   def real(params)
     "all the bars"
@@ -150,7 +150,7 @@ Foo::Client.requests # => [Foo::Client::GetBars, Foo::Client::GetBar]
 
 ### Models
 
-* `service` represents the associated `Foo::Client` instance.
+* `cistern` represents the associated `Foo::Client` instance.
 * `collection` represents the related collection (if applicable)
 * `new_record?` checks if `identity` is present
 * `requires(*requirements)` throws `ArgumentError` if an attribute matching a requirement isn't set
@@ -182,7 +182,7 @@ class Foo::Client::Bar < Foo::Client::Model
     params  = {
       "id" => self.identity
     }
-    self.service.destroy_bar(params).body["request"]
+    self.cistern.destroy_bar(params).body["request"]
   end
 
   def save
@@ -196,11 +196,11 @@ class Foo::Client::Bar < Foo::Client::Model
     }
 
     if new_record?
-      merge_attributes(service.create_bar(params).body["bar"])
+      merge_attributes(cistern.create_bar(params).body["bar"])
     else
       requires :identity
 
-      merge_attributes(service.update_bar(params).body["bar"])
+      merge_attributes(cistern.update_bar(params).body["bar"])
     end
   end
 end
@@ -209,7 +209,7 @@ end
 ### Collection
 
 * `model` tells Cistern which class is contained within the collection.
-* `service` is the associated `Foo::Client` instance
+* `cistern` is the associated `Foo::Client` instance
 * `attribute` specifications on collections are allowed. use `merge_attributes`
 * `load` consumes an Array of data and constructs matching `model` instances
 
@@ -221,7 +221,7 @@ class Foo::Client::Bars < Foo::Client::Collection
   model Foo::Client::Bar
 
   def all(params = {})
-    response = service.get_bars(params)
+    response = cistern.get_bars(params)
 
     data = response.body
 
@@ -235,11 +235,11 @@ class Foo::Client::Bars < Foo::Client::Collection
     }
     params.merge!("location" => options[:location]) if options.key?(:location)
 
-    service.requests.new(service.discover_bar(params).body["request"])
+    cistern.requests.new(cistern.discover_bar(params).body["request"])
   end
 
   def get(id)
-    if data = service.get_bar("id" => id).body["bar"]
+    if data = cistern.get_bar("id" => id).body["bar"]
       new(data)
     else
       nil

@@ -1,7 +1,9 @@
 require 'spec_helper'
 
 describe 'Cistern::Request' do
-  class SampleService < Cistern::Service
+  class RequestService
+    include Cistern::Client
+
     recognizes :key
 
     class Real
@@ -14,11 +16,11 @@ describe 'Cistern::Request' do
   end
 
   # @todo Sample::Service.request
-  class ListSamples < SampleService::Request
-    service_method :list_all_samples
+  class ListSamples < RequestService::Request
+    cistern_method :list_all_samples
 
     def real(*args)
-      service.service_args + args + ['real']
+      cistern.service_args + args + ['real']
     end
 
     def mock(*args)
@@ -27,11 +29,30 @@ describe 'Cistern::Request' do
   end
 
   it 'should execute a new-style request' do
-    expect(SampleService.new.list_all_samples('sample1')).to eq([{}, 'sample1', 'real'])
-    expect(SampleService::Real.new.list_all_samples('sample2')).to eq(%w(sample2 real))
-    expect(SampleService::Mock.new.list_all_samples('sample3')).to eq(%w(sample3 mock))
+    expect(RequestService.new.list_all_samples('sample1')).to eq([{}, 'sample1', 'real'])
+    expect(RequestService::Real.new.list_all_samples('sample2')).to eq(%w(sample2 real))
+    expect(RequestService::Mock.new.list_all_samples('sample3')).to eq(%w(sample3 mock))
 
     # service access
-    expect(SampleService.new(key: 'value').list_all_samples('stat')).to eq([{ key: 'value' }, 'stat', 'real'])
+    expect(RequestService.new(key: 'value').list_all_samples('stat')).to eq([{ key: 'value' }, 'stat', 'real'])
+  end
+
+  describe 'deprecation', :deprecated do
+    class DeprecatedRequestService
+      include Cistern::Client
+    end
+
+    it 'responds to #service' do
+      class ListDeprecations < DeprecatedRequestService::Request
+        service_method :list_deprecations
+
+        def real
+          self
+        end
+      end
+
+      sample = DeprecatedRequestService.new.list_deprecations
+      expect(sample.service).to eq(sample.cistern)
+    end
   end
 end

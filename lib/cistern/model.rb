@@ -7,21 +7,46 @@ module Cistern::Model
     klass.send(:extend, Cistern::Model::ClassMethods)
   end
 
-  def self.service_model(service, klass, name)
-    service.const_get(:Collections).module_eval <<-EOS, __FILE__, __LINE__
+  def self.cistern_model(cistern, klass, name)
+    cistern.const_get(:Collections).module_eval <<-EOS, __FILE__, __LINE__
       def #{name}(attributes={})
-        #{klass.name}.new(attributes.merge(service: self))
+    #{klass.name}.new(attributes.merge(cistern: self))
       end
     EOS
   end
 
   module ClassMethods
+    # @deprecated Use {#cistern_method} instead
     def service_method(name = nil)
-      @_service_method ||= name
+      Cistern.deprecation(
+        '#service_method is deprecated.  Please use #cistern_method',
+        caller[0]
+      )
+      @_cistern_method ||= name
+    end
+
+    def cistern_method(name = nil)
+      @_cistern_method ||= name
     end
   end
 
-  attr_accessor :collection, :service
+  attr_accessor :collection, :cistern
+
+  def service=(service)
+    Cistern.deprecation(
+      '#service= is deprecated.  Please use #cistern=',
+      caller[0]
+    )
+    @cistern = service
+  end
+
+  def service
+    Cistern.deprecation(
+      '#service is deprecated.  Please use #cistern',
+      caller[0]
+    )
+    @cistern
+  end
 
   def inspect
     Cistern.formatter.call(self)
@@ -69,15 +94,23 @@ module Cistern::Model
     end
   end
 
-  def wait_for(timeout = service_class.timeout, interval = service_class.poll_interval, &block)
-    service_class.wait_for(timeout, interval) { reload && block.call(self) }
+  def wait_for(timeout = cistern_class.timeout, interval = cistern_class.poll_interval, &block)
+    cistern_class.wait_for(timeout, interval) { reload && block.call(self) }
   end
 
-  def wait_for!(timeout = service_class.timeout, interval = service_class.poll_interval, &block)
-    service_class.wait_for!(timeout, interval) { reload && block.call(self) }
+  def wait_for!(timeout = cistern_class.timeout, interval = cistern_class.poll_interval, &block)
+    cistern_class.wait_for!(timeout, interval) { reload && block.call(self) }
   end
 
   def service_class
-    service ? service.class : Cistern
+    Cistern.deprecation(
+      '#service_class is deprecated.  Please use #cistern_class',
+      caller[0]
+    )
+    cistern ? cistern.class : Cistern
+  end
+
+  def cistern_class
+    cistern ? cistern.class : Cistern
   end
 end

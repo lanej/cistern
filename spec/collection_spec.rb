@@ -1,7 +1,8 @@
 require 'spec_helper'
 
 describe 'Cistern::Collection' do
-  class SampleService < Cistern::Service
+  class SampleService
+    include Cistern::Client
   end
 
   class Drug < SampleService::Model
@@ -18,7 +19,7 @@ describe 'Cistern::Collection' do
   end
 
   class Tacs < SampleService::Collection
-    service_method :toes
+    cistern_method :toes
   end
 
   it 'should generate a default collection method' do
@@ -63,5 +64,20 @@ describe 'Cistern::Collection' do
 
   it 'should ==' do
     Drugs.new.all == Drugs.new.all
+  end
+
+  describe 'deprecation', :deprecated do
+    class DeprecatedCollectionService
+      include Cistern::Client
+    end
+
+    it 'responds to #service' do
+      class DeprecationCollection < DeprecatedCollectionService::Collection
+        service_method :deprecator
+      end
+
+      sample = DeprecatedCollectionService.new.deprecator
+      expect(sample.service).to eq(sample.cistern)
+    end
   end
 end
