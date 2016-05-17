@@ -191,47 +191,28 @@ module Cistern::Attributes
       end
     end
 
+    # Update model's attributes.  New attributes take precedence over existing attributes.
+    #
+    # This is bst called within a {Cistern::Model#save}, when {#new_attributes} represents a recently presented remote
+    # resource.  {#dirty_attributes} is cleared after merging.
+    #
+    # @param new_attributes [Hash] attributes to merge with current attributes
     def merge_attributes(new_attributes = {})
-      protected_methods  = (Cistern::Model.instance_methods - PROTECTED_METHODS)
-      ignored_attributes = self.class.ignored_attributes
-      class_attributes   = self.class.attributes
-      class_aliases      = self.class.aliases
-
-      new_attributes.each do |_key, value|
-        string_key = _key.is_a?(String) ? _key : _key.to_s
-        symbol_key = case _key
-                     when String
-                       _key.to_sym
-                     when Symbol
-                       _key
-                     else
-                       string_key.to_sym
-                     end
-
-        # find nested paths
-        value.is_a?(::Hash) && class_attributes.each do |name, options|
-          if options[:squash] && options[:squash].first == string_key
-            send("#{name}=", symbol_key => value)
-          end
-        end
-
-        next if ignored_attributes.include?(symbol_key)
-
-        if class_aliases.key?(symbol_key)
-          class_aliases[symbol_key].each do |aliased_key|
-            send("#{aliased_key}=", value)
-          end
-        end
-
-        assignment_method = "#{string_key}="
-
-        if !protected_methods.include?(symbol_key) && self.respond_to?(assignment_method, true)
-          send(assignment_method, value)
-        end
-      end
+      _merge_attributes(new_attributes)
 
       changed.clear
 
+      self
+    end
+
+    # Update model's attributes.  New attributes take precedence over existing attributes.
+    #
+    # This is best called within a {Cistern::Model#update}, when {#new_attributes} represents attributes to be
+    # presented to a remote service. {#dirty_attributes} will contain the valid portion of {#new_attributes}
+    #
+    # @param new_attributes [Hash] attributes to merge with current attributes
+    def stage_attributes(new_attributes = {})
+      _merge_attributes(new_attributes)
       self
     end
 
@@ -280,6 +261,46 @@ module Cistern::Attributes
                            else
                              [from, to]
                            end
+    end
+
+    def _merge_attributes(new_attributes)
+      protected_methods  = (Cistern::Model.instance_methods - PROTECTED_METHODS)
+      ignored_attributes = self.class.ignored_attributes
+      class_attributes   = self.class.attributes
+      class_aliases      = self.class.aliases
+
+      new_attributes.each do |_key, value|
+        string_key = _key.is_a?(String) ? _key : _key.to_s
+        symbol_key = case _key
+                     when String
+                       _key.to_sym
+                     when Symbol
+                       _key
+                     else
+                       string_key.to_sym
+                     end
+
+        # find nested paths
+        value.is_a?(::Hash) && class_attributes.each do |name, options|
+          if options[:squash] && options[:squash].first == string_key
+            send("#{name}=", symbol_key => value)
+          end
+        end
+
+        next if ignored_attributes.include?(symbol_key)
+
+        if class_aliases.key?(symbol_key)
+          class_aliases[symbol_key].each do |aliased_key|
+            send("#{aliased_key}=", value)
+          end
+        end
+
+        assignment_method = "#{string_key}="
+
+        if !protected_methods.include?(symbol_key) && self.respond_to?(assignment_method, true)
+          send(assignment_method, value)
+        end
+      end
     end
   end
 end
