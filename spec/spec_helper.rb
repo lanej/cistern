@@ -8,12 +8,18 @@ Dir[File.expand_path('../{support,shared,matchers,fixtures}/*.rb', __FILE__)].ea
 
 Bundler.require(:test)
 
-Cistern.deprecation_warnings = false
+Cistern.deprecation_warnings = !!ENV['DEBUG']
 
-RSpec.configure do |c|
+RSpec.configure do |rspec|
   if Kernel.respond_to?(:caller_locations)
     require File.expand_path('../../lib/cistern/coverage', __FILE__)
   else
-    c.filter_run_excluding(:coverage)
+    rspec.filter_run_excluding(:coverage)
+  end
+  rspec.around(:each, :deprecated) do |example|
+    original_value = Cistern.deprecation_warnings?
+    Cistern.deprecation_warnings = false
+    example.run
+    Cistern.deprecation_warnings = original_value
   end
 end

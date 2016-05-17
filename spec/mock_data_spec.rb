@@ -6,7 +6,7 @@ describe 'mock data' do
     end
 
     def mock(diagnosis)
-      service.data.store(:diagnosis, service.data.fetch(:diagnosis) + [diagnosis])
+      cistern.data.store(:diagnosis, cistern.data.fetch(:diagnosis) + [diagnosis])
     end
   end
 
@@ -15,7 +15,7 @@ describe 'mock data' do
     end
 
     def mock(treatment)
-      service.data[:treatments] += [treatment]
+      cistern.data[:treatments] += [treatment]
     end
   end
 

@@ -1,8 +1,8 @@
 module Cistern::Singular
-  def self.service_singular(service, klass, name)
-    service.const_get(:Collections).module_eval <<-EOS, __FILE__, __LINE__
+  def self.cistern_singular(cistern, klass, name)
+    cistern.const_get(:Collections).module_eval <<-EOS, __FILE__, __LINE__
       def #{name}(attributes={})
-        #{klass.name}.new(attributes.merge(service: self))
+    #{klass.name}.new(attributes.merge(cistern: self))
       end
     EOS
   end
@@ -13,7 +13,15 @@ module Cistern::Singular
     klass.send(:extend, Cistern::Model::ClassMethods)
   end
 
-  attr_accessor :service
+  attr_accessor :cistern
+
+  def service
+    Cistern.deprecation(
+      '#service is deprecated.  Please use #cistern',
+      caller[0]
+    )
+    @cistern
+  end
 
   def inspect
     Cistern.formatter.call(self)

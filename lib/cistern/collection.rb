@@ -5,23 +5,40 @@ module Cistern::Collection
     :keep_if, :pop, :shift, :delete_at, :compact
   ].to_set # :nodoc:
 
-  def self.service_collection(service, klass, name)
-    service.const_get(:Collections).module_eval <<-EOS, __FILE__, __LINE__
+  def self.cistern_collection(cistern, klass, name)
+    cistern.const_get(:Collections).module_eval <<-EOS, __FILE__, __LINE__
       def #{name}(attributes={})
-        #{klass.name}.new(attributes.merge(service: self))
+        #{klass.name}.new(attributes.merge(cistern: self))
       end
     EOS
   end
 
-  attr_accessor :records, :loaded, :service
+  attr_accessor :records, :loaded, :cistern
+
+  def service
+    Cistern.deprecation(
+      '#service is deprecated.  Please use #cistern',
+      caller[0]
+    )
+    @cistern
+  end
 
   module ClassMethods
     def model(new_model = nil)
       @_model ||= new_model
     end
 
+    # @deprecated Use {#cistern_method} instead
     def service_method(name = nil)
-      @_service_method ||= name
+      Cistern.deprecation(
+        '#service_method is deprecated.  Please use #cistern_method',
+        caller[0]
+      )
+      @_cistern_method ||= name
+    end
+
+    def cistern_method(name = nil)
+      @_cistern_method ||= name
     end
   end
 
@@ -80,7 +97,7 @@ module Cistern::Collection
     model.new(
       {
         collection: self,
-        service: service
+        cistern: cistern,
       }.merge(attributes)
     )
   end

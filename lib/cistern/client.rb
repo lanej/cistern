@@ -1,11 +1,11 @@
 module Cistern::Client
   module Collections
     def collections
-      service.collections
+      cistern.collections
     end
 
     def requests
-      service.requests
+      cistern.requests
     end
   end
 
@@ -43,19 +43,35 @@ module Cistern::Client
     interface_callback = (:class == interface) ? :inherited : :included
 
     unless klass.name
-      fail ArgumentError, "can't turn anonymous class into a Cistern service"
+      fail ArgumentError, "can't turn anonymous class into a Cistern cistern"
     end
 
     klass.class_eval <<-EOS, __FILE__, __LINE__
       module Collections
         include ::Cistern::Client::Collections
 
-        def service
+        def cistern
+          Cistern.deprecation(
+            '#cistern is deprecated.  Please use #cistern',
+            caller[0]
+          )
+          #{klass.name}
+        end
+
+        def cistern
           #{klass.name}
         end
       end
 
-      def self.service
+      def self.cistern
+        Cistern.deprecation(
+          '#cistern is deprecated.  Please use #cistern',
+          caller[0]
+        )
+        #{klass.name}
+      end
+
+      def self.cistern
         #{klass.name}
       end
 
@@ -71,21 +87,29 @@ module Cistern::Client
 
       #{interface} #{model_class}
         def self.#{interface_callback}(klass)
-          service.models << klass
+          cistern.models << klass
 
           klass.send(:include, ::Cistern::Model)
 
           super
         end
 
-        def self.service
+        def self.cistern
+          Cistern.deprecation(
+            '#cistern is deprecated.  Please use #cistern',
+            caller[0]
+          )
+          #{klass.name}
+        end
+
+        def self.cistern
           #{klass.name}
         end
       end
 
       #{interface} #{singular_class}
         def self.#{interface_callback}(klass)
-          service.singularities << klass
+          cistern.singularities << klass
 
           klass.send(:include, ::Cistern::Singular)
 
@@ -93,6 +117,14 @@ module Cistern::Client
         end
 
         def self.service
+          Cistern.deprecation(
+            '#service is deprecated.  Please use #cistern',
+            caller[0]
+          )
+          #{klass.name}
+        end
+
+        def self.cistern
           #{klass.name}
         end
       end
@@ -105,12 +137,20 @@ module Cistern::Client
           klass.send(:extend, Cistern::Collection::ClassMethods)
           klass.send(:include, Cistern::Attributes::InstanceMethods)
 
-          service.collections << klass
+          cistern.collections << klass
 
           super
         end
 
         def self.service
+          Cistern.deprecation(
+            '#service is deprecated.  Please use #cistern',
+            caller[0]
+          )
+          #{klass.name}
+        end
+
+        def self.cistern
           #{klass.name}
         end
       end
@@ -119,13 +159,21 @@ module Cistern::Client
         include ::Cistern::Request
 
         def self.service
+          Cistern.deprecation(
+            '#service is deprecated.  Please use #cistern',
+            caller[0]
+          )
+          #{klass.name}
+        end
+
+        def self.cistern
           #{klass.name}
         end
 
         def self.#{interface_callback}(klass)
           klass.extend(::Cistern::Request::ClassMethods)
 
-          service.requests << klass
+          cistern.requests << klass
 
           super
         end
@@ -219,31 +267,31 @@ module Cistern::Client
       return true if @_setup
 
       requests.each do |klass|
-        name = klass.service_method ||
+        name = klass.cistern_method ||
                Cistern::String.camelize(Cistern::String.demodulize(klass.name))
 
-        Cistern::Request.service_request(self, klass, name)
+        Cistern::Request.cistern_request(self, klass, name)
       end
 
       collections.each do |klass|
-        name = klass.service_method ||
+        name = klass.cistern_method ||
                Cistern::String.underscore(klass.name.gsub("#{self.name}::", '').gsub('::', ''))
 
-        Cistern::Collection.service_collection(self, klass, name)
+        Cistern::Collection.cistern_collection(self, klass, name)
       end
 
       models.each do |klass|
-        name = klass.service_method ||
+        name = klass.cistern_method ||
                Cistern::String.underscore(klass.name.gsub("#{self.name}::", '').gsub('::', ''))
 
-        Cistern::Model.service_model(self, klass, name)
+        Cistern::Model.cistern_model(self, klass, name)
       end
 
       singularities.each do |klass|
-        name = klass.service_method ||
+        name = klass.cistern_method ||
                Cistern::String.underscore(klass.name.gsub("#{self.name}::", '').gsub('::', ''))
 
-        Cistern::Singular.service_singular(self, klass, name)
+        Cistern::Singular.cistern_singular(self, klass, name)
       end
 
       @_setup = true
