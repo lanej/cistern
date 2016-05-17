@@ -220,21 +220,34 @@ module Cistern::Attributes
       identity.nil?
     end
 
-    # check that the attributes specified in args exist and is not nil
+    # Require specification of certain attributes
+    #
+    # @raise [ArgumentError] if any requested attribute does not have a value
+    # @return [Hash] of matching attributes
     def requires(*args)
-      missing = missing_attributes(args)
+      missing, required = missing_attributes(args)
+
       if missing.length == 1
-        fail(ArgumentError, "#{missing.first} is required for this operation")
+        fail(ArgumentError, "#{missing.keys.first} is required for this operation")
       elsif missing.any?
-        fail(ArgumentError, "#{missing[0...-1].join(', ')} and #{missing[-1]} are required for this operation")
+        fail(ArgumentError, "#{missing.keys[0...-1].join(', ')} and #{missing.keys[-1]} are required for this operation")
       end
+
+      required
     end
 
+    # Require specification of one or more attributes.
+    #
+    # @raise [ArgumentError] if no requested attributes have values
+    # @return [Hash] of matching attributes
     def requires_one(*args)
-      missing = missing_attributes(args)
+      missing, required = missing_attributes(args)
+
       if missing.length == args.length
-        fail(ArgumentError, "#{missing[0...-1].join(', ')} or #{missing[-1]} are required for this operation")
+        fail(ArgumentError, "#{missing.keys[0...-1].join(', ')} or #{missing.keys[-1]} are required for this operation")
       end
+
+      required
     end
 
     def dirty?
@@ -249,10 +262,12 @@ module Cistern::Attributes
       @changes ||= {}
     end
 
-    protected
+    private
 
-    def missing_attributes(args)
-      args.select { |arg| send("#{arg}").nil? }
+    def missing_attributes(keys)
+      keys.reduce({}) { |a,e| a.merge(e => send("#{e}")) }
+        .partition { |_,v| v.nil? }
+        .map { |s| Hash[s] }
     end
 
     def changed!(attribute, from, to)
