@@ -37,42 +37,6 @@ class Foo::GetBar
 end
 ```
 
-### Custom Architecture
-
-When configuring your client, you can use `:collection`, `:request`, and `:model` options to define the name of module or class interface for the service component.
-
-For example: if you'd like `Request` is to be used for a model, then the `Request` component name can be remapped to `Prayer`
-
-For example:
-
-```ruby
-class Foo::Client
-  include Cistern::Client.with(interface: :modules, request: "Prayer")
-end
-```
-
-allows a model named `Request` to exist
-
-```ruby
-class Foo::Request
-  include Foo::Client::Model
-
-  identity :jovi
-end
-```
-
-while living on a `Prayer`
-
-```ruby
-class Foo::GetBar
-  include Foo::Client::Prayer
-
-  def real
-    cistern.request.get("/wing")
-  end
-end
-```
-
 
 ### Service
 
@@ -356,6 +320,42 @@ bar.save
 bar.dirty?           # => false
 bar.changed          # => {}
 bar.dirty_attributes # => {}
+```
+
+### Custom Architecture
+
+When configuring your client, you can use `:collection`, `:request`, and `:model` options to define the name of module or class interface for the service component.
+
+For example: if you'd like `Request` is to be used for a model, then the `Request` component name can be remapped to `Prayer`
+
+For example:
+
+```ruby
+class Foo::Client
+  include Cistern::Client.with(interface: :modules, request: "Prayer")
+end
+```
+
+allows a model named `Request` to exist
+
+```ruby
+class Foo::Request
+  include Foo::Client::Model
+
+  identity :jovi
+end
+```
+
+while living on a `Prayer`
+
+```ruby
+class Foo::GetBar
+  include Foo::Client::Prayer
+
+  def real
+    cistern.request.get("/wing")
+  end
+end
 ```
 
 ## Examples
