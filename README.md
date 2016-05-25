@@ -9,11 +9,15 @@ Cistern helps you consistently build your API clients and faciliates building mo
 
 ## Usage
 
-### Custom Architecture
+### Notice: Cistern 3.0
 
-By default a service's `Request`, `Collection`, and `Model` are all classes. In cistern `~> 3.0`, the default will be modules.
+Cistern 3.0 will change the way Cistern interacts with your `Request`, `Collection` and `Model` classes.
 
-You can modify your client's architecture to be forwards compatible by using `Cistern::Client.with`
+Prior to 3.0, your `Request`, `Collection` and `Model` classes would have inherited from `<service>::Client::Request`, `<service>::Client::Collection` and `<service>::Client::Model` classes, respectively.
+
+In cistern `~> 3.0`, the default will be for `Request`, `Collection` and `Model` classes to instead include their respective `<service>::Client` modules.
+
+If you want to be forwards-compatible today, you can configure your client by using `Cistern::Client.with`
 
 ```ruby
 class Foo::Client
@@ -32,6 +36,8 @@ class Foo::GetBar
   end
 end
 ```
+
+### Custom Architecture
 
 Other options include `:collection`, `:request`, and `:model`.  This options define the name of module or class interface for the service component.
 
