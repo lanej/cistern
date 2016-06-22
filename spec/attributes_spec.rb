@@ -75,7 +75,7 @@ describe Cistern::Attributes, 'parsing' do
   it 'should parse string' do
     expect(TypeSpec.new(name: 1).name).to eq('1')
     expect(TypeSpec.new(name: "b").name).to eq('b')
-    expect(TypeSpec.new(name: nil).name).to eq("")
+    expect(TypeSpec.new(name: nil).name).to eq(nil)
   end
 
   it 'should allow nils in string types' do

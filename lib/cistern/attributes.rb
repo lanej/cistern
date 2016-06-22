@@ -8,7 +8,7 @@ module Cistern::Attributes
       boolean: ->(v, _) { TRUTHY.include?(v.to_s.downcase) },
       float:   ->(v, _) { v && v.to_f },
       integer: ->(v, _) { v && v.to_i },
-      string:  ->(v, opts) { (opts[:allow_nil] && v.nil?) ? v : v.to_s },
+      string:  ->(v, _) { v && v.to_s },
       time:    ->(v, _) { v.is_a?(Time) ? v : v && Time.parse(v.to_s) },
     }
   end
