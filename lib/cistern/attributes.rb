@@ -2,40 +2,38 @@ module Cistern::Attributes
   PROTECTED_METHODS = [:cistern, :service, :identity, :collection].freeze
   TRUTHY = ['true', '1'].freeze
 
-  def self.parsers
-    @parsers ||= {
-      array:   ->(v, _) { [*v] },
-      boolean: ->(v, _) { TRUTHY.include?(v.to_s.downcase) },
-      float:   ->(v, _) { v && v.to_f },
-      integer: ->(v, _) { v && v.to_i },
-      string:  ->(v, _) { v && v.to_s },
-      time:    ->(v, _) { v.is_a?(Time) ? v : v && Time.parse(v.to_s) },
-    }
-  end
-
-  def self.squasher(tree, path)
-    tree.is_a?(::Hash) ? squasher(tree[path.shift], path) : tree
-  end
-
-  private_class_method :squasher
-
-  def self.transforms
-    @transforms ||= {
-      squash: proc do |_, _v, options|
-        v      = Cistern::Hash.stringify_keys(_v)
-        squash = options[:squash]
-
-        v.is_a?(::Hash) ? squasher(v, squash.dup) : v
-      end,
-      none: ->(_, v, _) { v }
-    }
-  end
-
-  def self.default_parser
-    @default_parser ||= ->(v, _opts) { v }
-  end
-
   module ClassMethods
+    def parsers
+      @parsers ||= {
+        array:   ->(v, _) { [*v] },
+        boolean: ->(v, _) { TRUTHY.include?(v.to_s.downcase) },
+        float:   ->(v, _) { v && v.to_f },
+        integer: ->(v, _) { v && v.to_i },
+        string:  ->(v, _) { v && v.to_s },
+        time:    ->(v, _) { v.is_a?(Time) ? v : v && Time.parse(v.to_s) },
+      }
+    end
+
+    def squasher(tree, path)
+      tree.is_a?(::Hash) ? squasher(tree[path.shift], path) : tree
+    end
+
+    def transforms
+      @transforms ||= {
+        squash: proc do |_, _v, options|
+          v      = Cistern::Hash.stringify_keys(_v)
+          squash = options[:squash]
+
+          v.is_a?(::Hash) ? squasher(v, squash.dup) : v
+        end,
+        none: ->(_, v, _) { v }
+      }
+    end
+
+    def default_parser
+      @default_parser ||= ->(v, _opts) { v }
+    end
+
     def aliases
       @aliases ||= Hash.new { |h, k| h[k] = [] }
     end
@@ -112,8 +110,8 @@ module Cistern::Attributes
       options[:aliases] = Array(options[:aliases] || options[:alias]).map { |a| a.to_sym }
 
       transform = options.key?(:squash) ? :squash : :none
-      options[:transform] ||= Cistern::Attributes.transforms.fetch(transform)
-      options[:parser] ||= Cistern::Attributes.parsers[options[:type]] || Cistern::Attributes.default_parser
+      options[:transform] ||= transforms.fetch(transform)
+      options[:parser] ||= parsers[options[:type]] || default_parser
     end
   end
 
