@@ -56,32 +56,20 @@ module Cistern::Attributes
         end
       end
 
-      name = _name.to_s.to_sym
+      name_sym = _name.to_sym
 
-      send(:define_method, name) do
-        read_attribute(name)
-      end unless instance_methods.include?(name)
-
-      send(:alias_method, "#{name}?", name) if options[:type] == :boolean
-
-      send(:define_method, "#{name}=") do |value|
-        write_attribute(name, value)
-      end unless instance_methods.include?("#{name}=".to_sym)
-
-      if attributes[name]
-        fail(ArgumentError, "#{self.name} attribute[#{_name}] specified more than once")
-      else
-        if options[:squash]
-          options[:squash] = Array(options[:squash]).map(&:to_s)
-        end
-        attributes[name] = options
+      if attributes.key?(name_sym)
+        fail(ArgumentError, "#{self.name} attribute[#{name_sym}] specified more than once")
       end
 
-      options[:aliases] = Array(options[:aliases] || options[:alias]).map { |a| a.to_s.to_sym }
+      normalize_options(options)
 
-      options[:aliases].each do |new_alias|
-        aliases[new_alias] << name.to_s.to_sym
-      end
+      attributes[name_sym] = options
+
+      define_attribute_reader(name_sym, options)
+      define_attribute_writer(name_sym, options)
+
+      options[:aliases].each { |new_alias| aliases[new_alias] << name_sym }
     end
 
     def identity(name, options = {})
@@ -95,6 +83,29 @@ module Cistern::Attributes
 
     def ignored_attributes
       @ignored_attributes ||= []
+    end
+
+    protected
+
+    def define_attribute_reader(name, options)
+      send(:define_method, name) do
+        read_attribute(name)
+      end unless instance_methods.include?(name)
+
+      send(:alias_method, "#{name}?", name) if options[:type] == :boolean
+    end
+
+    def define_attribute_writer(name, options)
+      return if instance_methods.include?("#{name}=".to_sym)
+
+      send(:define_method, "#{name}=") { |value| write_attribute(name, value) }
+    end
+
+    private
+
+    def normalize_options(options)
+      options[:squash] = Array(options[:squash]).map(&:to_s) if options[:squash]
+      options[:aliases] = Array(options[:aliases] || options[:alias]).map { |a| a.to_sym }
     end
   end
 
