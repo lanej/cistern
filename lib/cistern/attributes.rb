@@ -119,7 +119,8 @@ module Cistern::Attributes
     end
 
     def read_attribute(name)
-      key = name.to_s.to_sym
+      key = name.to_sym
+
       options = self.class.attributes[key]
       default = options[:default]
 
