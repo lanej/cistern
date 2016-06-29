@@ -164,9 +164,7 @@ module Cistern::Attributes
     end
 
     def dup
-      copy = super
-      copy.attributes = copy.attributes.dup
-      copy
+      super.tap { |m| m.attributes = attributes.dup }
     end
 
     def identity
