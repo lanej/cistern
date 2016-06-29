@@ -135,9 +135,9 @@ module Cistern::Attributes
       transform = Cistern::Attributes.transforms[options[:squash] ? :squash : :none] ||
                   Cistern::Attributes.default_transform
 
-      parser = Cistern::Attributes.parsers[options[:type]] ||
-               options[:parser] ||
-               Cistern::Attributes.default_parser
+      parser = options[:parser] ||
+        Cistern::Attributes.parsers[options[:type]] ||
+        Cistern::Attributes.default_parser
 
       transformed = transform.call(name, value, options)
 
