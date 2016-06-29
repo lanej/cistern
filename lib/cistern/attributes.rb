@@ -257,7 +257,7 @@ module Cistern::Attributes
     private
 
     def missing_attributes(keys)
-      keys.reduce({}) { |a,e| a.merge(e => send("#{e}")) }
+      keys.map(&:to_sym).reduce({}) { |a,e| a.merge(e => public_send("#{e}")) }
         .partition { |_,v| v.nil? }
         .map { |s| Hash[s] }
     end
@@ -292,13 +292,13 @@ module Cistern::Attributes
         next if ignored_attributes.include?(symbol_key)
 
         if class_aliases.key?(symbol_key)
-          class_aliases[symbol_key].each { |attribute_alias| send("#{attribute_alias}=", value) }
+          class_aliases[symbol_key].each { |attribute_alias| public_send("#{attribute_alias}=", value) }
         end
 
         assignment_method = "#{key}="
 
         if !protected_methods.include?(symbol_key) && self.respond_to?(assignment_method, true)
-          send(assignment_method, value)
+          public_send(assignment_method, value)
         end
       end
     end
