@@ -106,6 +106,10 @@ module Cistern::Attributes
     def normalize_options(options)
       options[:squash] = Array(options[:squash]).map(&:to_s) if options[:squash]
       options[:aliases] = Array(options[:aliases] || options[:alias]).map { |a| a.to_sym }
+
+      transform = options.key?(:squash) ? :squash : :none
+      options[:transform] ||= Cistern::Attributes.transforms.fetch(transform)
+      options[:parser] ||= Cistern::Attributes.parsers[options[:type]] || Cistern::Attributes.default_parser
     end
   end
 
@@ -132,12 +136,9 @@ module Cistern::Attributes
     def write_attribute(name, value)
       options = self.class.attributes[name] || {}
 
-      transform = Cistern::Attributes.transforms[options[:squash] ? :squash : :none] ||
-                  Cistern::Attributes.default_transform
+      transform = options[:transform]
 
-      parser = options[:parser] ||
-        Cistern::Attributes.parsers[options[:type]] ||
-        Cistern::Attributes.default_parser
+      parser = options[:parser]
 
       transformed = transform.call(name, value, options)
 
