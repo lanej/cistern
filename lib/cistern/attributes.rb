@@ -45,16 +45,7 @@ module Cistern::Attributes
     end
 
     def attribute(name, options = {})
-      if defined? Cistern::Coverage
-        attribute_call = Cistern::Coverage.find_caller_before('cistern/attributes.rb')
-
-        # Only use DSL attribute calls from within a model
-        if attribute_call && attribute_call.label.start_with?('<class:')
-          options[:coverage_file] = attribute_call.absolute_path
-          options[:coverage_line] = attribute_call.lineno
-          options[:coverage_hits] = 0
-        end
-      end
+      add_coverage(options)
 
       name_sym = name.to_sym
 
@@ -86,6 +77,19 @@ module Cistern::Attributes
     end
 
     protected
+
+    def add_coverage(options)
+      return unless defined? Cistern::Coverage
+
+      attribute_call = Cistern::Coverage.find_caller_before('cistern/attributes.rb')
+
+      # Only use DSL attribute calls from within a model
+      if attribute_call && attribute_call.label.start_with?('<class:')
+        options[:coverage_file] = attribute_call.absolute_path
+        options[:coverage_line] = attribute_call.lineno
+        options[:coverage_hits] = 0
+      end
+    end
 
     def define_attribute_reader(name, options)
       send(:define_method, name) do
