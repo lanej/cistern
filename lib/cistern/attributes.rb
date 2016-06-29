@@ -45,13 +45,13 @@ module Cistern::Attributes
     end
 
     def attribute(name, options = {})
-      add_coverage(options)
-
       name_sym = name.to_sym
 
       if attributes.key?(name_sym)
         fail(ArgumentError, "#{self.name} attribute[#{name_sym}] specified more than once")
       end
+
+      add_coverage(options)
 
       normalize_options(options)
 
