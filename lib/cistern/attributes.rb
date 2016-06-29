@@ -36,10 +36,6 @@ module Cistern::Attributes
   end
 
   module ClassMethods
-    def _load(marshalled)
-      new(Marshal.load(marshalled))
-    end
-
     def aliases
       @aliases ||= Hash.new { |h, k| h[k] = [] }
     end
