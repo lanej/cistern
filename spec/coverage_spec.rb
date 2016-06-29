@@ -30,6 +30,6 @@ describe 'coverage', :coverage do
 
   it "should store how many times an attribute's reader is called" do
     expect(CoverageSpec.attributes[:used][:coverage_hits]).to eq(2)
-    expect(CoverageSpec.attributes[:unused][:coverage_hits]).to eq(0)
+    expect(CoverageSpec.attributes[:unused][:coverage_hits]).to eq(3)
   end
 end

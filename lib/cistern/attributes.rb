@@ -146,7 +146,7 @@ module Cistern::Attributes
       new_value = parser.call(transformed, options)
       attribute = name.to_s.to_sym
 
-      previous_value = attributes[attribute]
+      previous_value = read_attribute(name)
 
       attributes[attribute] = new_value
 
