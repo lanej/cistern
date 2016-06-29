@@ -57,8 +57,6 @@ module Cistern::Attributes
 
       define_attribute_reader(name_sym, options)
       define_attribute_writer(name_sym, options)
-
-      options[:aliases].each { |new_alias| aliases[new_alias] << name_sym }
     end
 
     def identity(name, options = {})
@@ -95,6 +93,8 @@ module Cistern::Attributes
       end unless instance_methods.include?(name)
 
       send(:alias_method, "#{name}?", name) if options[:type] == :boolean
+
+      options[:aliases].each { |new_alias| aliases[new_alias] << name }
     end
 
     def define_attribute_writer(name, options)
