@@ -15,31 +15,18 @@ module Cistern::Attributes
 
   def self.transforms
     @transforms ||= {
-      squash: proc do |_k, _v, options|
+      squash: proc do |_, _v, options|
         v      = Cistern::Hash.stringify_keys(_v)
         squash = options[:squash]
 
-        if v.is_a?(::Hash) && squash.is_a?(Array)
+        if v.is_a?(::Hash)
           travel = lambda do |tree, path|
-            if tree.is_a?(::Hash)
-              travel.call(tree[path.shift], path)
-            else
-              tree
-            end
+            tree.is_a?(::Hash) ? travel.call(tree[path.shift], path) : tree
           end
 
           travel.call(v, squash.dup)
-        elsif v.is_a?(::Hash)
-          squash_s = squash.to_s
-
-          if v.key?(key = squash_s.to_sym)
-            v[key]
-          elsif v.key?(squash_s)
-            v[squash_s]
-          else
-            v
-          end
-        else v
+        else
+          v
         end
       end,
       none: ->(_, v, _) { v }
