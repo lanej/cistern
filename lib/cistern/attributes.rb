@@ -44,7 +44,7 @@ module Cistern::Attributes
       @attributes ||= {}
     end
 
-    def attribute(_name, options = {})
+    def attribute(name, options = {})
       if defined? Cistern::Coverage
         attribute_call = Cistern::Coverage.find_caller_before('cistern/attributes.rb')
 
@@ -56,7 +56,7 @@ module Cistern::Attributes
         end
       end
 
-      name_sym = _name.to_sym
+      name_sym = name.to_sym
 
       if attributes.key?(name_sym)
         fail(ArgumentError, "#{self.name} attribute[#{name_sym}] specified more than once")
