@@ -281,36 +281,29 @@ module Cistern::Attributes
     def _merge_attributes(new_attributes)
       protected_methods  = (Cistern::Model.instance_methods - PROTECTED_METHODS)
       ignored_attributes = self.class.ignored_attributes
-      class_attributes   = self.class.attributes
+      specifications     = self.class.attributes
       class_aliases      = self.class.aliases
 
-      new_attributes.each do |_key, value|
-        string_key = _key.is_a?(String) ? _key : _key.to_s
-        symbol_key = case _key
-                     when String
-                       _key.to_sym
-                     when Symbol
-                       _key
-                     else
-                       string_key.to_sym
-                     end
+      # this has the side effect of dup'ing the incoming hash
+      new_attributes = Cistern::Hash.stringify_keys(new_attributes)
+
+      new_attributes.each do |key, value|
+        symbol_key = key.to_sym
 
         # find nested paths
-        value.is_a?(::Hash) && class_attributes.each do |name, options|
-          if options[:squash] && options[:squash].first == string_key
-            send("#{name}=", symbol_key => value)
+        value.is_a?(::Hash) && specifications.each do |name, options|
+          if options[:squash] && options[:squash].first == key
+            send("#{name}=", key => value)
           end
         end
 
         next if ignored_attributes.include?(symbol_key)
 
         if class_aliases.key?(symbol_key)
-          class_aliases[symbol_key].each do |aliased_key|
-            send("#{aliased_key}=", value)
-          end
+          class_aliases[symbol_key].each { |attribute_alias| send("#{attribute_alias}=", value) }
         end
 
-        assignment_method = "#{string_key}="
+        assignment_method = "#{key}="
 
         if !protected_methods.include?(symbol_key) && self.respond_to?(assignment_method, true)
           send(assignment_method, value)
