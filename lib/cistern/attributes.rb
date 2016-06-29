@@ -13,21 +13,19 @@ module Cistern::Attributes
     }
   end
 
+  def self.squasher(tree, path)
+    tree.is_a?(::Hash) ? squasher(tree[path.shift], path) : tree
+  end
+
+  private_class_method :squasher
+
   def self.transforms
     @transforms ||= {
       squash: proc do |_, _v, options|
         v      = Cistern::Hash.stringify_keys(_v)
         squash = options[:squash]
 
-        if v.is_a?(::Hash)
-          travel = lambda do |tree, path|
-            tree.is_a?(::Hash) ? travel.call(tree[path.shift], path) : tree
-          end
-
-          travel.call(v, squash.dup)
-        else
-          v
-        end
+        v.is_a?(::Hash) ? squasher(v, squash.dup) : v
       end,
       none: ->(_, v, _) { v }
     }
