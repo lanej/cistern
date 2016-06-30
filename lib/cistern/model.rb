@@ -1,5 +1,6 @@
 module Cistern::Model
   include Cistern::Attributes::InstanceMethods
+  include Cistern::HashSupport
 
   def self.included(klass)
     klass.send(:extend, Cistern::Attributes::ClassMethods)

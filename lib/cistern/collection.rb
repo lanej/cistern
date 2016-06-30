@@ -1,4 +1,6 @@
 module Cistern::Collection
+  include Cistern::HashSupport
+
   BLACKLISTED_ARRAY_METHODS = [
     :compact!, :flatten!, :reject!, :reverse!, :rotate!, :map!,
     :shuffle!, :slice!, :sort!, :sort_by!, :delete_if,

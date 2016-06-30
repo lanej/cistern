@@ -10,6 +10,7 @@ module Cistern
   Timeout = Class.new(Error)
 
   require 'cistern/hash'
+  require 'cistern/hash_support'
   require 'cistern/string'
   require 'cistern/mock'
   require 'cistern/wait_for'
