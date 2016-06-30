@@ -2,57 +2,36 @@ module Cistern::Attributes
   PROTECTED_METHODS = [:cistern, :service, :identity, :collection].freeze
   TRUTHY = ['true', '1'].freeze
 
-  def self.parsers
-    @parsers ||= {
-      array:   ->(v, _) { [*v] },
-      boolean: ->(v, _) { TRUTHY.include?(v.to_s.downcase) },
-      float:   ->(v, _) { v && v.to_f },
-      integer: ->(v, _) { v && v.to_i },
-      string:  ->(v, _) { v && v.to_s },
-      time:    ->(v, _) { v.is_a?(Time) ? v : v && Time.parse(v.to_s) },
-    }
-  end
-
-  def self.transforms
-    @transforms ||= {
-      squash: proc do |_k, _v, options|
-        v      = Cistern::Hash.stringify_keys(_v)
-        squash = options[:squash]
-
-        if v.is_a?(::Hash) && squash.is_a?(Array)
-          travel = lambda do |tree, path|
-            if tree.is_a?(::Hash)
-              travel.call(tree[path.shift], path)
-            else
-              tree
-            end
-          end
-
-          travel.call(v, squash.dup)
-        elsif v.is_a?(::Hash)
-          squash_s = squash.to_s
-
-          if v.key?(key = squash_s.to_sym)
-            v[key]
-          elsif v.key?(squash_s)
-            v[squash_s]
-          else
-            v
-          end
-        else v
-        end
-      end,
-      none: ->(_, v, _) { v }
-    }
-  end
-
-  def self.default_parser
-    @default_parser ||= ->(v, _opts) { v }
-  end
-
   module ClassMethods
-    def _load(marshalled)
-      new(Marshal.load(marshalled))
+    def parsers
+      @parsers ||= {
+        array:   ->(v, _) { [*v] },
+        boolean: ->(v, _) { TRUTHY.include?(v.to_s.downcase) },
+        float:   ->(v, _) { v && v.to_f },
+        integer: ->(v, _) { v && v.to_i },
+        string:  ->(v, _) { v && v.to_s },
+        time:    ->(v, _) { v.is_a?(Time) ? v : v && Time.parse(v.to_s) },
+      }
+    end
+
+    def squasher(tree, path)
+      tree.is_a?(::Hash) ? squasher(tree[path.shift], path) : tree
+    end
+
+    def transforms
+      @transforms ||= {
+        squash: proc do |_, _v, options|
+          v      = Cistern::Hash.stringify_keys(_v)
+          squash = options[:squash]
+
+          v.is_a?(::Hash) ? squasher(v, squash.dup) : v
+        end,
+        none: ->(_, v, _) { v }
+      }
+    end
+
+    def default_parser
+      @default_parser ||= ->(v, _opts) { v }
     end
 
     def aliases
@@ -60,47 +39,24 @@ module Cistern::Attributes
     end
 
     def attributes
-      @attributes ||= {}
+      @attributes ||= parent_attributes || {}
     end
 
-    def attribute(_name, options = {})
-      if defined? Cistern::Coverage
-        attribute_call = Cistern::Coverage.find_caller_before('cistern/attributes.rb')
+    def attribute(name, options = {})
+      name_sym = name.to_sym
 
-        # Only use DSL attribute calls from within a model
-        if attribute_call && attribute_call.label.start_with?('<class:')
-          options[:coverage_file] = attribute_call.absolute_path
-          options[:coverage_line] = attribute_call.lineno
-          options[:coverage_hits] = 0
-        end
+      if attributes.key?(name_sym)
+        fail(ArgumentError, "#{self.name} attribute[#{name_sym}] specified more than once")
       end
 
-      name = _name.to_s.to_sym
+      add_coverage(options)
 
-      send(:define_method, name) do
-        read_attribute(name)
-      end unless instance_methods.include?(name)
+      normalize_options(options)
 
-      send(:alias_method, "#{name}?", name) if options[:type] == :boolean
+      attributes[name_sym] = options
 
-      send(:define_method, "#{name}=") do |value|
-        write_attribute(name, value)
-      end unless instance_methods.include?("#{name}=".to_sym)
-
-      if attributes[name]
-        fail(ArgumentError, "#{self.name} attribute[#{_name}] specified more than once")
-      else
-        if options[:squash]
-          options[:squash] = Array(options[:squash]).map(&:to_s)
-        end
-        attributes[name] = options
-      end
-
-      options[:aliases] = Array(options[:aliases] || options[:alias]).map { |a| a.to_s.to_sym }
-
-      options[:aliases].each do |new_alias|
-        aliases[new_alias] << name.to_s.to_sym
-      end
+      define_attribute_reader(name_sym, options)
+      define_attribute_writer(name_sym, options)
     end
 
     def identity(name, options = {})
@@ -115,6 +71,52 @@ module Cistern::Attributes
     def ignored_attributes
       @ignored_attributes ||= []
     end
+
+    protected
+
+    def add_coverage(options)
+      return unless defined? Cistern::Coverage
+
+      attribute_call = Cistern::Coverage.find_caller_before('cistern/attributes.rb')
+
+      # Only use DSL attribute calls from within a model
+      if attribute_call && attribute_call.label.start_with?('<class:')
+        options[:coverage_file] = attribute_call.absolute_path
+        options[:coverage_line] = attribute_call.lineno
+        options[:coverage_hits] = 0
+      end
+    end
+
+    def define_attribute_reader(name, options)
+      send(:define_method, name) do
+        read_attribute(name)
+      end unless instance_methods.include?(name)
+
+      send(:alias_method, "#{name}?", name) if options[:type] == :boolean
+
+      options[:aliases].each { |new_alias| aliases[new_alias] << name }
+    end
+
+    def define_attribute_writer(name, options)
+      return if instance_methods.include?("#{name}=".to_sym)
+
+      send(:define_method, "#{name}=") { |value| write_attribute(name, value) }
+    end
+
+    private
+
+    def normalize_options(options)
+      options[:squash] = Array(options[:squash]).map(&:to_s) if options[:squash]
+      options[:aliases] = Array(options[:aliases] || options[:alias]).map { |a| a.to_sym }
+
+      transform = options.key?(:squash) ? :squash : :none
+      options[:transform] ||= transforms.fetch(transform)
+      options[:parser] ||= parsers[options[:type]] || default_parser
+    end
+
+    def parent_attributes
+      superclass && superclass.respond_to?(:attributes) && superclass.attributes.dup
+    end
   end
 
   module InstanceMethods
@@ -123,7 +125,8 @@ module Cistern::Attributes
     end
 
     def read_attribute(name)
-      key = name.to_s.to_sym
+      key = name.to_sym
+
       options = self.class.attributes[key]
       default = options[:default]
 
@@ -140,19 +143,16 @@ module Cistern::Attributes
     def write_attribute(name, value)
       options = self.class.attributes[name] || {}
 
-      transform = Cistern::Attributes.transforms[options[:squash] ? :squash : :none] ||
-                  Cistern::Attributes.default_transform
+      transform = options[:transform]
 
-      parser = Cistern::Attributes.parsers[options[:type]] ||
-               options[:parser] ||
-               Cistern::Attributes.default_parser
+      parser = options[:parser]
 
       transformed = transform.call(name, value, options)
 
       new_value = parser.call(transformed, options)
       attribute = name.to_s.to_sym
 
-      previous_value = attributes[attribute]
+      previous_value = read_attribute(name)
 
       attributes[attribute] = new_value
 
@@ -170,9 +170,7 @@ module Cistern::Attributes
     end
 
     def dup
-      copy = super
-      copy.attributes = copy.attributes.dup
-      copy
+      super.tap { |m| m.attributes = attributes.dup }
     end
 
     def identity
@@ -265,7 +263,7 @@ module Cistern::Attributes
     private
 
     def missing_attributes(keys)
-      keys.reduce({}) { |a,e| a.merge(e => send("#{e}")) }
+      keys.map(&:to_sym).reduce({}) { |a,e| a.merge(e => public_send("#{e}")) }
         .partition { |_,v| v.nil? }
         .map { |s| Hash[s] }
     end
@@ -281,39 +279,32 @@ module Cistern::Attributes
     def _merge_attributes(new_attributes)
       protected_methods  = (Cistern::Model.instance_methods - PROTECTED_METHODS)
       ignored_attributes = self.class.ignored_attributes
-      class_attributes   = self.class.attributes
+      specifications     = self.class.attributes
       class_aliases      = self.class.aliases
 
-      new_attributes.each do |_key, value|
-        string_key = _key.is_a?(String) ? _key : _key.to_s
-        symbol_key = case _key
-                     when String
-                       _key.to_sym
-                     when Symbol
-                       _key
-                     else
-                       string_key.to_sym
-                     end
+      # this has the side effect of dup'ing the incoming hash
+      new_attributes = Cistern::Hash.stringify_keys(new_attributes)
+
+      new_attributes.each do |key, value|
+        symbol_key = key.to_sym
 
         # find nested paths
-        value.is_a?(::Hash) && class_attributes.each do |name, options|
-          if options[:squash] && options[:squash].first == string_key
-            send("#{name}=", symbol_key => value)
+        value.is_a?(::Hash) && specifications.each do |name, options|
+          if options[:squash] && options[:squash].first == key
+            send("#{name}=", key => value)
           end
         end
 
         next if ignored_attributes.include?(symbol_key)
 
         if class_aliases.key?(symbol_key)
-          class_aliases[symbol_key].each do |aliased_key|
-            send("#{aliased_key}=", value)
-          end
+          class_aliases[symbol_key].each { |attribute_alias| public_send("#{attribute_alias}=", value) }
         end
 
-        assignment_method = "#{string_key}="
+        assignment_method = "#{key}="
 
         if !protected_methods.include?(symbol_key) && self.respond_to?(assignment_method, true)
-          send(assignment_method, value)
+          public_send(assignment_method, value)
         end
       end
     end
