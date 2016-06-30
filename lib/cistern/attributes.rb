@@ -39,7 +39,7 @@ module Cistern::Attributes
     end
 
     def attributes
-      @attributes ||= {}
+      @attributes ||= parent_attributes || {}
     end
 
     def attribute(name, options = {})
@@ -112,6 +112,10 @@ module Cistern::Attributes
       transform = options.key?(:squash) ? :squash : :none
       options[:transform] ||= transforms.fetch(transform)
       options[:parser] ||= parsers[options[:type]] || default_parser
+    end
+
+    def parent_attributes
+      superclass && superclass.respond_to?(:attributes) && superclass.attributes.dup
     end
   end
 

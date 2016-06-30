@@ -1,6 +1,20 @@
 require 'spec_helper'
 
 describe 'Cistern::Model' do
+  describe 'inheritance' do
+    it 'provides the child with the attributes of the parent' do
+      parent = Class.new(Sample::Model) do
+        attribute :parent
+      end
+
+      child = Class.new(parent) do
+        attribute :child
+      end
+
+      expect(parent.attributes.keys).to contain_exactly(:parent)
+      expect(child.attributes.keys).to contain_exactly(:parent, :child)
+    end
+  end
   describe '#update' do
     class UpdateSpec < Sample::Model
       identity :id
