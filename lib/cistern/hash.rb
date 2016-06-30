@@ -1,8 +1,6 @@
 class Cistern::Hash
   def self.slice(hash, *keys)
-    {}.tap do |sliced|
-      keys.each { |k| sliced[k] = hash[k] if hash.key?(k) }
-    end
+    keys.each_with_object({}) { |e, a| a[e] = hash[e] if hash.key?(e) }
   end
 
   def self.except(hash, *keys)
@@ -18,7 +16,7 @@ class Cistern::Hash
   def self.stringify_keys(object)
     case object
     when Hash
-      object.inject({}) { |r, (k, v)| r.merge(k.to_s => stringify_keys(v)) }
+      object.each_with_object({}) { |(k, v), a| a[k.to_s] = stringify_keys(v) }
     when Array
       object.map { |v| stringify_keys(v) }
     else
