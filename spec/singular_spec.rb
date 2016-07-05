@@ -2,13 +2,21 @@ require 'spec_helper'
 
 describe 'Cistern::Singular' do
   class Settings < Sample::Singular
-    attribute :name
+    attribute :name, type: :string
     attribute :count, type: :number
 
+    def save
+      result = @@settings = attributes.merge(dirty_attributes)
+
+      merge_attributes(result)
+    end
+
     def get
-      @counter ||= 0
-      @counter += 1
-      merge_attributes(name: 'amazing', count: @counter)
+      settings = @@settings ||= {}
+      settings[:count] ||= 0
+      settings[:count] += 1
+
+      merge_attributes(settings)
     end
   end
 
@@ -28,5 +36,8 @@ describe 'Cistern::Singular' do
     expect { singular.reload }.to change(singular, :count).by(1)
   end
 
-  it 'updates'
+  it 'updates' do
+    service.settings.update(name: 6)
+    expect(service.settings.get.name).to eq('6')
+  end
 end
