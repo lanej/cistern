@@ -15,10 +15,6 @@ describe 'Cistern::Singular' do
     end
   end
 
-  it 'should work' do
-    expect(Sample.new.sample_singular.name).to eq('amazing')
-  end
-
   describe 'deprecation', :deprecated do
     it 'responds to #service' do
       sample = Sample.new.sample_singular
@@ -26,10 +22,10 @@ describe 'Cistern::Singular' do
     end
   end
 
-  it 'should reload' do
+  it 'reloads on initialize' do
     singular = Sample.new.sample_singular
-    old_count = singular.count
-    expect(singular.count).to eq(old_count)
-    expect(singular.reload.count).to be > old_count
+    expect(singular.name).to eq('amazing')
+
+    expect { singular.reload }.to change(singular, :count).by(1)
   end
 end
