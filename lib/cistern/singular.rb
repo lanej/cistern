@@ -4,7 +4,7 @@ module Cistern::Singular
   def self.cistern_singular(cistern, klass, name)
     cistern.const_get(:Collections).module_eval <<-EOS, __FILE__, __LINE__
       def #{name}(attributes={})
-    #{klass.name}.new(attributes.merge(cistern: self))
+        #{klass.name}.new(attributes.merge(cistern: self))
       end
     EOS
   end
