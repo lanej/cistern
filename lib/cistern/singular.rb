@@ -31,16 +31,14 @@ module Cistern::Singular
 
   def initialize(options)
     merge_attributes(options)
-    reload
+  end
+
+  def fetch(*args)
+    reload(*args)
+    self
   end
 
   def reload
-    new_attributes = fetch_attributes
-
-    merge_attributes(new_attributes) if new_attributes
-  end
-
-  def fetch_attributes
-    fail NotImplementedError
+    raise NotImplementedError
   end
 end
