@@ -5,10 +5,7 @@ describe 'Cistern::Singular' do
     attribute :name
     attribute :count, type: :number
 
-    def reload
-      # test that initialize waits for cistern to be defined
-      fail 'missing cistern' unless cistern
-
+    def get
       @counter ||= 0
       @counter += 1
       merge_attributes(name: 'amazing', count: @counter)
@@ -19,7 +16,7 @@ describe 'Cistern::Singular' do
 
   describe 'deprecation', :deprecated do
     it 'responds to #service' do
-      sample = service.settings.fetch
+      sample = service.settings.get
 
       expect(sample.service).to eq(sample.cistern)
     end

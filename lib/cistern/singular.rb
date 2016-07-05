@@ -1,5 +1,5 @@
 module Cistern::Singular
-  include Cistern::HashSupport
+  include Cistern::Model
 
   def self.cistern_singular(cistern, klass, name)
     cistern.const_get(:Collections).module_eval <<-EOS, __FILE__, __LINE__
@@ -10,35 +10,23 @@ module Cistern::Singular
   end
 
   def self.included(klass)
+    super
+
     klass.send(:extend, Cistern::Attributes::ClassMethods)
     klass.send(:include, Cistern::Attributes::InstanceMethods)
     klass.send(:extend, Cistern::Model::ClassMethods)
   end
 
-  attr_accessor :cistern
-
-  def service
-    Cistern.deprecation(
-      '#service is deprecated.  Please use #cistern',
-      caller[0]
-    )
-    @cistern
-  end
-
-  def inspect
-    Cistern.formatter.call(self)
-  end
-
-  def initialize(options)
-    merge_attributes(options)
-  end
-
-  def fetch(*args)
-    reload(*args)
+  def collection
     self
   end
 
-  def reload
+  def get
     raise NotImplementedError
+  end
+
+  def reload
+    get
+    self
   end
 end
