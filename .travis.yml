@@ -2,7 +2,6 @@ language: ruby
 rvm:
 - 2.3.0
 - 2.2
-- 1.9
 bundler_args: "--without development"
 before_install:
 - gem install bundler -v "~> 1.10"
@@ -12,6 +11,11 @@ notifications:
 sudo: false
 services:
 - redis-server
+matrix:
+  include:
+    - rvm: 1.9
+      gemfile: gemfiles/ruby_lt_2.0.gemfile
+
 env:
   matrix:
     secure: eiDhDgp8jBYKZVOqe891g4StnFsqRXcQwlDSnXthRSuWNMd6oFyFOo/s9aXd9lNFkaTBnSAFrUvywH1t2+H3j+cPMn/91W2s2Ldc+SxVxjrY3mWyr6NIudro/rdK7nIfIcWJFtm0teSXg/1nRPZt0qlXc4bZmvwvN3T8MvdgI2I=
