@@ -8,10 +8,10 @@ module Cistern::Model
     klass.send(:extend, Cistern::Model::ClassMethods)
   end
 
-  def self.cistern_model(cistern, klass, name)
+  def self.setup(cistern, klass, name)
     cistern.const_get(:Collections).module_eval <<-EOS, __FILE__, __LINE__
       def #{name}(attributes={})
-    #{klass.name}.new(attributes.merge(cistern: self))
+        #{klass.name}.new(attributes.merge(cistern: self))
       end
     EOS
   end

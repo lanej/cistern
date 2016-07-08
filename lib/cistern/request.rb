@@ -1,7 +1,7 @@
 module Cistern::Request
   include Cistern::HashSupport
 
-  def self.cistern_request(cistern, klass, name)
+  def self.setup(cistern, klass, name)
     unless klass.name || klass.cistern_method
       fail ArgumentError, "can't turn anonymous class into a Cistern request"
     end

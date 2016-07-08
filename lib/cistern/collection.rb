@@ -7,7 +7,7 @@ module Cistern::Collection
     :keep_if, :pop, :shift, :delete_at, :compact
   ].to_set # :nodoc:
 
-  def self.cistern_collection(cistern, klass, name)
+  def self.setup(cistern, klass, name)
     cistern.const_get(:Collections).module_eval <<-EOS, __FILE__, __LINE__
       def #{name}(attributes={})
         #{klass.name}.new(attributes.merge(cistern: self))

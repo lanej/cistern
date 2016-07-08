@@ -274,31 +274,19 @@ module Cistern::Client
       return true if @_setup
 
       requests.each do |klass|
-        name = klass.cistern_method ||
-               Cistern::String.camelize(Cistern::String.demodulize(klass.name))
-
-        Cistern::Request.cistern_request(self, klass, name)
+        Cistern::Request.setup(self, klass, resource_name(klass))
       end
 
       collections.each do |klass|
-        name = klass.cistern_method ||
-               Cistern::String.underscore(klass.name.gsub("#{self.name}::", '').gsub('::', ''))
-
-        Cistern::Collection.cistern_collection(self, klass, name)
+        Cistern::Collection.setup(self, klass, resource_name(klass))
       end
 
       models.each do |klass|
-        name = klass.cistern_method ||
-               Cistern::String.underscore(klass.name.gsub("#{self.name}::", '').gsub('::', ''))
-
-        Cistern::Model.cistern_model(self, klass, name)
+        Cistern::Model.setup(self, klass, resource_name(klass))
       end
 
       singularities.each do |klass|
-        name = klass.cistern_method ||
-               Cistern::String.underscore(klass.name.gsub("#{self.name}::", '').gsub('::', ''))
-
-        Cistern::Singular.cistern_singular(self, klass, name)
+        Cistern::Singular.setup(self, klass, resource_name(klass))
       end
 
       @_setup = true
@@ -313,6 +301,13 @@ module Cistern::Client
 
     def reset!
       const_get(:Mock).reset!
+    end
+
+    private
+
+    def resource_name(klass)
+      klass.cistern_method ||
+        Cistern::String.camelize(Cistern::String.demodulize(klass.name))
     end
   end
 end
