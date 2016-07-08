@@ -1,4 +1,7 @@
 language: ruby
+rvm:
+- 2.3.0
+- 2.2
 bundler_args: "--without development"
 before_install:
 - gem install bundler -v "~> 1.10"
@@ -10,8 +13,6 @@ services:
 - redis-server
 matrix:
   include:
-    - rvm: 2.3.0
-    - rvm: 2.2
     - rvm: 1.9
       gemfile: gemfiles/ruby_lt_2.0.gemfile
 
