@@ -314,6 +314,54 @@ post.update(author_id: 1) #=> calls #save with #dirty_attributes == { 'author_id
 post.author_id #=> 1
 ```
 
+### Singular
+
+Singular resources do not have an associated collection and the model contains the `get` and`save` methods.
+
+For instance:
+
+```ruby
+class Blog::PostData
+  include Blog::Singular
+
+  attribute :post_id, type: :integer
+  attribute :upvotes, type: :integer
+  attribute :views, type: :integer
+  attribute :rating, type: :float
+
+  def get
+    response = cistern.get_post_data(post_id)
+    merge_attributes(response.body['data'])
+  end
+  
+  def save
+    response = cistern.update_post_data(post_id, dirty_attributes)
+    merge_attributes(response.data['data'])
+  end
+end
+```
+
+Singular resources often hang off of other models or collections.
+
+```ruby
+class Blog::Post
+  include Cistern::Model
+
+  identity :id, type: :integer
+
+  def data
+    cistern.post_data(post_id: identity).load
+  end
+end
+```
+
+They are special cases of Models and have similar interfaces.
+
+```ruby
+post.data.views #=> nil
+post.data.update(views: 3)
+post.data.views #=> 3
+```
 
 
 ### Collection
