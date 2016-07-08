@@ -40,12 +40,12 @@ end
 
 ### Service
 
-This represents the remote service that you are wrapping. If the service name is `foo` then a good name is `Blog`.
+This represents the remote service that you are wrapping. If the service name is `blog` then a good name is `Blog`.
 
 Service initialization parameters are enumerated by `requires` and `recognizes`. Parameters defined using `recognizes` are optional.
 
 ```ruby
-# lib/foo.rb
+# lib/blog.rb
 class Blog
   include Cistern::Client
 
