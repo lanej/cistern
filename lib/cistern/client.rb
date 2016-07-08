@@ -296,7 +296,7 @@ module Cistern::Client
       setup
       validate_options(options)
 
-      const_get(self.mocking? ? :Mock : :Real).new(options)
+      client_class.new(options)
     end
 
     def reset!
@@ -304,6 +304,10 @@ module Cistern::Client
     end
 
     private
+
+    def client_class
+      const_get(self.mocking? ? :Mock : :Real)
+    end
 
     def resource_name(klass)
       klass.cistern_method ||
