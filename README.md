@@ -192,66 +192,134 @@ Blog.requests # => [Blog::GetPosts, Blog::GetPost]
 
 ### Models
 
-* `cistern` represents the associated `Blog` instance.
-* `collection` represents the related collection (if applicable)
+* `cistern` represents the associated `Blog::Real` or `Blog::Mock` instance. 
+* `collection` represents the related collection.
 * `new_record?` checks if `identity` is present
 * `requires(*requirements)` throws `ArgumentError` if an attribute matching a requirement isn't set
+* `requires_one(*requirements)` throws `ArgumentError` if no attribute matching requirement is set
 * `merge_attributes(attributes)` sets attributes for the current model instance
+* `dirty_attributes` represents attributes changed since the last `merge_attributes`.  This is useful for using `update`
 
 #### Attributes
 
-Attributes are designed to be a flexible way of parsing service request responses.
+Cistern attributes are designed to make your model flexible and developer friendly.
 
-`identity` is special but not required.
+* `attribute :post_id` adds an accessor to the model.
+	```ruby
+	attribute :post_id
 
-`attribute :flavor` makes `Blog::Post.new.respond_to?(:flavor)`
+	model.post_id #=> nil
+	model.post_id = 1 #=> 1
+	model.post_id #=> 1
+	model.attributes #=> {'post_id' => 1 }
+	model.dirty_attributes #=> {'post_id' => 1 }
+	```
+* `identity` represents the name of the model's unique identifier.  As this is not always available, it is not required.
+	```ruby
+	identity :name
+	```
 
-* `:aliases` or `:alias` allows a attribute key to be different then a response key. `attribute :keypair_id, alias: "keypair"` with `merge_attributes("keypair" => 1)` sets `keypair_id` to `1`
-* `:type` automatically casts the attribute do the specified type. `attribute :private_ips, type: :array` with `merge_attributes("private_ips" => 2)` sets `private_ips` to `[2]`
-* `:squash` traverses nested hashes for a key. `attribute :keypair_id, aliases: "keypair", squash: "id"` with `merge_attributes("keypair" => {"id" => 3})` sets `keypair_id` to `3`
+	creates an attribute called `name` that is aliased to identity.
 
-Example
+	```ruby
+	model.name = 'michelle'
+
+	model.identity   #=> 'michelle'
+	model.name       #=> 'michelle'
+	model.attributes #=> {  'name' => 'michelle' }
+	```
+* `:aliases` or `:alias` allows a attribute key to be different then a response key. 
+	```ruby
+	attribute :post_id, alias: "post"
+	```
+
+	allows
+
+	```ruby
+	model.merge_attributes("post" => 1)
+	model.post_id #=> 1
+	```
+* `:type` automatically casts the attribute do the specified type. 
+	```ruby
+	attribute :private_ips, type: :array
+
+	model.merge_attributes("private_ips" => 2)
+	model.private_ips #=> [2]
+	```
+* `:squash` traverses nested hashes for a key. 
+	```ruby
+	attribute :post_id, aliases: "post", squash: "id"
+
+	model.merge_attributes("post" => {"id" => 3})
+	model.post_id #=> 3
+	```
+
+#### Persistence
+
+* `save` is used to persist the model into the remote service.  `save` is responsible for determining if the operation is an update to an existing resource or a new resource.
+* `reload` is used to grab the latest data and merge it into the model.  `reload` uses `collection.get(identity)` by default.
+* `update(attrs)` is a `merge_attributes` and a `save`.  When calling `update`, `dirty_attributes` can be used to persist only what has changed locally.
+
+
+For example:
 
 ```ruby
 class Blog::Post < Blog::Model
-  identity :id
+  identity :id, type: :integer
 
-  attribute :flavor
-  attribute :keypair_id, aliases: "keypair",  squash: "id"
-  attribute :private_ips, type: :array
+  attribute :body
+  attribute :author_id, aliases: "author",  squash: "id"
+  attribute :deleted_at, type: :time
 
   def destroy
-    params  = {
-      "id" => self.identity
-    }
-    self.cistern.destroy_post(params).body["request"]
+    requires :identity
+
+    data = cistern.destroy_post(params).body['post']
   end
 
   def save
-    requires :keypair_id
+    requires :author_id
 
-    params = {
-      "keypair" => self.keypair_id,
-      "post"     => {
-        "flavor" => self.flavor,
-      },
-    }
+    response = if new_record?
+                 cistern.create_post(attributes)
+               else
+                 cistern.update_post(dirty_attributes)
+               end
 
-    if new_record?
-      merge_attributes(cistern.create_post(params).body["post"])
-    else
-      requires :identity
-
-      merge_attributes(cistern.update_post(params).body["post"])
-    end
+    merge_attributes(response.body['post'])
   end
 end
 ```
 
+Usage:
+
+**create**
+
+```ruby
+blog.posts.create(author_id: 1, body: 'text')
+```
+
+is equal to
+
+```ruby
+post = blog.posts.new(author_id: 1, body: 'text')
+post.save
+```
+
+**update**
+
+```ruby
+post = blog.posts.get(1)
+post.update(author_id: 1) #=> calls #save with #dirty_attributes == { 'author_id' => 1 }
+post.author_id #=> 1
+```
+
+
+
 ### Collection
 
-* `model` tells Cistern which class is contained within the collection.
-* `cistern` is the associated `Blog` instance
+* `model` tells Cistern which resource class this collection represents.
+* `cistern` is the associated `Blog::Real` or `Blog::Mock` instance
 * `attribute` specifications on collections are allowed. use `merge_attributes`
 * `load` consumes an Array of data and constructs matching `model` instances
 
@@ -267,25 +335,23 @@ class Blog::Posts < Blog::Collection
 
     data = response.body
 
-    self.load(data["posts"])     # store post records in collection
-    self.merge_attributes(data) # store any other attributes of the response on the collection
+    load(data["posts"])    # store post records in collection
+    merge_attributes(data) # store any other attributes of the response on the collection
   end
 
-  def discover(provisioned_id, options={})
+  def discover(author_id, options={})
     params = {
-      "provisioned_id" => provisioned_id,
+      "author_id" => author_id,
     }
-    params.merge!("location" => options[:location]) if options.key?(:location)
+    params.merge!("topic" => options[:topic]) if options.key?(:topic)
 
-    cistern.requests.new(cistern.discover_post(params).body["request"])
+    cistern.blogs.new(cistern.discover_blog(params).body["blog"])
   end
 
   def get(id)
-    if data = cistern.get_post("id" => id).body["post"]
-      new(data)
-    else
-      nil
-    end
+    data = cistern.get_post(id).body["post"]
+
+    new(data) if data
   end
 end
 ```
