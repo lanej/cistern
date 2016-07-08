@@ -105,6 +105,48 @@ real.is_a?(Blog::Real) # true
 fake.is_a?(Blog::Mock) # true
 ```
 
+### Working with data
+
+`Cistern::Hash` contains many useful functions for working with data normalization and transformation.
+
+**#stringify_keys**
+
+```ruby
+# anywhere
+Cistern::Hash.stringify_keys({a: 1, b: 2}) #=> {'a' => 1, 'b' => 2}
+# within a Resource
+hash_stringify_keys({a: 1, b: 2}) #=> {'a' => 1, 'b' => 2}
+```
+
+**#slice**
+
+```ruby
+# anywhere
+Cistern::Hash.slice({a: 1, b: 2, c: 3}, :a, :c) #=> {a: 1, c: 3}
+# within a Resource
+hash_slice({a: 1, b: 2, c: 3}, :a, :c) #=> {a: 1, c: 3}
+```
+
+**#except**
+
+```ruby
+# anywhere
+Cistern::Hash.except({a: 1, b: 2}, :a) #=> {b: 2}
+# within a Resource
+hash_except({a: 1, b: 2}, :a) #=> {b: 2}
+```
+
+
+**#except!**
+
+```ruby
+# same as #except but modify specified Hash in-place
+Cistern::Hash.except!({:a => 1, :b => 2}, :a) #=> {:b => 2}
+# within a Resource
+hash_except!({:a => 1, :b => 2}, :a) #=> {:b => 2}
+```
+
+
 ### Requests
 
 Requests are defined by subclassing `#{service}::Request`.

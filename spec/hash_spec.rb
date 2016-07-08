@@ -49,3 +49,38 @@ describe 'Cistern::Hash' do
     end
   end
 end
+
+shared_examples_for 'hash_support' do
+  it { should respond_to(:hash_except) }
+  it { should respond_to(:hash_except!) }
+  it { should respond_to(:hash_slice) }
+  it { should respond_to(:hash_stringify_keys) }
+end
+
+describe Cistern::Model do
+  subject { Class.new(Sample::Model).new }
+
+  include_examples 'hash_support'
+end
+
+describe Cistern::Collection do
+  subject { Class.new(Sample::Collection).new }
+
+  include_examples 'hash_support'
+end
+
+describe Cistern::Singular do
+  subject { Class.new(Sample::Singular) do
+    def reload
+      attributes
+    end
+  end.new({}) }
+
+  include_examples 'hash_support'
+end
+
+describe Cistern::Request do
+  subject { Class.new(Sample::Request).new({}) }
+
+  include_examples 'hash_support'
+end
