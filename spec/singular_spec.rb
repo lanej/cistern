@@ -24,7 +24,7 @@ describe 'Cistern::Singular' do
 
   describe 'deprecation', :deprecated do
     it 'responds to #service' do
-      sample = service.settings.get
+      sample = service.settings.load
 
       expect(sample.service).to eq(sample.cistern)
     end
@@ -38,6 +38,6 @@ describe 'Cistern::Singular' do
 
   it 'updates' do
     service.settings.update(name: 6)
-    expect(service.settings.get.name).to eq('6')
+    expect(service.settings.load.name).to eq('6')
   end
 end

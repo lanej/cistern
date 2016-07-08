@@ -29,4 +29,6 @@ module Cistern::Singular
     get
     self
   end
+
+  alias load reload
 end
