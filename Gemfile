@@ -3,6 +3,8 @@ source "https://rubygems.org"
 # Specify your gem"s dependencies in cistern.gemspec
 gemspec
 
+gem "appraisal"
+
 group :test do
   gem "guard-rspec", "~> 4.2", require: false
   gem "guard-bundler", "~> 2.0", require: false
