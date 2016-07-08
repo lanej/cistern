@@ -1,31 +1,43 @@
 require 'spec_helper'
 
 describe 'Cistern::Singular' do
-  class SampleSingular < Sample::Singular
-    attribute :name
+  class Settings < Sample::Singular
+    attribute :name, type: :string
     attribute :count, type: :number
 
-    def fetch_attributes
-      # test that initialize waits for cistern to be defined
-      fail 'missing cistern' unless cistern
+    def save
+      result = @@settings = attributes.merge(dirty_attributes)
 
-      @counter ||= 0
-      @counter += 1
-      { name: 'amazing', count: @counter }
+      merge_attributes(result)
+    end
+
+    def get
+      settings = @@settings ||= {}
+      settings[:count] ||= 0
+      settings[:count] += 1
+
+      merge_attributes(settings)
     end
   end
 
+  let!(:service) { Sample.new }
+
   describe 'deprecation', :deprecated do
     it 'responds to #service' do
-      sample = Sample.new.sample_singular
+      sample = service.settings.load
+
       expect(sample.service).to eq(sample.cistern)
     end
   end
 
-  it 'reloads on initialize' do
-    singular = Sample.new.sample_singular
-    expect(singular.name).to eq('amazing')
+  it 'reloads' do
+    singular = service.settings(count: 0)
 
     expect { singular.reload }.to change(singular, :count).by(1)
+  end
+
+  it 'updates' do
+    service.settings.update(name: 6)
+    expect(service.settings.load.name).to eq('6')
   end
 end
