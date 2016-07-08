@@ -62,7 +62,32 @@ Blog.new(hmac_id: "1", url: "http://example.org")
 Blog.new(hmac_id: "1")
 ```
 
-Cistern will define for you two classes, `Mock` and `Real`.
+Cistern will define for you two classes, `Mock` and `Real`. Create the corresponding files and initialzers for your
+new service.
+
+```ruby
+# lib/blog/real.rb
+class Blog::Real
+  attr_reader :url, :connection
+
+  def initialize(attributes)
+    @hmac_id, @hmac_secret = attributes.values_at(:hmac_id, :hmac_secret)
+    @url = attributes[:url] || 'http://blog.example.org'
+    @connection = Faraday.new(url)
+  end
+end
+```
+
+```ruby
+# lib/blog/mock.rb
+class Blog::Mock
+  attr_reader :url
+
+  def initialize(attributes)
+    @url = attributes[:url]
+  end
+end
+```
 
 ### Mocking
 
