@@ -20,7 +20,7 @@ In cistern `~> 3.0`, the default will be for `Request`, `Collection` and `Model`
 If you want to be forwards-compatible today, you can configure your client by using `Cistern::Client.with`
 
 ```ruby
-class Foo
+class Blog
   include Cistern::Client.with(interface: :module)
 end
 ```
@@ -28,11 +28,11 @@ end
 Now request classes would look like:
 
 ```ruby
-class Foo::GetBar
-  include Foo::Request
+class Blog::GetPost
+  include Blog::Request
 
   def real
-    "bar"
+    "post"
   end
 end
 ```
@@ -40,13 +40,13 @@ end
 
 ### Service
 
-This represents the remote service that you are wrapping. If the service name is `foo` then a good name is `Foo`.
+This represents the remote service that you are wrapping. If the service name is `foo` then a good name is `Blog`.
 
 Service initialization parameters are enumerated by `requires` and `recognizes`. Parameters defined using `recognizes` are optional.
 
 ```ruby
 # lib/foo.rb
-class Foo
+class Blog
   include Cistern::Client
 
   requires :hmac_id, :hmac_secret
@@ -54,12 +54,12 @@ class Foo
 end
 
 # Acceptable
-Foo.new(hmac_id: "1", hmac_secret: "2")                            # Foo::Real
-Foo.new(hmac_id: "1", hmac_secret: "2", url: "http://example.org") # Foo::Real
+Blog.new(hmac_id: "1", hmac_secret: "2")                            # Blog::Real
+Blog.new(hmac_id: "1", hmac_secret: "2", url: "http://example.org") # Blog::Real
 
 # ArgumentError
-Foo.new(hmac_id: "1", url: "http://example.org")
-Foo.new(hmac_id: "1")
+Blog.new(hmac_id: "1", url: "http://example.org")
+Blog.new(hmac_id: "1")
 ```
 
 Cistern will define for you two classes, `Mock` and `Real`.
@@ -69,25 +69,25 @@ Cistern will define for you two classes, `Mock` and `Real`.
 Cistern strongly encourages you to generate mock support for your service. Mocking can be enabled using `mock!`.
 
 ```ruby
-Foo.mocking?          # falsey
-real = Foo.new        # Foo::Real
-Foo.mock!
-Foo.mocking?          # true
-fake = Foo.new        # Foo::Mock
-Foo.unmock!
-Foo.mocking?          # false
-real.is_a?(Foo::Real) # true
-fake.is_a?(Foo::Mock) # true
+Blog.mocking?          # falsey
+real = Blog.new        # Blog::Real
+Blog.mock!
+Blog.mocking?          # true
+fake = Blog.new        # Blog::Mock
+Blog.unmock!
+Blog.mocking?          # false
+real.is_a?(Blog::Real) # true
+fake.is_a?(Blog::Mock) # true
 ```
 
 ### Requests
 
 Requests are defined by subclassing `#{service}::Request`.
 
-* `cistern` represents the associated `Foo` instance.
+* `cistern` represents the associated `Blog` instance.
 
 ```ruby
-class Foo::GetBar < Foo::Request
+class Blog::GetPost < Blog::Request
   def real(params)
     # make a real request
     "i'm real"
@@ -99,33 +99,33 @@ class Foo::GetBar < Foo::Request
   end
 end
 
-Foo.new.get_bar # "i'm real"
+Blog.new.get_post # "i'm real"
 ```
 
 The `#cistern_method` function allows you to specify the name of the generated method.
 
 ```ruby
-class Foo::GetBars < Foo::Request
-  cistern_method :get_all_the_bars
+class Blog::GetPosts < Blog::Request
+  cistern_method :get_all_the_posts
 
   def real(params)
-    "all the bars"
+    "all the posts"
   end
 end
 
-Foo.new.respond_to?(:get_bars) # false
-Foo.new.get_all_the_bars       # "all the bars"
+Blog.new.respond_to?(:get_posts) # false
+Blog.new.get_all_the_posts       # "all the posts"
 ```
 
 All declared requests can be listed via `Cistern::Client#requests`.
 
 ```ruby
-Foo.requests # => [Foo::GetBars, Foo::GetBar]
+Blog.requests # => [Blog::GetPosts, Blog::GetPost]
 ```
 
 ### Models
 
-* `cistern` represents the associated `Foo` instance.
+* `cistern` represents the associated `Blog` instance.
 * `collection` represents the related collection (if applicable)
 * `new_record?` checks if `identity` is present
 * `requires(*requirements)` throws `ArgumentError` if an attribute matching a requirement isn't set
@@ -137,7 +137,7 @@ Attributes are designed to be a flexible way of parsing service request response
 
 `identity` is special but not required.
 
-`attribute :flavor` makes `Foo::Bar.new.respond_to?(:flavor)`
+`attribute :flavor` makes `Blog::Post.new.respond_to?(:flavor)`
 
 * `:aliases` or `:alias` allows a attribute key to be different then a response key. `attribute :keypair_id, alias: "keypair"` with `merge_attributes("keypair" => 1)` sets `keypair_id` to `1`
 * `:type` automatically casts the attribute do the specified type. `attribute :private_ips, type: :array` with `merge_attributes("private_ips" => 2)` sets `private_ips` to `[2]`
@@ -146,7 +146,7 @@ Attributes are designed to be a flexible way of parsing service request response
 Example
 
 ```ruby
-class Foo::Bar < Foo::Model
+class Blog::Post < Blog::Model
   identity :id
 
   attribute :flavor
@@ -157,7 +157,7 @@ class Foo::Bar < Foo::Model
     params  = {
       "id" => self.identity
     }
-    self.cistern.destroy_bar(params).body["request"]
+    self.cistern.destroy_post(params).body["request"]
   end
 
   def save
@@ -165,17 +165,17 @@ class Foo::Bar < Foo::Model
 
     params = {
       "keypair" => self.keypair_id,
-      "bar"     => {
+      "post"     => {
         "flavor" => self.flavor,
       },
     }
 
     if new_record?
-      merge_attributes(cistern.create_bar(params).body["bar"])
+      merge_attributes(cistern.create_post(params).body["post"])
     else
       requires :identity
 
-      merge_attributes(cistern.update_bar(params).body["bar"])
+      merge_attributes(cistern.update_post(params).body["post"])
     end
   end
 end
@@ -184,23 +184,23 @@ end
 ### Collection
 
 * `model` tells Cistern which class is contained within the collection.
-* `cistern` is the associated `Foo` instance
+* `cistern` is the associated `Blog` instance
 * `attribute` specifications on collections are allowed. use `merge_attributes`
 * `load` consumes an Array of data and constructs matching `model` instances
 
 ```ruby
-class Foo::Bars < Foo::Collection
+class Blog::Posts < Blog::Collection
 
   attribute :count, type: :integer
 
-  model Foo::Bar
+  model Blog::Post
 
   def all(params = {})
-    response = cistern.get_bars(params)
+    response = cistern.get_posts(params)
 
     data = response.body
 
-    self.load(data["bars"])     # store bar records in collection
+    self.load(data["posts"])     # store post records in collection
     self.merge_attributes(data) # store any other attributes of the response on the collection
   end
 
@@ -210,11 +210,11 @@ class Foo::Bars < Foo::Collection
     }
     params.merge!("location" => options[:location]) if options.key?(:location)
 
-    cistern.requests.new(cistern.discover_bar(params).body["request"])
+    cistern.requests.new(cistern.discover_post(params).body["request"])
   end
 
   def get(id)
-    if data = cistern.get_bar("id" => id).body["bar"]
+    if data = cistern.get_post("id" => id).body["post"]
       new(data)
     else
       nil
@@ -228,16 +228,16 @@ end
 A uniform interface for mock data is mixed into the `Mock` class by default.
 
 ```ruby
-Foo.mock!
-client = Foo.new     # Foo::Mock
+Blog.mock!
+client = Blog.new     # Blog::Mock
 client.data                  # Cistern::Data::Hash
-client.data["bars"] += ["x"] # ["x"]
+client.data["posts"] += ["x"] # ["x"]
 ```
 
 Mock data is class-level by default
 
 ```ruby
-Foo::Mock.data["bars"] # ["x"]
+Blog::Mock.data["posts"] # ["x"]
 ```
 
 `reset!` dimisses the `data` object.
@@ -245,18 +245,18 @@ Foo::Mock.data["bars"] # ["x"]
 ```ruby
 client.data.object_id # 70199868585600
 client.reset!
-client.data["bars"]   # []
+client.data["posts"]   # []
 client.data.object_id # 70199868566840
 ```
 
 `clear` removes existing keys and values but keeps the same object.
 
 ```ruby
-client.data["bars"] += ["y"] # ["y"]
-client.data.object_id        # 70199868378300
+client.data["posts"] += ["y"] # ["y"]
+client.data.object_id         # 70199868378300
 client.clear
-client.data["bars"]          # []
-client.data.object_id        # 70199868378300
+client.data["posts"]          # []
+client.data.object_id         # 70199868378300
 ```
 
 * `store` and `[]=` write
@@ -265,7 +265,7 @@ client.data.object_id        # 70199868378300
 You can make the service bypass Cistern's mock data structures by simply creating a `self.data` function in your service `Mock` declaration.
 
 ```ruby
-class Foo
+class Blog
   include Cistern::Client
 
   class Mock
@@ -305,53 +305,53 @@ Dirty attributes are tracked and cleared when `merge_attributes` is called.
 
 
 ```ruby
-bar = Foo::Bar.new(id: 1, flavor: "x") # => <#Foo::Bar>
+post = Blog::Post.new(id: 1, flavor: "x") # => <#Blog::Post>
 
-bar.dirty?           # => false
-bar.changed          # => {}
-bar.dirty_attributes # => {}
+post.dirty?           # => false
+post.changed          # => {}
+post.dirty_attributes # => {}
 
-bar.flavor = "y"
+post.flavor = "y"
 
-bar.dirty?           # => true
-bar.changed          # => {flavor: ["x", "y"]}
-bar.dirty_attributes # => {flavor: "y"}
+post.dirty?           # => true
+post.changed          # => {flavor: ["x", "y"]}
+post.dirty_attributes # => {flavor: "y"}
 
-bar.save
-bar.dirty?           # => false
-bar.changed          # => {}
-bar.dirty_attributes # => {}
+post.save
+post.dirty?           # => false
+post.changed          # => {}
+post.dirty_attributes # => {}
 ```
 
 ### Custom Architecture
 
 When configuring your client, you can use `:collection`, `:request`, and `:model` options to define the name of module or class interface for the service component.
 
-For example: if you'd like `Request` is to be used for a model, then the `Request` component name can be remapped to `Prayer`
+For example: if you'd `Request` is to be used for a model, then the `Request` component name can be remapped to `Demand`
 
 For example:
 
 ```ruby
-class Foo
-  include Cistern::Client.with(interface: :modules, request: "Prayer")
+class Blog
+  include Cistern::Client.with(interface: :modules, request: "Demand")
 end
 ```
 
 allows a model named `Request` to exist
 
 ```ruby
-class Foo::Request
-  include Foo::Model
+class Blog::Request
+  include Blog::Model
 
   identity :jovi
 end
 ```
 
-while living on a `Prayer`
+while living on a `Demand`
 
 ```ruby
-class Foo::GetBar
-  include Foo::Prayer
+class Blog::GetPost
+  include Blog::Demand
 
   def real
     cistern.request.get("/wing")
