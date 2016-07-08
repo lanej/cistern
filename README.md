@@ -20,7 +20,7 @@ In cistern `~> 3.0`, the default will be for `Request`, `Collection` and `Model`
 If you want to be forwards-compatible today, you can configure your client by using `Cistern::Client.with`
 
 ```ruby
-class Foo::Client
+class Foo
   include Cistern::Client.with(interface: :module)
 end
 ```
@@ -40,12 +40,13 @@ end
 
 ### Service
 
-This represents the remote service that you are wrapping. If the service name is `foo` then a good name is `Foo::Client`.
+This represents the remote service that you are wrapping. If the service name is `foo` then a good name is `Foo`.
 
 Service initialization parameters are enumerated by `requires` and `recognizes`. Parameters defined using `recognizes` are optional.
 
 ```ruby
-class Foo::Client
+# lib/foo.rb
+class Foo
   include Cistern::Client
 
   requires :hmac_id, :hmac_secret
@@ -53,12 +54,12 @@ class Foo::Client
 end
 
 # Acceptable
-Foo::Client.new(hmac_id: "1", hmac_secret: "2")                            # Foo::Client::Real
-Foo::Client.new(hmac_id: "1", hmac_secret: "2", url: "http://example.org") # Foo::Client::Real
+Foo.new(hmac_id: "1", hmac_secret: "2")                            # Foo::Real
+Foo.new(hmac_id: "1", hmac_secret: "2", url: "http://example.org") # Foo::Real
 
 # ArgumentError
-Foo::Client.new(hmac_id: "1", url: "http://example.org")
-Foo::Client.new(hmac_id: "1")
+Foo.new(hmac_id: "1", url: "http://example.org")
+Foo.new(hmac_id: "1")
 ```
 
 Cistern will define for you two classes, `Mock` and `Real`.
@@ -68,25 +69,25 @@ Cistern will define for you two classes, `Mock` and `Real`.
 Cistern strongly encourages you to generate mock support for your service. Mocking can be enabled using `mock!`.
 
 ```ruby
-Foo::Client.mocking?          # falsey
-real = Foo::Client.new        # Foo::Client::Real
-Foo::Client.mock!
-Foo::Client.mocking?          # true
-fake = Foo::Client.new        # Foo::Client::Mock
-Foo::Client.unmock!
-Foo::Client.mocking?          # false
-real.is_a?(Foo::Client::Real) # true
-fake.is_a?(Foo::Client::Mock) # true
+Foo.mocking?          # falsey
+real = Foo.new        # Foo::Real
+Foo.mock!
+Foo.mocking?          # true
+fake = Foo.new        # Foo::Mock
+Foo.unmock!
+Foo.mocking?          # false
+real.is_a?(Foo::Real) # true
+fake.is_a?(Foo::Mock) # true
 ```
 
 ### Requests
 
 Requests are defined by subclassing `#{service}::Request`.
 
-* `cistern` represents the associated `Foo::Client` instance.
+* `cistern` represents the associated `Foo` instance.
 
 ```ruby
-class Foo::Client::GetBar < Foo::Client::Request
+class Foo::GetBar < Foo::Request
   def real(params)
     # make a real request
     "i'm real"
@@ -98,13 +99,13 @@ class Foo::Client::GetBar < Foo::Client::Request
   end
 end
 
-Foo::Client.new.get_bar # "i'm real"
+Foo.new.get_bar # "i'm real"
 ```
 
 The `#cistern_method` function allows you to specify the name of the generated method.
 
 ```ruby
-class Foo::Client::GetBars < Foo::Client::Request
+class Foo::GetBars < Foo::Request
   cistern_method :get_all_the_bars
 
   def real(params)
@@ -112,19 +113,19 @@ class Foo::Client::GetBars < Foo::Client::Request
   end
 end
 
-Foo::Client.new.respond_to?(:get_bars) # false
-Foo::Client.new.get_all_the_bars       # "all the bars"
+Foo.new.respond_to?(:get_bars) # false
+Foo.new.get_all_the_bars       # "all the bars"
 ```
 
 All declared requests can be listed via `Cistern::Client#requests`.
 
 ```ruby
-Foo::Client.requests # => [Foo::Client::GetBars, Foo::Client::GetBar]
+Foo.requests # => [Foo::GetBars, Foo::GetBar]
 ```
 
 ### Models
 
-* `cistern` represents the associated `Foo::Client` instance.
+* `cistern` represents the associated `Foo` instance.
 * `collection` represents the related collection (if applicable)
 * `new_record?` checks if `identity` is present
 * `requires(*requirements)` throws `ArgumentError` if an attribute matching a requirement isn't set
@@ -136,7 +137,7 @@ Attributes are designed to be a flexible way of parsing service request response
 
 `identity` is special but not required.
 
-`attribute :flavor` makes `Foo::Client::Bar.new.respond_to?(:flavor)`
+`attribute :flavor` makes `Foo::Bar.new.respond_to?(:flavor)`
 
 * `:aliases` or `:alias` allows a attribute key to be different then a response key. `attribute :keypair_id, alias: "keypair"` with `merge_attributes("keypair" => 1)` sets `keypair_id` to `1`
 * `:type` automatically casts the attribute do the specified type. `attribute :private_ips, type: :array` with `merge_attributes("private_ips" => 2)` sets `private_ips` to `[2]`
@@ -145,7 +146,7 @@ Attributes are designed to be a flexible way of parsing service request response
 Example
 
 ```ruby
-class Foo::Client::Bar < Foo::Client::Model
+class Foo::Bar < Foo::Model
   identity :id
 
   attribute :flavor
@@ -183,16 +184,16 @@ end
 ### Collection
 
 * `model` tells Cistern which class is contained within the collection.
-* `cistern` is the associated `Foo::Client` instance
+* `cistern` is the associated `Foo` instance
 * `attribute` specifications on collections are allowed. use `merge_attributes`
 * `load` consumes an Array of data and constructs matching `model` instances
 
 ```ruby
-class Foo::Client::Bars < Foo::Client::Collection
+class Foo::Bars < Foo::Collection
 
   attribute :count, type: :integer
 
-  model Foo::Client::Bar
+  model Foo::Bar
 
   def all(params = {})
     response = cistern.get_bars(params)
@@ -227,8 +228,8 @@ end
 A uniform interface for mock data is mixed into the `Mock` class by default.
 
 ```ruby
-Foo::Client.mock!
-client = Foo::Client.new     # Foo::Client::Mock
+Foo.mock!
+client = Foo.new     # Foo::Mock
 client.data                  # Cistern::Data::Hash
 client.data["bars"] += ["x"] # ["x"]
 ```
@@ -236,7 +237,7 @@ client.data["bars"] += ["x"] # ["x"]
 Mock data is class-level by default
 
 ```ruby
-Foo::Client::Mock.data["bars"] # ["x"]
+Foo::Mock.data["bars"] # ["x"]
 ```
 
 `reset!` dimisses the `data` object.
@@ -264,7 +265,7 @@ client.data.object_id        # 70199868378300
 You can make the service bypass Cistern's mock data structures by simply creating a `self.data` function in your service `Mock` declaration.
 
 ```ruby
-class Foo::Client
+class Foo
   include Cistern::Client
 
   class Mock
@@ -304,7 +305,7 @@ Dirty attributes are tracked and cleared when `merge_attributes` is called.
 
 
 ```ruby
-bar = Foo::Client::Bar.new(id: 1, flavor: "x") # => <#Foo::Client::Bar>
+bar = Foo::Bar.new(id: 1, flavor: "x") # => <#Foo::Bar>
 
 bar.dirty?           # => false
 bar.changed          # => {}
@@ -331,7 +332,7 @@ For example: if you'd like `Request` is to be used for a model, then the `Reques
 For example:
 
 ```ruby
-class Foo::Client
+class Foo
   include Cistern::Client.with(interface: :modules, request: "Prayer")
 end
 ```
@@ -340,7 +341,7 @@ allows a model named `Request` to exist
 
 ```ruby
 class Foo::Request
-  include Foo::Client::Model
+  include Foo::Model
 
   identity :jovi
 end
@@ -350,7 +351,7 @@ while living on a `Prayer`
 
 ```ruby
 class Foo::GetBar
-  include Foo::Client::Prayer
+  include Foo::Prayer
 
   def real
     cistern.request.get("/wing")
