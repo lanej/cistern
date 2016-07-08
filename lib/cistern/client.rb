@@ -270,6 +270,10 @@ module Cistern::Client
       end
     end
 
+    def add_resource_method(meta_method)
+      const_get(:Collections).module_eval meta_method, __FILE__, __LINE__
+    end
+
     def setup
       return true if @_setup
 

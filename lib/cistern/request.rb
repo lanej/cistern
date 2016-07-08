@@ -1,18 +1,18 @@
 module Cistern::Request
   include Cistern::HashSupport
 
-  def self.setup(cistern, klass, name)
+  def self.setup(client, klass, name)
     unless klass.name || klass.cistern_method
       fail ArgumentError, "can't turn anonymous class into a Cistern request"
     end
 
-    cistern::Mock.module_eval <<-EOS, __FILE__, __LINE__
+    client::Mock.module_eval <<-EOS, __FILE__, __LINE__
       def #{name}(*args)
         #{klass}.new(self)._mock(*args)
       end
     EOS
 
-    cistern::Real.module_eval <<-EOS, __FILE__, __LINE__
+    client::Real.module_eval <<-EOS, __FILE__, __LINE__
       def #{name}(*args)
         #{klass}.new(self)._real(*args)
       end

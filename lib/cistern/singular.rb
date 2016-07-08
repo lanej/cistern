@@ -1,8 +1,8 @@
 module Cistern::Singular
   include Cistern::HashSupport
 
-  def self.setup(cistern, klass, name)
-    cistern.const_get(:Collections).module_eval <<-EOS, __FILE__, __LINE__
+  def self.setup(client, klass, name)
+    client.add_resource_method <<-EOS
       def #{name}(attributes={})
         #{klass.name}.new(attributes.merge(cistern: self))
       end
