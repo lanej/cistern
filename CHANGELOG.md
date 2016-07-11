@@ -2,7 +2,23 @@
 
 ## [Unreleased](https://github.com/lanej/cistern/tree/HEAD)
 
-[Full Changelog](https://github.com/lanej/cistern/compare/v2.2.7...HEAD)
+[Full Changelog](https://github.com/lanej/cistern/compare/v2.3.0...HEAD)
+
+**Implemented enhancements:**
+
+- refactor\(singular\): a collection-less model [\#61](https://github.com/lanej/cistern/pull/61) ([lanej](https://github.com/lanej))
+
+**Merged pull requests:**
+
+- test\(ci\): use `appraisal` for gemfile splitting [\#63](https://github.com/lanej/cistern/pull/63) ([lanej](https://github.com/lanej))
+- modernize README [\#62](https://github.com/lanej/cistern/pull/62) ([lanej](https://github.com/lanej))
+- feature\(hash\): refactor implementation, mixin helpers [\#60](https://github.com/lanej/cistern/pull/60) ([lanej](https://github.com/lanej))
+- refactor\(attributes\): overhaul internals [\#59](https://github.com/lanej/cistern/pull/59) ([lanej](https://github.com/lanej))
+- fix\(attributes\): allow string types to be nil [\#58](https://github.com/lanej/cistern/pull/58) ([lanej](https://github.com/lanej))
+- Tweaks for Readme [\#56](https://github.com/lanej/cistern/pull/56) ([jaw6](https://github.com/jaw6))
+
+## [v2.3.0](https://github.com/lanej/cistern/tree/v2.3.0) (2016-05-17)
+[Full Changelog](https://github.com/lanej/cistern/compare/v2.2.7...v2.3.0)
 
 **Implemented enhancements:**
 
