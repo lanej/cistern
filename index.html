@@ -7,7 +7,8 @@
 
     <link rel="stylesheet" href="stylesheets/styles.css">
     <link rel="stylesheet" href="stylesheets/github-light.css">
-    <meta name="viewport" content="width=device-width">
+    <script src="javascripts/scale.fix.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
     <!--[if lt IE 9]>
     <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]-->
@@ -15,21 +16,22 @@
   <body>
     <div class="wrapper">
       <header>
-        <h1>Cistern</h1>
-        <p>API client framework extracted from Fog</p>
-
-        <p class="view"><a href="https://github.com/lanej/cistern">View the Project on GitHub <small>lanej/cistern</small></a></p>
-
+        <h1 class="header">Cistern</h1>
+        <p class="header">API client framework extracted from Fog</p>
 
         <ul>
-          <li><a href="https://github.com/lanej/cistern/zipball/master">Download <strong>ZIP File</strong></a></li>
-          <li><a href="https://github.com/lanej/cistern/tarball/master">Download <strong>TAR Ball</strong></a></li>
-          <li><a href="https://github.com/lanej/cistern">View On <strong>GitHub</strong></a></li>
+          <li class="download"><a class="buttons" href="https://github.com/lanej/cistern/zipball/master">Download ZIP</a></li>
+          <li class="download"><a class="buttons" href="https://github.com/lanej/cistern/tarball/master">Download TAR</a></li>
+          <li><a class="buttons github" href="https://github.com/lanej/cistern">View On GitHub</a></li>
         </ul>
+
+        <p class="header">This project is maintained by <a class="header name" href="https://github.com/lanej">lanej</a></p>
+
+
       </header>
       <section>
         <h1>
-<a id="cistern" class="anchor" href="#cistern" aria-hidden="true"><span class="octicon octicon-link"></span></a>Cistern</h1>
+<a id="cistern" class="anchor" href="#cistern" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Cistern</h1>
 
 <p><a href="http://travis-ci.org/lanej/cistern"><img src="https://secure.travis-ci.org/lanej/cistern.png" alt="Build Status"></a>
 <a href="https://gemnasium.com/lanej/cistern.png"><img src="https://gemnasium.com/lanej/cistern.png" alt="Dependencies"></a>
@@ -39,61 +41,42 @@
 <p>Cistern helps you consistently build your API clients and faciliates building mock support.</p>
 
 <h2>
-<a id="usage" class="anchor" href="#usage" aria-hidden="true"><span class="octicon octicon-link"></span></a>Usage</h2>
+<a id="usage" class="anchor" href="#usage" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Usage</h2>
 
 <h3>
-<a id="custom-architecture" class="anchor" href="#custom-architecture" aria-hidden="true"><span class="octicon octicon-link"></span></a>Custom Architecture</h3>
+<a id="notice-cistern-30" class="anchor" href="#notice-cistern-30" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Notice: Cistern 3.0</h3>
 
-<p>By default a service's <code>Request</code>, <code>Collection</code>, and <code>Model</code> are all classes. In Cistern ~&gt; 3.0, the default will be modules.</p>
+<p>Cistern 3.0 will change the way Cistern interacts with your <code>Request</code>, <code>Collection</code> and <code>Model</code> classes.</p>
 
-<p>You can modify your client's architecture to be forwards compatible by using <code>Cistern::Client.with</code></p>
+<p>Prior to 3.0, your <code>Request</code>, <code>Collection</code> and <code>Model</code> classes would have inherited from <code>&lt;service&gt;::Client::Request</code>, <code>&lt;service&gt;::Client::Collection</code> and <code>&lt;service&gt;::Client::Model</code> classes, respectively.</p>
 
-<div class="highlight highlight-source-ruby"><pre><span class="pl-k">class</span> <span class="pl-en">Foo::Client</span>
+<p>In cistern <code>~&gt; 3.0</code>, the default will be for <code>Request</code>, <code>Collection</code> and <code>Model</code> classes to instead include their respective <code>&lt;service&gt;::Client</code> modules.</p>
+
+<p>If you want to be forwards-compatible today, you can configure your client by using <code>Cistern::Client.with</code></p>
+
+<div class="highlight highlight-source-ruby"><pre><span class="pl-k">class</span> <span class="pl-en">Blog</span>
   <span class="pl-k">include</span> <span class="pl-c1">Cistern</span>::<span class="pl-c1">Client</span>.with(<span class="pl-c1">interface:</span> <span class="pl-c1">:module</span>)
 <span class="pl-k">end</span></pre></div>
 
 <p>Now request classes would look like:</p>
 
-<div class="highlight highlight-source-ruby"><pre><span class="pl-k">class</span> <span class="pl-en">Foo::GetBar</span>
-  <span class="pl-k">include</span> <span class="pl-c1">Foo</span>::<span class="pl-c1">Request</span>
+<div class="highlight highlight-source-ruby"><pre><span class="pl-k">class</span> <span class="pl-en">Blog::GetPost</span>
+  <span class="pl-k">include</span> <span class="pl-c1">Blog</span>::<span class="pl-c1">Request</span>
 
   <span class="pl-k">def</span> <span class="pl-en">real</span>
-    <span class="pl-s"><span class="pl-pds">"</span>bar<span class="pl-pds">"</span></span>
-  <span class="pl-k">end</span>
-<span class="pl-k">end</span></pre></div>
-
-<p>Other options include <code>:collection</code>, <code>:request</code>, and <code>:model</code>.  This options define the name of module or class interface for the service component.</p>
-
-<p>If <code>Request</code> is to reserved for a model, then the <code>Request</code> component name can be remapped to <code>Prayer</code></p>
-
-<p>For example:</p>
-
-<div class="highlight highlight-source-ruby"><pre><span class="pl-k">class</span> <span class="pl-en">Foo::Client</span>
-  <span class="pl-k">include</span> <span class="pl-c1">Cistern</span>::<span class="pl-c1">Client</span>.with(<span class="pl-c1">request:</span> <span class="pl-s"><span class="pl-pds">"</span>Prayer<span class="pl-pds">"</span></span>)
-<span class="pl-k">end</span></pre></div>
-
-<p>allows a model named <code>Request</code> to exist</p>
-
-<div class="highlight highlight-source-ruby"><pre><span class="pl-k">class</span> <span class="pl-en">Foo::Request<span class="pl-e"> &lt; Foo::Model</span></span>
-  identity <span class="pl-c1">:jovi</span>
-<span class="pl-k">end</span></pre></div>
-
-<p>while living on a <code>Prayer</code></p>
-
-<div class="highlight highlight-source-ruby"><pre><span class="pl-k">class</span> <span class="pl-en">Foo::GetBar<span class="pl-e"> &lt; Foo::Prayer</span></span>
-  <span class="pl-k">def</span> <span class="pl-en">real</span>
-    service.request.get(<span class="pl-s"><span class="pl-pds">"</span>/wing<span class="pl-pds">"</span></span>)
+    <span class="pl-s"><span class="pl-pds">"</span>post<span class="pl-pds">"</span></span>
   <span class="pl-k">end</span>
 <span class="pl-k">end</span></pre></div>
 
 <h3>
-<a id="service" class="anchor" href="#service" aria-hidden="true"><span class="octicon octicon-link"></span></a>Service</h3>
+<a id="service" class="anchor" href="#service" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Service</h3>
 
-<p>This represents the remote service that you are wrapping. If the service name is <code>foo</code> then a good name is <code>Foo::Client</code>.</p>
+<p>This represents the remote service that you are wrapping. If the service name is <code>blog</code> then a good name is <code>Blog</code>.</p>
 
 <p>Service initialization parameters are enumerated by <code>requires</code> and <code>recognizes</code>. Parameters defined using <code>recognizes</code> are optional.</p>
 
-<div class="highlight highlight-source-ruby"><pre><span class="pl-k">class</span> <span class="pl-en">Foo::Client</span>
+<div class="highlight highlight-source-ruby"><pre><span class="pl-c"># lib/blog.rb</span>
+<span class="pl-k">class</span> <span class="pl-en">Blog</span>
   <span class="pl-k">include</span> <span class="pl-c1">Cistern</span>::<span class="pl-c1">Client</span>
 
   requires <span class="pl-c1">:hmac_id</span>, <span class="pl-c1">:hmac_secret</span>
@@ -101,41 +84,95 @@
 <span class="pl-k">end</span>
 
 <span class="pl-c"># Acceptable</span>
-<span class="pl-c1">Foo</span>::<span class="pl-c1">Client</span>.<span class="pl-k">new</span>(<span class="pl-c1">hmac_id:</span> <span class="pl-s"><span class="pl-pds">"</span>1<span class="pl-pds">"</span></span>, <span class="pl-c1">hmac_secret:</span> <span class="pl-s"><span class="pl-pds">"</span>2<span class="pl-pds">"</span></span>)                            <span class="pl-c"># Foo::Client::Real</span>
-<span class="pl-c1">Foo</span>::<span class="pl-c1">Client</span>.<span class="pl-k">new</span>(<span class="pl-c1">hmac_id:</span> <span class="pl-s"><span class="pl-pds">"</span>1<span class="pl-pds">"</span></span>, <span class="pl-c1">hmac_secret:</span> <span class="pl-s"><span class="pl-pds">"</span>2<span class="pl-pds">"</span></span>, <span class="pl-c1">url:</span> <span class="pl-s"><span class="pl-pds">"</span>http://example.org<span class="pl-pds">"</span></span>) <span class="pl-c"># Foo::Client::Real</span>
+<span class="pl-c1">Blog</span>.<span class="pl-k">new</span>(<span class="pl-c1">hmac_id:</span> <span class="pl-s"><span class="pl-pds">"</span>1<span class="pl-pds">"</span></span>, <span class="pl-c1">hmac_secret:</span> <span class="pl-s"><span class="pl-pds">"</span>2<span class="pl-pds">"</span></span>)                            <span class="pl-c"># Blog::Real</span>
+<span class="pl-c1">Blog</span>.<span class="pl-k">new</span>(<span class="pl-c1">hmac_id:</span> <span class="pl-s"><span class="pl-pds">"</span>1<span class="pl-pds">"</span></span>, <span class="pl-c1">hmac_secret:</span> <span class="pl-s"><span class="pl-pds">"</span>2<span class="pl-pds">"</span></span>, <span class="pl-c1">url:</span> <span class="pl-s"><span class="pl-pds">"</span>http://example.org<span class="pl-pds">"</span></span>) <span class="pl-c"># Blog::Real</span>
 
 <span class="pl-c"># ArgumentError</span>
-<span class="pl-c1">Foo</span>::<span class="pl-c1">Client</span>.<span class="pl-k">new</span>(<span class="pl-c1">hmac_id:</span> <span class="pl-s"><span class="pl-pds">"</span>1<span class="pl-pds">"</span></span>, <span class="pl-c1">url:</span> <span class="pl-s"><span class="pl-pds">"</span>http://example.org<span class="pl-pds">"</span></span>)
-<span class="pl-c1">Foo</span>::<span class="pl-c1">Client</span>.<span class="pl-k">new</span>(<span class="pl-c1">hmac_id:</span> <span class="pl-s"><span class="pl-pds">"</span>1<span class="pl-pds">"</span></span>)</pre></div>
+<span class="pl-c1">Blog</span>.<span class="pl-k">new</span>(<span class="pl-c1">hmac_id:</span> <span class="pl-s"><span class="pl-pds">"</span>1<span class="pl-pds">"</span></span>, <span class="pl-c1">url:</span> <span class="pl-s"><span class="pl-pds">"</span>http://example.org<span class="pl-pds">"</span></span>)
+<span class="pl-c1">Blog</span>.<span class="pl-k">new</span>(<span class="pl-c1">hmac_id:</span> <span class="pl-s"><span class="pl-pds">"</span>1<span class="pl-pds">"</span></span>)</pre></div>
 
-<p>Cistern will define for you two classes, <code>Mock</code> and <code>Real</code>.</p>
+<p>Cistern will define for you two classes, <code>Mock</code> and <code>Real</code>. Create the corresponding files and initialzers for your
+new service.</p>
+
+<div class="highlight highlight-source-ruby"><pre><span class="pl-c"># lib/blog/real.rb</span>
+<span class="pl-k">class</span> <span class="pl-en">Blog::Real</span>
+  <span class="pl-k">attr_reader</span> <span class="pl-c1">:url</span>, <span class="pl-c1">:connection</span>
+
+  <span class="pl-k">def</span> <span class="pl-en">initialize</span>(<span class="pl-smi">attributes</span>)
+    <span class="pl-smi">@hmac_id</span>, <span class="pl-smi">@hmac_secret</span> <span class="pl-k">=</span> attributes.values_at(<span class="pl-c1">:hmac_id</span>, <span class="pl-c1">:hmac_secret</span>)
+    <span class="pl-smi">@url</span> <span class="pl-k">=</span> attributes[<span class="pl-c1">:url</span>] <span class="pl-k">||</span> <span class="pl-s"><span class="pl-pds">'</span>http://blog.example.org<span class="pl-pds">'</span></span>
+    <span class="pl-smi">@connection</span> <span class="pl-k">=</span> <span class="pl-c1">Faraday</span>.<span class="pl-k">new</span>(url)
+  <span class="pl-k">end</span>
+<span class="pl-k">end</span></pre></div>
+
+<div class="highlight highlight-source-ruby"><pre><span class="pl-c"># lib/blog/mock.rb</span>
+<span class="pl-k">class</span> <span class="pl-en">Blog::Mock</span>
+  <span class="pl-k">attr_reader</span> <span class="pl-c1">:url</span>
+
+  <span class="pl-k">def</span> <span class="pl-en">initialize</span>(<span class="pl-smi">attributes</span>)
+    <span class="pl-smi">@url</span> <span class="pl-k">=</span> attributes[<span class="pl-c1">:url</span>]
+  <span class="pl-k">end</span>
+<span class="pl-k">end</span></pre></div>
 
 <h3>
-<a id="mocking" class="anchor" href="#mocking" aria-hidden="true"><span class="octicon octicon-link"></span></a>Mocking</h3>
+<a id="mocking" class="anchor" href="#mocking" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Mocking</h3>
 
 <p>Cistern strongly encourages you to generate mock support for your service. Mocking can be enabled using <code>mock!</code>.</p>
 
-<div class="highlight highlight-source-ruby"><pre><span class="pl-c1">Foo</span>::<span class="pl-c1">Client</span>.mocking?          <span class="pl-c"># falsey</span>
-real <span class="pl-k">=</span> <span class="pl-c1">Foo</span>::<span class="pl-c1">Client</span>.<span class="pl-k">new</span>        <span class="pl-c"># Foo::Client::Real</span>
-<span class="pl-c1">Foo</span>::<span class="pl-c1">Client</span>.mock!
-<span class="pl-c1">Foo</span>::<span class="pl-c1">Client</span>.mocking?          <span class="pl-c"># true</span>
-fake <span class="pl-k">=</span> <span class="pl-c1">Foo</span>::<span class="pl-c1">Client</span>.<span class="pl-k">new</span>        <span class="pl-c"># Foo::Client::Mock</span>
-<span class="pl-c1">Foo</span>::<span class="pl-c1">Client</span>.unmock!
-<span class="pl-c1">Foo</span>::<span class="pl-c1">Client</span>.mocking?          <span class="pl-c"># false</span>
-real.is_a?(<span class="pl-c1">Foo</span>::<span class="pl-c1">Client</span>::<span class="pl-c1">Real</span>) <span class="pl-c"># true</span>
-fake.is_a?(<span class="pl-c1">Foo</span>::<span class="pl-c1">Client</span>::<span class="pl-c1">Mock</span>) <span class="pl-c"># true</span></pre></div>
+<div class="highlight highlight-source-ruby"><pre><span class="pl-c1">Blog</span>.mocking?          <span class="pl-c"># falsey</span>
+real <span class="pl-k">=</span> <span class="pl-c1">Blog</span>.<span class="pl-k">new</span>        <span class="pl-c"># Blog::Real</span>
+<span class="pl-c1">Blog</span>.mock!
+<span class="pl-c1">Blog</span>.mocking?          <span class="pl-c"># true</span>
+fake <span class="pl-k">=</span> <span class="pl-c1">Blog</span>.<span class="pl-k">new</span>        <span class="pl-c"># Blog::Mock</span>
+<span class="pl-c1">Blog</span>.unmock!
+<span class="pl-c1">Blog</span>.mocking?          <span class="pl-c"># false</span>
+real.is_a?(<span class="pl-c1">Blog</span>::<span class="pl-c1">Real</span>) <span class="pl-c"># true</span>
+fake.is_a?(<span class="pl-c1">Blog</span>::<span class="pl-c1">Mock</span>) <span class="pl-c"># true</span></pre></div>
 
 <h3>
-<a id="requests" class="anchor" href="#requests" aria-hidden="true"><span class="octicon octicon-link"></span></a>Requests</h3>
+<a id="working-with-data" class="anchor" href="#working-with-data" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Working with data</h3>
+
+<p><code>Cistern::Hash</code> contains many useful functions for working with data normalization and transformation.</p>
+
+<p><strong>#stringify_keys</strong></p>
+
+<div class="highlight highlight-source-ruby"><pre><span class="pl-c"># anywhere</span>
+<span class="pl-c1">Cistern</span>::<span class="pl-c1">Hash</span>.stringify_keys({<span class="pl-c1">a:</span> <span class="pl-c1">1</span>, <span class="pl-c1">b:</span> <span class="pl-c1">2</span>}) <span class="pl-c">#=&gt; {'a' =&gt; 1, 'b' =&gt; 2}</span>
+<span class="pl-c"># within a Resource</span>
+hash_stringify_keys({<span class="pl-c1">a:</span> <span class="pl-c1">1</span>, <span class="pl-c1">b:</span> <span class="pl-c1">2</span>}) <span class="pl-c">#=&gt; {'a' =&gt; 1, 'b' =&gt; 2}</span></pre></div>
+
+<p><strong>#slice</strong></p>
+
+<div class="highlight highlight-source-ruby"><pre><span class="pl-c"># anywhere</span>
+<span class="pl-c1">Cistern</span>::<span class="pl-c1">Hash</span>.slice({<span class="pl-c1">a:</span> <span class="pl-c1">1</span>, <span class="pl-c1">b:</span> <span class="pl-c1">2</span>, <span class="pl-c1">c:</span> <span class="pl-c1">3</span>}, <span class="pl-c1">:a</span>, <span class="pl-c1">:c</span>) <span class="pl-c">#=&gt; {a: 1, c: 3}</span>
+<span class="pl-c"># within a Resource</span>
+hash_slice({<span class="pl-c1">a:</span> <span class="pl-c1">1</span>, <span class="pl-c1">b:</span> <span class="pl-c1">2</span>, <span class="pl-c1">c:</span> <span class="pl-c1">3</span>}, <span class="pl-c1">:a</span>, <span class="pl-c1">:c</span>) <span class="pl-c">#=&gt; {a: 1, c: 3}</span></pre></div>
+
+<p><strong>#except</strong></p>
+
+<div class="highlight highlight-source-ruby"><pre><span class="pl-c"># anywhere</span>
+<span class="pl-c1">Cistern</span>::<span class="pl-c1">Hash</span>.except({<span class="pl-c1">a:</span> <span class="pl-c1">1</span>, <span class="pl-c1">b:</span> <span class="pl-c1">2</span>}, <span class="pl-c1">:a</span>) <span class="pl-c">#=&gt; {b: 2}</span>
+<span class="pl-c"># within a Resource</span>
+hash_except({<span class="pl-c1">a:</span> <span class="pl-c1">1</span>, <span class="pl-c1">b:</span> <span class="pl-c1">2</span>}, <span class="pl-c1">:a</span>) <span class="pl-c">#=&gt; {b: 2}</span></pre></div>
+
+<p><strong>#except!</strong></p>
+
+<div class="highlight highlight-source-ruby"><pre><span class="pl-c"># same as #except but modify specified Hash in-place</span>
+<span class="pl-c1">Cistern</span>::<span class="pl-c1">Hash</span>.except!({<span class="pl-c1">:a</span> =&gt; <span class="pl-c1">1</span>, <span class="pl-c1">:b</span> =&gt; <span class="pl-c1">2</span>}, <span class="pl-c1">:a</span>) <span class="pl-c">#=&gt; {:b =&gt; 2}</span>
+<span class="pl-c"># within a Resource</span>
+hash_except!({<span class="pl-c1">:a</span> =&gt; <span class="pl-c1">1</span>, <span class="pl-c1">:b</span> =&gt; <span class="pl-c1">2</span>}, <span class="pl-c1">:a</span>) <span class="pl-c">#=&gt; {:b =&gt; 2}</span></pre></div>
+
+<h3>
+<a id="requests" class="anchor" href="#requests" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Requests</h3>
 
 <p>Requests are defined by subclassing <code>#{service}::Request</code>.</p>
 
 <ul>
 <li>
-<code>service</code> represents the associated <code>Foo::Client</code> instance.</li>
+<code>cistern</code> represents the associated <code>Blog</code> instance.</li>
 </ul>
 
-<div class="highlight highlight-source-ruby"><pre><span class="pl-k">class</span> <span class="pl-en">Foo::Client::GetBar<span class="pl-e"> &lt; Foo::Client::Request</span></span>
+<div class="highlight highlight-source-ruby"><pre><span class="pl-k">class</span> <span class="pl-en">Blog::GetPost<span class="pl-e"> &lt; Blog::Request</span></span>
   <span class="pl-k">def</span> <span class="pl-en">real</span>(<span class="pl-smi">params</span>)
     <span class="pl-c"># make a real request</span>
     <span class="pl-s"><span class="pl-pds">"</span>i'm real<span class="pl-pds">"</span></span>
@@ -147,106 +184,213 @@ fake.is_a?(<span class="pl-c1">Foo</span>::<span class="pl-c1">Client</span>::<s
   <span class="pl-k">end</span>
 <span class="pl-k">end</span>
 
-<span class="pl-c1">Foo</span>::<span class="pl-c1">Client</span>.<span class="pl-k">new</span>.get_bar <span class="pl-c"># "i'm real"</span></pre></div>
+<span class="pl-c1">Blog</span>.<span class="pl-k">new</span>.get_post <span class="pl-c"># "i'm real"</span></pre></div>
 
-<p>The <code>#service_method</code> function allows you to specify the name of the generated method.</p>
+<p>The <code>#cistern_method</code> function allows you to specify the name of the generated method.</p>
 
-<div class="highlight highlight-source-ruby"><pre><span class="pl-k">class</span> <span class="pl-en">Foo::Client::GetBars<span class="pl-e"> &lt; Foo::Client::Request</span></span>
-  service_method <span class="pl-c1">:get_all_the_bars</span>
+<div class="highlight highlight-source-ruby"><pre><span class="pl-k">class</span> <span class="pl-en">Blog::GetPosts<span class="pl-e"> &lt; Blog::Request</span></span>
+  cistern_method <span class="pl-c1">:get_all_the_posts</span>
 
   <span class="pl-k">def</span> <span class="pl-en">real</span>(<span class="pl-smi">params</span>)
-    <span class="pl-s"><span class="pl-pds">"</span>all the bars<span class="pl-pds">"</span></span>
+    <span class="pl-s"><span class="pl-pds">"</span>all the posts<span class="pl-pds">"</span></span>
   <span class="pl-k">end</span>
 <span class="pl-k">end</span>
 
-<span class="pl-c1">Foo</span>::<span class="pl-c1">Client</span>.<span class="pl-k">new</span>.respond_to?(<span class="pl-c1">:get_bars</span>) <span class="pl-c"># false</span>
-<span class="pl-c1">Foo</span>::<span class="pl-c1">Client</span>.<span class="pl-k">new</span>.get_all_the_bars       <span class="pl-c"># "all the bars"</span></pre></div>
+<span class="pl-c1">Blog</span>.<span class="pl-k">new</span>.respond_to?(<span class="pl-c1">:get_posts</span>) <span class="pl-c"># false</span>
+<span class="pl-c1">Blog</span>.<span class="pl-k">new</span>.get_all_the_posts       <span class="pl-c"># "all the posts"</span></pre></div>
 
 <p>All declared requests can be listed via <code>Cistern::Client#requests</code>.</p>
 
-<div class="highlight highlight-source-ruby"><pre><span class="pl-c1">Foo</span>::<span class="pl-c1">Client</span>.requests <span class="pl-c"># =&gt; [Foo::Client::GetBars, Foo::Client::GetBar]</span></pre></div>
+<div class="highlight highlight-source-ruby"><pre><span class="pl-c1">Blog</span>.requests <span class="pl-c"># =&gt; [Blog::GetPosts, Blog::GetPost]</span></pre></div>
 
 <h3>
-<a id="models" class="anchor" href="#models" aria-hidden="true"><span class="octicon octicon-link"></span></a>Models</h3>
+<a id="models" class="anchor" href="#models" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Models</h3>
 
 <ul>
 <li>
-<code>service</code> represents the associated <code>Foo::Client</code> instance.</li>
+<code>cistern</code> represents the associated <code>Blog::Real</code> or <code>Blog::Mock</code> instance. </li>
 <li>
-<code>collection</code> represents the related collection (if applicable)</li>
+<code>collection</code> represents the related collection.</li>
 <li>
 <code>new_record?</code> checks if <code>identity</code> is present</li>
 <li>
 <code>requires(*requirements)</code> throws <code>ArgumentError</code> if an attribute matching a requirement isn't set</li>
 <li>
+<code>requires_one(*requirements)</code> throws <code>ArgumentError</code> if no attribute matching requirement is set</li>
+<li>
 <code>merge_attributes(attributes)</code> sets attributes for the current model instance</li>
+<li>
+<code>dirty_attributes</code> represents attributes changed since the last <code>merge_attributes</code>.  This is useful for using <code>update</code>
+</li>
 </ul>
 
 <h4>
-<a id="attributes" class="anchor" href="#attributes" aria-hidden="true"><span class="octicon octicon-link"></span></a>Attributes</h4>
+<a id="attributes" class="anchor" href="#attributes" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Attributes</h4>
 
-<p>Attributes are designed to be a flexible way of parsing service request responses.</p>
-
-<p><code>identity</code> is special but not required.</p>
-
-<p><code>attribute :flavor</code> makes <code>Foo::Client::Bar.new.respond_to?(:flavor)</code></p>
+<p>Cistern attributes are designed to make your model flexible and developer friendly.</p>
 
 <ul>
 <li>
-<code>:aliases</code> or <code>:alias</code> allows a attribute key to be different then a response key. <code>attribute :keypair_id, alias: "keypair"</code> with <code>merge_attributes("keypair" =&gt; 1)</code> sets <code>keypair_id</code> to <code>1</code>
+<p><code>attribute :post_id</code> adds an accessor to the model.</p>
+
+<div class="highlight highlight-source-ruby"><pre>attribute <span class="pl-c1">:post_id</span>
+
+model.post_id <span class="pl-c">#=&gt; nil</span>
+model.post_id <span class="pl-k">=</span> <span class="pl-c1">1</span> <span class="pl-c">#=&gt; 1</span>
+model.post_id <span class="pl-c">#=&gt; 1</span>
+model.attributes <span class="pl-c">#=&gt; {'post_id' =&gt; 1 }</span>
+model.dirty_attributes <span class="pl-c">#=&gt; {'post_id' =&gt; 1 }</span></pre></div>
 </li>
 <li>
-<code>:type</code> automatically casts the attribute do the specified type. <code>attribute :private_ips, type: :array</code> with <code>merge_attributes("private_ips" =&gt; 2)</code> sets <code>private_ips</code> to <code>[2]</code>
+<p><code>identity</code> represents the name of the model's unique identifier.  As this is not always available, it is not required.</p>
+
+<div class="highlight highlight-source-ruby"><pre>identity <span class="pl-c1">:name</span></pre></div>
+
+<p>creates an attribute called <code>name</code> that is aliased to identity.</p>
+
+<div class="highlight highlight-source-ruby"><pre>model.name <span class="pl-k">=</span> <span class="pl-s"><span class="pl-pds">'</span>michelle<span class="pl-pds">'</span></span>
+
+model.identity   <span class="pl-c">#=&gt; 'michelle'</span>
+model.name       <span class="pl-c">#=&gt; 'michelle'</span>
+model.attributes <span class="pl-c">#=&gt; {  'name' =&gt; 'michelle' }</span></pre></div>
 </li>
 <li>
-<code>:squash</code> traverses nested hashes for a key. <code>attribute :keypair_id, aliases: "keypair", squash: "id"</code> with <code>merge_attributes("keypair" =&gt; {"id" =&gt; 3})</code> sets <code>keypair_id</code> to <code>3</code>
+<p><code>:aliases</code> or <code>:alias</code> allows a attribute key to be different then a response key. </p>
+
+<div class="highlight highlight-source-ruby"><pre>attribute <span class="pl-c1">:post_id</span>, <span class="pl-c1">alias:</span> <span class="pl-s"><span class="pl-pds">"</span>post<span class="pl-pds">"</span></span></pre></div>
+
+<p>allows</p>
+
+<div class="highlight highlight-source-ruby"><pre>model.merge_attributes(<span class="pl-s"><span class="pl-pds">"</span>post<span class="pl-pds">"</span></span> =&gt; <span class="pl-c1">1</span>)
+model.post_id <span class="pl-c">#=&gt; 1</span></pre></div>
+</li>
+<li>
+<p><code>:type</code> automatically casts the attribute do the specified type. </p>
+
+<div class="highlight highlight-source-ruby"><pre>attribute <span class="pl-c1">:private_ips</span>, <span class="pl-c1">type:</span> <span class="pl-c1">:array</span>
+
+model.merge_attributes(<span class="pl-s"><span class="pl-pds">"</span>private_ips<span class="pl-pds">"</span></span> =&gt; <span class="pl-c1">2</span>)
+model.private_ips <span class="pl-c">#=&gt; [2]</span></pre></div>
+</li>
+<li>
+<p><code>:squash</code> traverses nested hashes for a key. </p>
+
+<div class="highlight highlight-source-ruby"><pre>attribute <span class="pl-c1">:post_id</span>, <span class="pl-c1">aliases:</span> <span class="pl-s"><span class="pl-pds">"</span>post<span class="pl-pds">"</span></span>, <span class="pl-c1">squash:</span> <span class="pl-s"><span class="pl-pds">"</span>id<span class="pl-pds">"</span></span>
+
+model.merge_attributes(<span class="pl-s"><span class="pl-pds">"</span>post<span class="pl-pds">"</span></span> =&gt; {<span class="pl-s"><span class="pl-pds">"</span>id<span class="pl-pds">"</span></span> =&gt; <span class="pl-c1">3</span>})
+model.post_id <span class="pl-c">#=&gt; 3</span></pre></div>
 </li>
 </ul>
 
-<p>Example</p>
-
-<div class="highlight highlight-source-ruby"><pre><span class="pl-k">class</span> <span class="pl-en">Foo::Client::Bar<span class="pl-e"> &lt; Foo::Client::Model</span></span>
-  identity <span class="pl-c1">:id</span>
-
-  attribute <span class="pl-c1">:flavor</span>
-  attribute <span class="pl-c1">:keypair_id</span>, <span class="pl-c1">aliases:</span> <span class="pl-s"><span class="pl-pds">"</span>keypair<span class="pl-pds">"</span></span>,  <span class="pl-c1">squash:</span> <span class="pl-s"><span class="pl-pds">"</span>id<span class="pl-pds">"</span></span>
-  attribute <span class="pl-c1">:private_ips</span>, <span class="pl-c1">type:</span> <span class="pl-c1">:array</span>
-
-  <span class="pl-k">def</span> <span class="pl-en">destroy</span>
-    params  <span class="pl-k">=</span> {
-      <span class="pl-s"><span class="pl-pds">"</span>id<span class="pl-pds">"</span></span> =&gt; <span class="pl-v">self</span>.identity
-    }
-    <span class="pl-v">self</span>.service.destroy_bar(params).body[<span class="pl-s"><span class="pl-pds">"</span>request<span class="pl-pds">"</span></span>]
-  <span class="pl-k">end</span>
-
-  <span class="pl-k">def</span> <span class="pl-en">save</span>
-    requires <span class="pl-c1">:keypair_id</span>
-
-    params <span class="pl-k">=</span> {
-      <span class="pl-s"><span class="pl-pds">"</span>keypair<span class="pl-pds">"</span></span> =&gt; <span class="pl-v">self</span>.keypair_id,
-      <span class="pl-s"><span class="pl-pds">"</span>bar<span class="pl-pds">"</span></span>     =&gt; {
-        <span class="pl-s"><span class="pl-pds">"</span>flavor<span class="pl-pds">"</span></span> =&gt; <span class="pl-v">self</span>.flavor,
-      },
-    }
-
-    <span class="pl-k">if</span> new_record?
-      merge_attributes(service.create_bar(params).body[<span class="pl-s"><span class="pl-pds">"</span>bar<span class="pl-pds">"</span></span>])
-    <span class="pl-k">else</span>
-      requires <span class="pl-c1">:identity</span>
-
-      merge_attributes(service.update_bar(params).body[<span class="pl-s"><span class="pl-pds">"</span>bar<span class="pl-pds">"</span></span>])
-    <span class="pl-k">end</span>
-  <span class="pl-k">end</span>
-<span class="pl-k">end</span></pre></div>
-
-<h3>
-<a id="collection" class="anchor" href="#collection" aria-hidden="true"><span class="octicon octicon-link"></span></a>Collection</h3>
+<h4>
+<a id="persistence" class="anchor" href="#persistence" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Persistence</h4>
 
 <ul>
 <li>
-<code>model</code> tells Cistern which class is contained within the collection.</li>
+<code>save</code> is used to persist the model into the remote service.  <code>save</code> is responsible for determining if the operation is an update to an existing resource or a new resource.</li>
 <li>
-<code>service</code> is the associated <code>Foo::Client</code> instance</li>
+<code>reload</code> is used to grab the latest data and merge it into the model.  <code>reload</code> uses <code>collection.get(identity)</code> by default.</li>
+<li>
+<code>update(attrs)</code> is a <code>merge_attributes</code> and a <code>save</code>.  When calling <code>update</code>, <code>dirty_attributes</code> can be used to persist only what has changed locally.</li>
+</ul>
+
+<p>For example:</p>
+
+<div class="highlight highlight-source-ruby"><pre><span class="pl-k">class</span> <span class="pl-en">Blog::Post<span class="pl-e"> &lt; Blog::Model</span></span>
+  identity <span class="pl-c1">:id</span>, <span class="pl-c1">type:</span> <span class="pl-c1">:integer</span>
+
+  attribute <span class="pl-c1">:body</span>
+  attribute <span class="pl-c1">:author_id</span>, <span class="pl-c1">aliases:</span> <span class="pl-s"><span class="pl-pds">"</span>author<span class="pl-pds">"</span></span>,  <span class="pl-c1">squash:</span> <span class="pl-s"><span class="pl-pds">"</span>id<span class="pl-pds">"</span></span>
+  attribute <span class="pl-c1">:deleted_at</span>, <span class="pl-c1">type:</span> <span class="pl-c1">:time</span>
+
+  <span class="pl-k">def</span> <span class="pl-en">destroy</span>
+    requires <span class="pl-c1">:identity</span>
+
+    data <span class="pl-k">=</span> cistern.destroy_post(params).body[<span class="pl-s"><span class="pl-pds">'</span>post<span class="pl-pds">'</span></span>]
+  <span class="pl-k">end</span>
+
+  <span class="pl-k">def</span> <span class="pl-en">save</span>
+    requires <span class="pl-c1">:author_id</span>
+
+    response <span class="pl-k">=</span> <span class="pl-k">if</span> new_record?
+                 cistern.create_post(attributes)
+               <span class="pl-k">else</span>
+                 cistern.update_post(dirty_attributes)
+               <span class="pl-k">end</span>
+
+    merge_attributes(response.body[<span class="pl-s"><span class="pl-pds">'</span>post<span class="pl-pds">'</span></span>])
+  <span class="pl-k">end</span>
+<span class="pl-k">end</span></pre></div>
+
+<p>Usage:</p>
+
+<p><strong>create</strong></p>
+
+<div class="highlight highlight-source-ruby"><pre>blog.posts.create(<span class="pl-c1">author_id:</span> <span class="pl-c1">1</span>, <span class="pl-c1">body:</span> <span class="pl-s"><span class="pl-pds">'</span>text<span class="pl-pds">'</span></span>)</pre></div>
+
+<p>is equal to</p>
+
+<div class="highlight highlight-source-ruby"><pre>post <span class="pl-k">=</span> blog.posts.<span class="pl-k">new</span>(<span class="pl-c1">author_id:</span> <span class="pl-c1">1</span>, <span class="pl-c1">body:</span> <span class="pl-s"><span class="pl-pds">'</span>text<span class="pl-pds">'</span></span>)
+post.save</pre></div>
+
+<p><strong>update</strong></p>
+
+<div class="highlight highlight-source-ruby"><pre>post <span class="pl-k">=</span> blog.posts.get(<span class="pl-c1">1</span>)
+post.update(<span class="pl-c1">author_id:</span> <span class="pl-c1">1</span>) <span class="pl-c">#=&gt; calls #save with #dirty_attributes == { 'author_id' =&gt; 1 }</span>
+post.author_id <span class="pl-c">#=&gt; 1</span></pre></div>
+
+<h3>
+<a id="singular" class="anchor" href="#singular" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Singular</h3>
+
+<p>Singular resources do not have an associated collection and the model contains the <code>get</code> and<code>save</code> methods.</p>
+
+<p>For instance:</p>
+
+<div class="highlight highlight-source-ruby"><pre><span class="pl-k">class</span> <span class="pl-en">Blog::PostData</span>
+  <span class="pl-k">include</span> <span class="pl-c1">Blog</span>::<span class="pl-c1">Singular</span>
+
+  attribute <span class="pl-c1">:post_id</span>, <span class="pl-c1">type:</span> <span class="pl-c1">:integer</span>
+  attribute <span class="pl-c1">:upvotes</span>, <span class="pl-c1">type:</span> <span class="pl-c1">:integer</span>
+  attribute <span class="pl-c1">:views</span>, <span class="pl-c1">type:</span> <span class="pl-c1">:integer</span>
+  attribute <span class="pl-c1">:rating</span>, <span class="pl-c1">type:</span> <span class="pl-c1">:float</span>
+
+  <span class="pl-k">def</span> <span class="pl-en">get</span>
+    response <span class="pl-k">=</span> cistern.get_post_data(post_id)
+    merge_attributes(response.body[<span class="pl-s"><span class="pl-pds">'</span>data<span class="pl-pds">'</span></span>])
+  <span class="pl-k">end</span>
+
+  <span class="pl-k">def</span> <span class="pl-en">save</span>
+    response <span class="pl-k">=</span> cistern.update_post_data(post_id, dirty_attributes)
+    merge_attributes(response.data[<span class="pl-s"><span class="pl-pds">'</span>data<span class="pl-pds">'</span></span>])
+  <span class="pl-k">end</span>
+<span class="pl-k">end</span></pre></div>
+
+<p>Singular resources often hang off of other models or collections.</p>
+
+<div class="highlight highlight-source-ruby"><pre><span class="pl-k">class</span> <span class="pl-en">Blog::Post</span>
+  <span class="pl-k">include</span> <span class="pl-c1">Cistern</span>::<span class="pl-c1">Model</span>
+
+  identity <span class="pl-c1">:id</span>, <span class="pl-c1">type:</span> <span class="pl-c1">:integer</span>
+
+  <span class="pl-k">def</span> <span class="pl-en">data</span>
+    cistern.post_data(<span class="pl-c1">post_id:</span> identity).load
+  <span class="pl-k">end</span>
+<span class="pl-k">end</span></pre></div>
+
+<p>They are special cases of Models and have similar interfaces.</p>
+
+<div class="highlight highlight-source-ruby"><pre>post.data.views <span class="pl-c">#=&gt; nil</span>
+post.data.update(<span class="pl-c1">views:</span> <span class="pl-c1">3</span>)
+post.data.views <span class="pl-c">#=&gt; 3</span></pre></div>
+
+<h3>
+<a id="collection" class="anchor" href="#collection" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Collection</h3>
+
+<ul>
+<li>
+<code>model</code> tells Cistern which resource class this collection represents.</li>
+<li>
+<code>cistern</code> is the associated <code>Blog::Real</code> or <code>Blog::Mock</code> instance</li>
 <li>
 <code>attribute</code> specifications on collections are allowed. use <code>merge_attributes</code>
 </li>
@@ -254,67 +398,65 @@ fake.is_a?(<span class="pl-c1">Foo</span>::<span class="pl-c1">Client</span>::<s
 <code>load</code> consumes an Array of data and constructs matching <code>model</code> instances</li>
 </ul>
 
-<div class="highlight highlight-source-ruby"><pre><span class="pl-k">class</span> <span class="pl-en">Foo::Client::Bars<span class="pl-e"> &lt; Foo::Client::Collection</span></span>
+<div class="highlight highlight-source-ruby"><pre><span class="pl-k">class</span> <span class="pl-en">Blog::Posts<span class="pl-e"> &lt; Blog::Collection</span></span>
 
   attribute <span class="pl-c1">:count</span>, <span class="pl-c1">type:</span> <span class="pl-c1">:integer</span>
 
-  model <span class="pl-c1">Foo</span>::<span class="pl-c1">Client</span>::<span class="pl-c1">Bar</span>
+  model <span class="pl-c1">Blog</span>::<span class="pl-c1">Post</span>
 
   <span class="pl-k">def</span> <span class="pl-en">all</span>(<span class="pl-smi">params</span> <span class="pl-k">=</span> {})
-    response <span class="pl-k">=</span> service.get_bars(params)
+    response <span class="pl-k">=</span> cistern.get_posts(params)
 
     data <span class="pl-k">=</span> response.body
 
-    <span class="pl-v">self</span>.load(data[<span class="pl-s"><span class="pl-pds">"</span>bars<span class="pl-pds">"</span></span>])     <span class="pl-c"># store bar records in collection</span>
-    <span class="pl-v">self</span>.merge_attributes(data) <span class="pl-c"># store any other attributes of the response on the collection</span>
+    load(data[<span class="pl-s"><span class="pl-pds">"</span>posts<span class="pl-pds">"</span></span>])    <span class="pl-c"># store post records in collection</span>
+    merge_attributes(data) <span class="pl-c"># store any other attributes of the response on the collection</span>
   <span class="pl-k">end</span>
 
-  <span class="pl-k">def</span> <span class="pl-en">discover</span>(<span class="pl-smi">provisioned_id</span>, <span class="pl-smi">options</span><span class="pl-k">=</span>{})
+  <span class="pl-k">def</span> <span class="pl-en">discover</span>(<span class="pl-smi">author_id</span>, <span class="pl-smi">options</span><span class="pl-k">=</span>{})
     params <span class="pl-k">=</span> {
-      <span class="pl-s"><span class="pl-pds">"</span>provisioned_id<span class="pl-pds">"</span></span> =&gt; provisioned_id,
+      <span class="pl-s"><span class="pl-pds">"</span>author_id<span class="pl-pds">"</span></span> =&gt; author_id,
     }
-    params.merge!(<span class="pl-s"><span class="pl-pds">"</span>location<span class="pl-pds">"</span></span> =&gt; options[<span class="pl-c1">:location</span>]) <span class="pl-k">if</span> options.key?(<span class="pl-c1">:location</span>)
+    params.merge!(<span class="pl-s"><span class="pl-pds">"</span>topic<span class="pl-pds">"</span></span> =&gt; options[<span class="pl-c1">:topic</span>]) <span class="pl-k">if</span> options.key?(<span class="pl-c1">:topic</span>)
 
-    service.requests.<span class="pl-k">new</span>(service.discover_bar(params).body[<span class="pl-s"><span class="pl-pds">"</span>request<span class="pl-pds">"</span></span>])
+    cistern.blogs.<span class="pl-k">new</span>(cistern.discover_blog(params).body[<span class="pl-s"><span class="pl-pds">"</span>blog<span class="pl-pds">"</span></span>])
   <span class="pl-k">end</span>
 
   <span class="pl-k">def</span> <span class="pl-en">get</span>(<span class="pl-smi">id</span>)
-    <span class="pl-k">if</span> data <span class="pl-k">=</span> service.get_bar(<span class="pl-s"><span class="pl-pds">"</span>id<span class="pl-pds">"</span></span> =&gt; id).body[<span class="pl-s"><span class="pl-pds">"</span>bar<span class="pl-pds">"</span></span>]
-      <span class="pl-k">new</span>(data)
-    <span class="pl-k">else</span>
-      <span class="pl-c1">nil</span>
-    <span class="pl-k">end</span>
+    data <span class="pl-k">=</span> cistern.get_post(id).body[<span class="pl-s"><span class="pl-pds">"</span>post<span class="pl-pds">"</span></span>]
+
+    <span class="pl-k">new</span>(data) <span class="pl-k">if</span> data
   <span class="pl-k">end</span>
 <span class="pl-k">end</span></pre></div>
 
 <h4>
-<a id="data" class="anchor" href="#data" aria-hidden="true"><span class="octicon octicon-link"></span></a>Data</h4>
+<a id="data" class="anchor" href="#data" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Data</h4>
 
 <p>A uniform interface for mock data is mixed into the <code>Mock</code> class by default.</p>
 
-<div class="highlight highlight-source-ruby"><pre><span class="pl-c1">Foo</span>::<span class="pl-c1">Client</span>.mock!
-client <span class="pl-k">=</span> <span class="pl-c1">Foo</span>::<span class="pl-c1">Client</span>.<span class="pl-k">new</span>     <span class="pl-c"># Foo::Client::Mock</span>
+<div class="highlight highlight-source-ruby"><pre><span class="pl-c1">Blog</span>.mock!
+client <span class="pl-k">=</span> <span class="pl-c1">Blog</span>.<span class="pl-k">new</span>     <span class="pl-c"># Blog::Mock</span>
 client.data                  <span class="pl-c"># Cistern::Data::Hash</span>
-client.data[<span class="pl-s"><span class="pl-pds">"</span>bars<span class="pl-pds">"</span></span>] <span class="pl-k">+=</span> [<span class="pl-s"><span class="pl-pds">"</span>x<span class="pl-pds">"</span></span>] <span class="pl-c"># ["x"]</span></pre></div>
+client.data[<span class="pl-s"><span class="pl-pds">"</span>posts<span class="pl-pds">"</span></span>] <span class="pl-k">+=</span> [<span class="pl-s"><span class="pl-pds">"</span>x<span class="pl-pds">"</span></span>] <span class="pl-c"># ["x"]</span></pre></div>
 
 <p>Mock data is class-level by default</p>
 
-<div class="highlight highlight-source-ruby"><pre><span class="pl-c1">Foo</span>::<span class="pl-c1">Client</span>::<span class="pl-c1">Mock</span>.data[<span class="pl-s"><span class="pl-pds">"</span>bars<span class="pl-pds">"</span></span>] <span class="pl-c"># ["x"]</span></pre></div>
+<div class="highlight highlight-source-ruby"><pre><span class="pl-c1">Blog</span>::<span class="pl-c1">Mock</span>.data[<span class="pl-s"><span class="pl-pds">"</span>posts<span class="pl-pds">"</span></span>] <span class="pl-c"># ["x"]</span></pre></div>
 
 <p><code>reset!</code> dimisses the <code>data</code> object.</p>
 
 <div class="highlight highlight-source-ruby"><pre>client.data.object_id <span class="pl-c"># 70199868585600</span>
 client.reset!
-client.data[<span class="pl-s"><span class="pl-pds">"</span>bars<span class="pl-pds">"</span></span>]   <span class="pl-c"># []</span>
+client.data[<span class="pl-s"><span class="pl-pds">"</span>posts<span class="pl-pds">"</span></span>]   <span class="pl-c"># []</span>
 client.data.object_id <span class="pl-c"># 70199868566840</span></pre></div>
 
 <p><code>clear</code> removes existing keys and values but keeps the same object.</p>
 
-<div class="highlight highlight-source-ruby"><pre>client.data[<span class="pl-s"><span class="pl-pds">"</span>bars<span class="pl-pds">"</span></span>] <span class="pl-k">+=</span> [<span class="pl-s"><span class="pl-pds">"</span>y<span class="pl-pds">"</span></span>] <span class="pl-c"># ["y"]</span>
-client.data.object_id        <span class="pl-c"># 70199868378300</span>
+<div class="highlight highlight-source-ruby"><pre>client.data[<span class="pl-s"><span class="pl-pds">"</span>posts<span class="pl-pds">"</span></span>] <span class="pl-k">+=</span> [<span class="pl-s"><span class="pl-pds">"</span>y<span class="pl-pds">"</span></span>] <span class="pl-c"># ["y"]</span>
+client.data.object_id         <span class="pl-c"># 70199868378300</span>
 client.clear
-client.data[<span class="pl-s"><span class="pl-pds">"</span>bars<span class="pl-pds">"</span></span>]          <span class="pl-c"># []</span>
-client.data.object_id        <span class="pl-c"># 70199868378300</span></pre></div>
+client.data[<span class="pl-s"><span class="pl-pds">"</span>posts<span class="pl-pds">"</span></span>]          <span class="pl-c"># []</span>
+client.data.object_id         <span class="pl-c"># 70199868378300</span></pre></div>
 
 <ul>
 <li>
@@ -325,7 +467,7 @@ client.data.object_id        <span class="pl-c"># 70199868378300</span></pre></d
 
 <p>You can make the service bypass Cistern's mock data structures by simply creating a <code>self.data</code> function in your service <code>Mock</code> declaration.</p>
 
-<div class="highlight highlight-source-ruby"><pre><span class="pl-k">class</span> <span class="pl-en">Foo::Client</span>
+<div class="highlight highlight-source-ruby"><pre><span class="pl-k">class</span> <span class="pl-en">Blog</span>
   <span class="pl-k">include</span> <span class="pl-c1">Cistern</span>::<span class="pl-c1">Client</span>
 
   <span class="pl-k">class</span> <span class="pl-en">Mock</span>
@@ -336,7 +478,7 @@ client.data.object_id        <span class="pl-c"># 70199868378300</span></pre></d
 <span class="pl-k">end</span></pre></div>
 
 <h4>
-<a id="storage" class="anchor" href="#storage" aria-hidden="true"><span class="octicon octicon-link"></span></a>Storage</h4>
+<a id="storage" class="anchor" href="#storage" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Storage</h4>
 
 <p>Currently supported storage backends are:</p>
 
@@ -358,7 +500,7 @@ client.data.object_id        <span class="pl-c"># 70199868378300</span></pre></d
 <span class="pl-c1">Patient</span>::<span class="pl-c1">Mock</span>.store_in(<span class="pl-c1">:hash</span>)</pre></div>
 
 <h4>
-<a id="dirty" class="anchor" href="#dirty" aria-hidden="true"><span class="octicon octicon-link"></span></a>Dirty</h4>
+<a id="dirty" class="anchor" href="#dirty" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Dirty</h4>
 
 <p>Dirty attributes are tracked and cleared when <code>merge_attributes</code> is called.</p>
 
@@ -369,25 +511,56 @@ client.data.object_id        <span class="pl-c"># 70199868378300</span></pre></d
 <code>dirty_attributes</code> returns Hash of changed attributes with there current value.  This should be used in the model <code>save</code> function.</li>
 </ul>
 
-<div class="highlight highlight-source-ruby"><pre>bar <span class="pl-k">=</span> <span class="pl-c1">Foo</span>::<span class="pl-c1">Client</span>::<span class="pl-c1">Bar</span>.<span class="pl-k">new</span>(<span class="pl-c1">id:</span> <span class="pl-c1">1</span>, <span class="pl-c1">flavor:</span> <span class="pl-s"><span class="pl-pds">"</span>x<span class="pl-pds">"</span></span>) <span class="pl-c"># =&gt; &lt;#Foo::Client::Bar&gt;</span>
+<div class="highlight highlight-source-ruby"><pre>post <span class="pl-k">=</span> <span class="pl-c1">Blog</span>::<span class="pl-c1">Post</span>.<span class="pl-k">new</span>(<span class="pl-c1">id:</span> <span class="pl-c1">1</span>, <span class="pl-c1">flavor:</span> <span class="pl-s"><span class="pl-pds">"</span>x<span class="pl-pds">"</span></span>) <span class="pl-c"># =&gt; &lt;#Blog::Post&gt;</span>
 
-bar.dirty?           <span class="pl-c"># =&gt; false</span>
-bar.changed          <span class="pl-c"># =&gt; {}</span>
-bar.dirty_attributes <span class="pl-c"># =&gt; {}</span>
+post.dirty?           <span class="pl-c"># =&gt; false</span>
+post.changed          <span class="pl-c"># =&gt; {}</span>
+post.dirty_attributes <span class="pl-c"># =&gt; {}</span>
 
-bar.flavor <span class="pl-k">=</span> <span class="pl-s"><span class="pl-pds">"</span>y<span class="pl-pds">"</span></span>
+post.flavor <span class="pl-k">=</span> <span class="pl-s"><span class="pl-pds">"</span>y<span class="pl-pds">"</span></span>
 
-bar.dirty?           <span class="pl-c"># =&gt; true</span>
-bar.changed          <span class="pl-c"># =&gt; {flavor: ["x", "y"]}</span>
-bar.dirty_attributes <span class="pl-c"># =&gt; {flavor: "y"}</span>
+post.dirty?           <span class="pl-c"># =&gt; true</span>
+post.changed          <span class="pl-c"># =&gt; {flavor: ["x", "y"]}</span>
+post.dirty_attributes <span class="pl-c"># =&gt; {flavor: "y"}</span>
 
-bar.save
-bar.dirty?           <span class="pl-c"># =&gt; false</span>
-bar.changed          <span class="pl-c"># =&gt; {}</span>
-bar.dirty_attributes <span class="pl-c"># =&gt; {}</span></pre></div>
+post.save
+post.dirty?           <span class="pl-c"># =&gt; false</span>
+post.changed          <span class="pl-c"># =&gt; {}</span>
+post.dirty_attributes <span class="pl-c"># =&gt; {}</span></pre></div>
+
+<h3>
+<a id="custom-architecture" class="anchor" href="#custom-architecture" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Custom Architecture</h3>
+
+<p>When configuring your client, you can use <code>:collection</code>, <code>:request</code>, and <code>:model</code> options to define the name of module or class interface for the service component.</p>
+
+<p>For example: if you'd <code>Request</code> is to be used for a model, then the <code>Request</code> component name can be remapped to <code>Demand</code></p>
+
+<p>For example:</p>
+
+<div class="highlight highlight-source-ruby"><pre><span class="pl-k">class</span> <span class="pl-en">Blog</span>
+  <span class="pl-k">include</span> <span class="pl-c1">Cistern</span>::<span class="pl-c1">Client</span>.with(<span class="pl-c1">interface:</span> <span class="pl-c1">:modules</span>, <span class="pl-c1">request:</span> <span class="pl-s"><span class="pl-pds">"</span>Demand<span class="pl-pds">"</span></span>)
+<span class="pl-k">end</span></pre></div>
+
+<p>allows a model named <code>Request</code> to exist</p>
+
+<div class="highlight highlight-source-ruby"><pre><span class="pl-k">class</span> <span class="pl-en">Blog::Request</span>
+  <span class="pl-k">include</span> <span class="pl-c1">Blog</span>::<span class="pl-c1">Model</span>
+
+  identity <span class="pl-c1">:jovi</span>
+<span class="pl-k">end</span></pre></div>
+
+<p>while living on a <code>Demand</code></p>
+
+<div class="highlight highlight-source-ruby"><pre><span class="pl-k">class</span> <span class="pl-en">Blog::GetPost</span>
+  <span class="pl-k">include</span> <span class="pl-c1">Blog</span>::<span class="pl-c1">Demand</span>
+
+  <span class="pl-k">def</span> <span class="pl-en">real</span>
+    cistern.request.get(<span class="pl-s"><span class="pl-pds">"</span>/wing<span class="pl-pds">"</span></span>)
+  <span class="pl-k">end</span>
+<span class="pl-k">end</span></pre></div>
 
 <h2>
-<a id="examples" class="anchor" href="#examples" aria-hidden="true"><span class="octicon octicon-link"></span></a>Examples</h2>
+<a id="examples" class="anchor" href="#examples" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Examples</h2>
 
 <ul>
 <li><a href="https://github.com/lanej/zendesk2">zendesk2</a></li>
@@ -395,13 +568,13 @@ bar.dirty_attributes <span class="pl-c"># =&gt; {}</span></pre></div>
 </ul>
 
 <h2>
-<a id="releasing" class="anchor" href="#releasing" aria-hidden="true"><span class="octicon octicon-link"></span></a>Releasing</h2>
+<a id="releasing" class="anchor" href="#releasing" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Releasing</h2>
 
 <pre><code>$ gem bump -trv (major|minor|patch)
 </code></pre>
 
 <h2>
-<a id="contributing" class="anchor" href="#contributing" aria-hidden="true"><span class="octicon octicon-link"></span></a>Contributing</h2>
+<a id="contributing" class="anchor" href="#contributing" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Contributing</h2>
 
 <ol>
 <li>Fork it</li>
@@ -412,12 +585,11 @@ bar.dirty_attributes <span class="pl-c"># =&gt; {}</span></pre></div>
 </ol>
       </section>
       <footer>
-        <p>This project is maintained by <a href="https://github.com/lanej">lanej</a></p>
-        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
+        <p><small>Hosted on <a href="https://pages.github.com">GitHub Pages</a> using the Dinky theme</small></p>
       </footer>
     </div>
-    <script src="javascripts/scale.fix.js"></script>
-              <script type="text/javascript">
+    <!--[if !IE]><script>fixScale(document);</script><![endif]-->
+		          <script type="text/javascript">
             var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
             document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
           </script>
