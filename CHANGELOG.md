@@ -1,5 +1,13 @@
 # Change Log
 
+## [Unreleased](https://github.com/lanej/cistern/tree/HEAD)
+
+[Full Changelog](https://github.com/lanej/cistern/compare/v2.4.0...HEAD)
+
+**Merged pull requests:**
+
+- fix\(attributes\): child classes inherit parent identity [\#64](https://github.com/lanej/cistern/pull/64) ([lanej](https://github.com/lanej))
+
 ## [v2.4.0](https://github.com/lanej/cistern/tree/v2.4.0) (2016-07-11)
 [Full Changelog](https://github.com/lanej/cistern/compare/v2.3.0...v2.4.0)
 
