@@ -57,11 +57,12 @@ module Cistern::Attributes
 
       define_attribute_reader(name_sym, options)
       define_attribute_writer(name_sym, options)
+
+      name_sym
     end
 
-    def identity(name, options = {})
-      @identity = name
-      attribute(name, options)
+    def identity(*args)
+      args.any? ? @identity = attribute(*args) : (@identity ||= parent_identity)
     end
 
     def ignore_attributes(*args)
@@ -116,6 +117,10 @@ module Cistern::Attributes
 
     def parent_attributes
       superclass && superclass.respond_to?(:attributes) && superclass.attributes.dup
+    end
+
+    def parent_identity
+      superclass && superclass.respond_to?(:identity) && superclass.identity
     end
   end
 
@@ -174,13 +179,13 @@ module Cistern::Attributes
     end
 
     def identity
-      key = self.class.instance_variable_get('@identity')
+      key = self.class.identity
 
       public_send(key) if key
     end
 
     def identity=(new_identity)
-      key = self.class.instance_variable_get('@identity')
+      key = self.class.identity
 
       if key
         public_send("#{key}=", new_identity)
