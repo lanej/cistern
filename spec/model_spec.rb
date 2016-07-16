@@ -14,7 +14,29 @@ describe 'Cistern::Model' do
       expect(parent.attributes.keys).to contain_exactly(:parent)
       expect(child.attributes.keys).to contain_exactly(:parent, :child)
     end
+
+    it 'provides the child with the identity of the parent' do
+      parent = Class.new(Sample::Model) do
+        identity :name
+        attribute :parent
+      end
+
+      child = Class.new(parent) do
+        attribute :child
+      end
+
+      expect(parent.identity).to eq(:name)
+      expect(child.identity).to eq(:name)
+      expect(child.new).to respond_to(:name)
+
+      girl = child.new
+
+      expect {
+        girl.name = 'lady'
+      }.to change(girl, :identity).to('lady')
+    end
   end
+
   describe '#update' do
     class UpdateSpec < Sample::Model
       identity :id
