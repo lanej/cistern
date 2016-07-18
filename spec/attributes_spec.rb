@@ -1,43 +1,45 @@
 require 'spec_helper'
 
 describe Cistern::Attributes, 'requires' do
-  class RequireSpec < Sample::Model
-    identity :id
-    attribute :name, type: :string
-    attribute :type
-  end
+  subject {
+    Class.new(Sample::Model) do
+      identity :id
+      attribute :name, type: :string
+      attribute :type
+    end
+  }
 
   it 'raises if required attributes are not present' do
     expect {
-      Sample.new.require_spec.requires :name
+      subject.new.requires :name
     }.to raise_exception(ArgumentError, /name is required/)
 
     data = { name: '1' }
-    return_value = Sample.new.require_spec(data).requires :name
+    return_value = subject.new(data).requires :name
 
     expect(return_value).to eq(data)
 
     expect {
-      Sample.new.require_spec.requires :name, :type
+      subject.new.requires :name, :type
     }.to raise_exception(ArgumentError, /name and type are required/)
 
     data = { name: '1', type: 'sample' }
-    return_values = Sample.new.require_spec(data).requires :name, :type
+    return_values = subject.new(data).requires :name, :type
     expect(return_values).to eq(data)
   end
 
   it 'raises if a required attribute attribute is not present' do
     expect {
-      Sample.new.require_spec.requires_one :name, :type
+      subject.new.requires_one :name, :type
     }.to raise_exception(ArgumentError, /name or type are required/)
 
     data = { name: '1' }
-    return_value = Sample.new.require_spec(data).requires_one :name, :type
+    return_value = subject.new(data).requires_one :name, :type
 
     expect(return_value).to eq(data)
 
     data = { name: '1', type: 'sample' }
-    return_values = Sample.new.require_spec(data).requires_one :name, :type
+    return_values = subject.new(data).requires_one :name, :type
     expect(return_values).to eq(data)
   end
 end
