@@ -1,5 +1,73 @@
 require 'spec_helper'
 
+describe Cistern::Attributes, '#request_attributes' do
+  subject { Class.new(Sample::Model) }
+
+  it 'returns a reverse-aliased attributes hash' do
+    subject.class_eval do
+      identity :id
+      attribute :name, alias: 'sample_name'
+    end
+
+    model = subject.new(name: 'steve', id: 1)
+
+    expect(model.request_attributes).to eq(
+      'sample_name' => 'steve',
+      'id' => 1
+    )
+  end
+
+  it 'drops duplicates values for multiple aliases' do
+    subject.class_eval do
+      identity :id
+      attribute :name, aliases: ['sample_name', 'other_name']
+    end
+
+    model = subject.new(name: 'steve', id: 1)
+
+    expect(model.request_attributes).to eq(
+      'sample_name' => 'steve',
+      'other_name' => 'steve',
+      'id' => 1
+    )
+  end
+end
+
+describe Cistern::Attributes, '#dirty_request_attributes' do
+  subject { Class.new(Sample::Model) }
+
+  it 'returns a reverse-aliased attributes hash of dirty attributes only' do
+    subject.class_eval do
+      identity :id
+      attribute :name, alias: 'sample_name'
+    end
+
+    model = subject.new
+    model.merge_attributes(name: 'steve', id: 1)
+
+    model.name = 'bob'
+
+    expect(model.dirty_request_attributes).to eq(
+      'sample_name' => 'bob',
+    )
+  end
+
+  it 'drops duplicates values for multiple aliases' do
+    subject.class_eval do
+      identity :id
+      attribute :name, aliases: ['sample_name', 'other_name']
+    end
+
+    model = subject.new(name: 'steve', id: 1)
+
+    expect(model.request_attributes).to eq(
+      'sample_name' => 'steve',
+      'other_name' => 'steve',
+      'id' => 1
+    )
+  end
+end
+
 describe Cistern::Attributes, 'requires' do
   subject {
     Class.new(Sample::Model) do
@@ -169,6 +237,7 @@ describe Cistern::Attributes, 'parsing' do
         attribute :same_alias_squashed_3, squash: %w(nested attr_2)
       end
     }
+
     it 'should do so when not squashing' do
       model = subject.new('nested' => 'bamboo')
 

@@ -265,6 +265,18 @@ module Cistern::Attributes
       @changes ||= {}
     end
 
+    def request_attributes(set = attributes)
+      set.inject({}) do |a,(k,v)|
+        aliases = self.class.attributes[k.to_sym][:aliases]
+        aliases << k if aliases.empty?
+        aliases.each_with_object(a) { |n,r| r[n.to_s] = v }
+      end
+    end
+
+    def dirty_request_attributes
+      request_attributes(dirty_attributes)
+    end
+
     private
 
     def missing_attributes(keys)
