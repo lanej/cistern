@@ -1,19 +1,21 @@
 require 'spec_helper'
 
 describe 'Cistern::Model#dirty' do
-  class DirtySpec < Sample::Model
-    identity :id
+  subject {
+    Class.new(Sample::Model) do
+      identity :id
 
-    attribute :name
-    attribute :properties, type: :array
+      attribute :name
+      attribute :properties, type: :array
 
-    def save
-      merge_attributes(attributes)
+      def save
+        merge_attributes(attributes)
+      end
     end
-  end
+  }
 
   it 'should mark a existing record as dirty' do
-    model = DirtySpec.new(id: 1, name: 'steve')
+    model = subject.new(id: 1, name: 'steve')
     expect(model.changed).to be_empty
 
     expect do
