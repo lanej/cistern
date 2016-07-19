@@ -2,7 +2,14 @@
 
 ## [Unreleased](https://github.com/lanej/cistern/tree/HEAD)
 
-[Full Changelog](https://github.com/lanej/cistern/compare/v2.4.0...HEAD)
+[Full Changelog](https://github.com/lanej/cistern/compare/v2.4.1...HEAD)
+
+**Implemented enhancements:**
+
+- add request\_attributes, dirty\_request\_attributes helpers [\#65](https://github.com/lanej/cistern/pull/65) ([lanej](https://github.com/lanej))
+
+## [v2.4.1](https://github.com/lanej/cistern/tree/v2.4.1) (2016-07-16)
+[Full Changelog](https://github.com/lanej/cistern/compare/v2.4.0...v2.4.1)
 
 **Merged pull requests:**
 
