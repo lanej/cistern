@@ -1,23 +1,25 @@
 require 'spec_helper'
 
 describe 'mock data' do
-  class Diagnosis < Sample::Request
-    def real(diagnosis)
+  before {
+    class Sample::Diagnosis < Sample::Request
+      def real(diagnosis)
+      end
+
+      def mock(diagnosis)
+        cistern.data.store(:diagnosis, cistern.data.fetch(:diagnosis) + [diagnosis])
+      end
     end
 
-    def mock(diagnosis)
-      cistern.data.store(:diagnosis, cistern.data.fetch(:diagnosis) + [diagnosis])
-    end
-  end
+    class Sample::Treat < Sample::Request
+      def real(treatment)
+      end
 
-  class Treat < Sample::Request
-    def real(treatment)
+      def mock(treatment)
+        cistern.data[:treatments] += [treatment]
+      end
     end
-
-    def mock(treatment)
-      cistern.data[:treatments] += [treatment]
-    end
-  end
+  }
 
   shared_examples 'mock_data#backend' do |backend, options|
     it 'should store mock data' do

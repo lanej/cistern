@@ -1,24 +1,26 @@
 require 'spec_helper'
 
 describe 'Cistern::Singular' do
-  class Settings < Sample::Singular
-    attribute :name, type: :string
-    attribute :count, type: :number
+  before {
+    class Sample::Settings < Sample::Singular
+      attribute :name, type: :string
+      attribute :count, type: :number
 
-    def save
-      result = @@settings = attributes.merge(dirty_attributes)
+      def save
+        result = @@settings = attributes.merge(dirty_attributes)
 
-      merge_attributes(result)
+        merge_attributes(result)
+      end
+
+      def get
+        settings = @@settings ||= {}
+        settings[:count] ||= 0
+        settings[:count] += 1
+
+        merge_attributes(settings)
+      end
     end
-
-    def get
-      settings = @@settings ||= {}
-      settings[:count] ||= 0
-      settings[:count] += 1
-
-      merge_attributes(settings)
-    end
-  end
+  }
 
   let!(:service) { Sample.new }
 
