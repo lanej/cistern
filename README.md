@@ -404,6 +404,8 @@ class Blog::Posts < Blog::Collection
 end
 ```
 
+### Associations
+
 #### Data
 
 A uniform interface for mock data is mixed into the `Mock` class by default.
