@@ -38,7 +38,7 @@ describe Cistern::Associations do
         model Sample::Associate
 
         def all
-          load([{id: group_id}])
+          load([{id: group_id + 1}])
         end
       end
 
@@ -49,7 +49,7 @@ describe Cistern::Associations do
         has_many :groups, -> { Sample::Associates.new(group_id: group_id) }
       end
 
-      expected = Sample::Associates.new(group_id: 2).load([{id: 2}])
+      expected = Sample::Associates.new(group_id: 2).load([{id: 3}])
 
       expect(subject.new(group_id: 2).groups.all).to eq(expected)
     end
