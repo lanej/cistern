@@ -53,10 +53,21 @@ module Cistern::Associations
   def belongs_to(name, block)
     name_sym = name.to_sym
 
+    reader_method = name
+    writer_method = "#{name}="
+
     attribute name_sym
 
-    define_method name_sym do
-      attributes[name_sym] ||= instance_exec(&block)
+    define_method reader_method do
+      model = instance_exec(&block)
+      attributes[name_sym] = model.attributes
+      model
+    end
+
+    define_method writer_method do |model|
+      data = model.respond_to?(:attributes) ? model.attributes : model
+      attributes[name_sym] = data
+      model
     end
 
     associations[:belongs_to] << name_sym
