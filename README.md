@@ -439,8 +439,9 @@ Foreign keys can be updated with association writing by overwriting the writer.
 
 ```ruby
 Blog::Tag.class_eval do
+  alias cistern_creator= creator=
   def creator=(creator)
-    super
+    self.cistern_creator = creator
     self.author_id = attributes[:creator][:id]
   end
 end
