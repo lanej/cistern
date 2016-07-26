@@ -406,14 +406,59 @@ end
 
 ### Associations
 
+Associations allow the use of a resource's attributes to reference other resources.  They act as lazy loaded attributes
+and push any loaded data into the resource's `attributes`.
+
+There are two types of associations available.
+
+* `belongs_to` references a specific resource and defines a reader.
+* `has_many` references a collection of resources and defines a reader / writer.
+
+```ruby
+class Blog::Tag < Blog::Model
+  identity :id
+  attribute :author_id
+
+  has_many :posts -> { cistern.posts(tag_id: identity) }
+  belongs_to :creator -> { cistern.authors.get(author_id) }
+end
+```
+
+Relationships store the collection's attributes within the resources' attributes on write / load.
+
+```ruby
+tag = blog.tags.get('ruby')
+tag.posts = blog.posts.load({'id' => 1, 'author_id' => '2'}, {'id' => 2, 'author_id' => 3})
+tag.attributes[:posts] #=> {'id' => 1, 'author_id' => '2'}, {'id' => 2, 'author_id' => 3}
+
+tag.creator = blogs.author.get(name: 'phil')
+tag.attributes[:creator] #=> { 'id' => 2, 'name' => 'phil' }
+```
+
+Foreign keys can be updated with association writing by overwriting the writer.
+
+```ruby
+Blog::Tag.class_eval do
+  def creator=(creator)
+    super
+    self.author_id = attributes[:creator][:id]
+  end
+end
+
+tag = blog.tags.get('ruby')
+tag.author_id = 4
+tag.creator = blogs.author.get(name: 'phil') #=> #<Blog::Author id=2 name='phil'>
+tag.author_id #=> 2
+```
+
 #### Data
 
 A uniform interface for mock data is mixed into the `Mock` class by default.
 
 ```ruby
 Blog.mock!
-client = Blog.new     # Blog::Mock
-client.data                  # Cistern::Data::Hash
+client = Blog.new # Blog::Mock
+client.data       # Cistern::Data::Hash
 client.data["posts"] += ["x"] # ["x"]
 ```
 
@@ -428,7 +473,7 @@ Blog::Mock.data["posts"] # ["x"]
 ```ruby
 client.data.object_id # 70199868585600
 client.reset!
-client.data["posts"]   # []
+client.data["posts"]  # []
 client.data.object_id # 70199868566840
 ```
 
