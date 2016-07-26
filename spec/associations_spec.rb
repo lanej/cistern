@@ -26,7 +26,7 @@ describe Cistern::Associations do
   end
 
   describe '#has_many' do
-    it 'returns assoicated models' do
+    before {
       Sample::Associate = Class.new(Sample::Model) do
         identity :id
       end
@@ -48,14 +48,34 @@ describe Cistern::Associations do
 
         has_many :groups, -> { Sample::Associates.new(group_id: group_id) }
       end
+    }
 
+    it 'returns assoicated models' do
       expected = Sample::Associates.new(group_id: 2).load([{id: 3}])
 
       expect(subject.new(group_id: 2).groups.all).to eq(expected)
     end
 
-    it 'stores data within #attributes'
-    it 'accepts raw data in the writer'
-    it 'accepts models in the writer'
+    it 'accepts models in the writer' do
+      model = subject.new(group_id: 2)
+      groups_data = [ { id: 1 }, { id: 2 }]
+      groups = Sample::Associates.new.load(groups_data)
+
+      model.groups = [ Sample::Associate.new(id: 1), Sample::Associate.new(id: 2) ]
+
+      expect(model.attributes[:groups]).to eq(groups_data)
+      expect(model.groups).to eq(groups)
+    end
+
+    it 'accepts raw data in the writer' do
+      model = subject.new(group_id: 2)
+      groups_data = [ { id: 1 }, { id: 2 }]
+      groups = Sample::Associates.new.load(groups_data)
+
+      model.groups = groups_data
+
+      expect(model.attributes[:groups]).to eq(groups_data)
+      expect(model.groups).to eq(groups)
+    end
   end
 end
