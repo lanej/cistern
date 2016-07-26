@@ -7,6 +7,16 @@ module Cistern::Associations
     @associations ||= Hash.new { |h,k| h[k] = [] }
   end
 
+  # Define an assocation that references a collection.
+  # @param name [Symbol] name of association and corresponding reader and writer.
+  # @param scope [Proc] returning {Cistern::Collection} instance to load models into. {#scope} is evaluated within the
+  #   context of the model.
+  # @return [Cistern::Collection] as defined by {#scope}
+  # @example
+  #   class Firm < Law::Model
+  #     identity :registration_id
+  #     has_many :lawyers, -> { cistern.associates(firm_id: identity) }
+  #    end
   def has_many(name, scope)
     name_sym = name.to_sym
 
@@ -31,6 +41,15 @@ module Cistern::Associations
     associations[:has_many] << name_sym
   end
 
+  # Define an assocation that references a model.
+  # @param name [Symbol] name of association and corresponding reader.
+  # @param scope [Proc] returning a {Cistern::Model} that is evaluated within the context of the model.
+  # @return [Cistern::Model] as defined by {#scope}
+  # @example
+  #   class Firm < Law::Model
+  #     identity :registration_id
+  #     belongs_to :leader, -> { cistern.employees.get(:ceo) }
+  #    end
   def belongs_to(name, block)
     name_sym = name.to_sym
 
