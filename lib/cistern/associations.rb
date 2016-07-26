@@ -8,6 +8,8 @@ module Cistern::Associations
   end
 
   def has_many(name, scope)
+    name_sym = name.to_sym
+
     reader_method = name
     writer_method = "#{name}="
 
@@ -15,7 +17,7 @@ module Cistern::Associations
 
     define_method reader_method do
       collection = instance_exec(&scope)
-      records = attributes[name] || []
+      records = attributes[name_sym] || []
 
       collection.load(records)
     end
@@ -26,18 +28,18 @@ module Cistern::Associations
       end
     end
 
-    associations[:has_many] << name
+    associations[:has_many] << name_sym
   end
 
   def belongs_to(name, block)
-    reader_method = name
+    name_sym = name.to_sym
 
-    attribute name
+    attribute name_sym
 
-    define_method reader_method do
-      attributes[name] ||= instance_exec(&block)
+    define_method name_sym do
+      attributes[name_sym] ||= instance_exec(&block)
     end
 
-    associations[:belongs_to] << name
+    associations[:belongs_to] << name_sym
   end
 end
