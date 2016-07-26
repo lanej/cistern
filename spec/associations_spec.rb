@@ -3,8 +3,27 @@ require 'spec_helper'
 describe Cistern::Associations do
   subject { Class.new(Sample::Model) }
 
-  describe '#belongs_to' do
+  describe '#assocations' do
+    before {
+      Sample::Associate = Class.new(Sample::Model) do
+        identity :id
 
+        belongs_to :association, -> { [] }
+        has_many :associates, -> { [] }
+      end
+    }
+
+    it 'returns a mapping of assocations types to names' do
+      expect(Sample::Associate.associations).to eq(
+        {
+          :belongs_to => [:association],
+          :has_many => [:associates],
+        }
+      )
+    end
+  end
+
+  describe '#belongs_to' do
     it 'returns an assoicated model' do
       Sample::Associate = Class.new(Sample::Model) do
         identity :id

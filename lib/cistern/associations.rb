@@ -1,7 +1,10 @@
 # frozen_string_literal: true
 module Cistern::Associations
+
+  # Lists the associations defined on the resource
+  # @return [Hash{Symbol=>Array}] mapping of association type to name
   def associations
-    @associations ||= []
+    @associations ||= Hash.new { |h,k| h[k] = [] }
   end
 
   def has_many(name, scope)
@@ -23,7 +26,7 @@ module Cistern::Associations
       end
     end
 
-    associations << name
+    associations[:has_many] << name
   end
 
   def belongs_to(name, block)
@@ -34,5 +37,7 @@ module Cistern::Associations
     define_method reader_method do
       attributes[name] ||= instance_exec(&block)
     end
+
+    associations[:belongs_to] << name
   end
 end
