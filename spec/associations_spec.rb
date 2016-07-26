@@ -12,16 +12,16 @@ describe Cistern::Associations do
 
       subject.class_eval do
         identity :id
-        attribute :group_id
+        attribute :associate_id
 
-        belongs_to :group, -> { Sample::Associate.new(id: group_id) }
+        belongs_to :associate, -> { Sample::Associate.new(id: associate_id) }
       end
 
-      sample = subject.new(id: 1, group_id: 2)
+      sample = subject.new(id: 1, associate_id: 2)
 
       belongs_to = Sample::Associate.new(id: 2)
 
-      expect(sample.group).to eq(belongs_to)
+      expect(sample.associate).to eq(belongs_to)
     end
   end
 
@@ -33,49 +33,49 @@ describe Cistern::Associations do
 
       Sample::Associates = Class.new(Sample::Collection) do
 
-        attribute :group_id
+        attribute :associate_id
 
         model Sample::Associate
 
         def all
-          load([{id: group_id + 1}])
+          load([{id: associate_id + 1}])
         end
       end
 
       subject.class_eval do
         identity :id
-        attribute :group_id
+        attribute :associate_id
 
-        has_many :groups, -> { Sample::Associates.new(group_id: group_id) }
+        has_many :associates, -> { Sample::Associates.new(associate_id: associate_id) }
       end
     }
 
     it 'returns assoicated models' do
-      expected = Sample::Associates.new(group_id: 2).load([{id: 3}])
+      expected = Sample::Associates.new(associate_id: 2).load([{id: 3}])
 
-      expect(subject.new(group_id: 2).groups.all).to eq(expected)
+      expect(subject.new(associate_id: 2).associates.all).to eq(expected)
     end
 
     it 'accepts models in the writer' do
-      model = subject.new(group_id: 2)
-      groups_data = [ { id: 1 }, { id: 2 }]
-      groups = Sample::Associates.new.load(groups_data)
+      model = subject.new(associate_id: 2)
+      associates_data = [ { id: 1 }, { id: 2 }]
+      associates = Sample::Associates.new.load(associates_data)
 
-      model.groups = [ Sample::Associate.new(id: 1), Sample::Associate.new(id: 2) ]
+      model.associates = [ Sample::Associate.new(id: 1), Sample::Associate.new(id: 2) ]
 
-      expect(model.attributes[:groups]).to eq(groups_data)
-      expect(model.groups).to eq(groups)
+      expect(model.attributes[:associates]).to eq(associates_data)
+      expect(model.associates).to eq(associates)
     end
 
     it 'accepts raw data in the writer' do
-      model = subject.new(group_id: 2)
-      groups_data = [ { id: 1 }, { id: 2 }]
-      groups = Sample::Associates.new.load(groups_data)
+      model = subject.new(associate_id: 2)
+      associates_data = [ { id: 1 }, { id: 2 }]
+      associates = Sample::Associates.new.load(associates_data)
 
-      model.groups = groups_data
+      model.associates = associates_data
 
-      expect(model.attributes[:groups]).to eq(groups_data)
-      expect(model.groups).to eq(groups)
+      expect(model.attributes[:associates]).to eq(associates_data)
+      expect(model.associates).to eq(associates)
     end
   end
 end
