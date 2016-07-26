@@ -13,6 +13,7 @@ module Cistern
   require 'cistern/hash_support'
   require 'cistern/string'
   require 'cistern/mock'
+  require 'cistern/associations'
   require 'cistern/wait_for'
   require 'cistern/attributes'
   require 'cistern/collection'
