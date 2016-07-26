@@ -113,6 +113,21 @@ describe Cistern::Associations do
       expect(subject.new(associate_id: 2).associates.all).to eq(expected)
     end
 
+    it 'does not consider the associated collection loaded without records' do
+      model = subject.new(associate_id: 2)
+      model.associates = []
+
+      expect(model.associates.loaded).to eq(false)
+    end
+
+    it 'considers the associated collection loaded with records' do
+      model = subject.new(associate_id: 2)
+      model.associates = Sample::Associates.new(associate_id: 2).load([{id: 3}])
+
+      expect(model.associates.loaded).to eq(true)
+      expect(model.associates.records).to contain_exactly(Sample::Associate.new(id: 3))
+    end
+
     describe '{has_many}=' do
       it 'accepts models' do
         model = subject.new(associate_id: 2)
