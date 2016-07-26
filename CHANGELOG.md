@@ -2,7 +2,18 @@
 
 ## [Unreleased](https://github.com/lanej/cistern/tree/HEAD)
 
-[Full Changelog](https://github.com/lanej/cistern/compare/v2.4.1...HEAD)
+[Full Changelog](https://github.com/lanej/cistern/compare/v2.5.0...HEAD)
+
+**Implemented enhancements:**
+
+- Associations [\#66](https://github.com/lanej/cistern/pull/66) ([lanej](https://github.com/lanej))
+
+**Fixed bugs:**
+
+- fix\(model\): \#has\_many is not loaded without records present [\#67](https://github.com/lanej/cistern/pull/67) ([lanej](https://github.com/lanej))
+
+## [v2.5.0](https://github.com/lanej/cistern/tree/v2.5.0) (2016-07-19)
+[Full Changelog](https://github.com/lanej/cistern/compare/v2.4.1...v2.5.0)
 
 **Implemented enhancements:**
 
