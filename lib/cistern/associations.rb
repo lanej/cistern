@@ -29,7 +29,8 @@ module Cistern::Associations
       collection = instance_exec(&scope)
       records = attributes[name_sym] || []
 
-      collection.load(records)
+      collection.load(records) if records.any?
+      collection
     end
 
     define_method writer_method do |models|

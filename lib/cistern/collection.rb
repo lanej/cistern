@@ -55,6 +55,7 @@ module Cistern::Collection
   alias_method :build, :initialize
 
   def initialize(attributes = {})
+    @loaded = false
     merge_attributes(attributes)
   end
 
