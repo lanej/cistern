@@ -6,9 +6,10 @@
     <title>Cistern by lanej</title>
 
     <link rel="stylesheet" href="stylesheets/styles.css">
-    <link rel="stylesheet" href="stylesheets/github-light.css">
+    <link rel="stylesheet" href="stylesheets/github-dark.css">
     <script src="javascripts/scale.fix.js"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+
     <!--[if lt IE 9]>
     <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]-->
@@ -16,22 +17,20 @@
   <body>
     <div class="wrapper">
       <header>
-        <h1 class="header">Cistern</h1>
-        <p class="header">API client framework extracted from Fog</p>
-
+        <h1>Cistern</h1>
+        <p>API client framework extracted from Fog</p>
+        <p class="view"><a href="https://github.com/lanej/cistern">View the Project on GitHub <small>lanej/cistern</small></a></p>
         <ul>
-          <li class="download"><a class="buttons" href="https://github.com/lanej/cistern/zipball/master">Download ZIP</a></li>
-          <li class="download"><a class="buttons" href="https://github.com/lanej/cistern/tarball/master">Download TAR</a></li>
-          <li><a class="buttons github" href="https://github.com/lanej/cistern">View On GitHub</a></li>
+          <li><a href="https://github.com/lanej/cistern/zipball/master">Download <strong>ZIP File</strong></a></li>
+          <li><a href="https://github.com/lanej/cistern/tarball/master">Download <strong>TAR Ball</strong></a></li>
+          <li><a href="https://github.com/lanej/cistern">View On <strong>GitHub</strong></a></li>
         </ul>
-
-        <p class="header">This project is maintained by <a class="header name" href="https://github.com/lanej">lanej</a></p>
-
-
       </header>
       <section>
         <h1>
 <a id="cistern" class="anchor" href="#cistern" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Cistern</h1>
+
+<p><a href="https://gitter.im/lanej/cistern?utm_source=badge&amp;utm_medium=badge&amp;utm_campaign=pr-badge&amp;utm_content=badge"><img src="https://badges.gitter.im/lanej/cistern.svg" alt="Join the chat at https://gitter.im/lanej/cistern"></a></p>
 
 <p><a href="http://travis-ci.org/lanej/cistern"><img src="https://secure.travis-ci.org/lanej/cistern.png" alt="Build Status"></a>
 <a href="https://gemnasium.com/lanej/cistern.png"><img src="https://gemnasium.com/lanej/cistern.png" alt="Dependencies"></a>
@@ -429,14 +428,62 @@ post.data.views <span class="pl-c">#=&gt; 3</span></pre></div>
   <span class="pl-k">end</span>
 <span class="pl-k">end</span></pre></div>
 
+<h3>
+<a id="associations" class="anchor" href="#associations" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Associations</h3>
+
+<p>Associations allow the use of a resource's attributes to reference other resources.  They act as lazy loaded attributes
+and push any loaded data into the resource's <code>attributes</code>.</p>
+
+<p>There are two types of associations available.</p>
+
+<ul>
+<li>
+<code>belongs_to</code> references a specific resource and defines a reader.</li>
+<li>
+<code>has_many</code> references a collection of resources and defines a reader / writer.</li>
+</ul>
+
+<div class="highlight highlight-source-ruby"><pre><span class="pl-k">class</span> <span class="pl-en">Blog::Tag<span class="pl-e"> &lt; Blog::Model</span></span>
+  identity <span class="pl-c1">:id</span>
+  attribute <span class="pl-c1">:author_id</span>
+
+  has_many <span class="pl-c1">:posts</span> <span class="pl-k">-</span><span class="pl-k">&gt;</span> { cistern.posts(<span class="pl-c1">tag_id:</span> identity) }
+  belongs_to <span class="pl-c1">:creator</span> <span class="pl-k">-</span><span class="pl-k">&gt;</span> { cistern.authors.get(author_id) }
+<span class="pl-k">end</span></pre></div>
+
+<p>Relationships store the collection's attributes within the resources' attributes on write / load.</p>
+
+<div class="highlight highlight-source-ruby"><pre>tag <span class="pl-k">=</span> blog.tags.get(<span class="pl-s"><span class="pl-pds">'</span>ruby<span class="pl-pds">'</span></span>)
+tag.posts <span class="pl-k">=</span> blog.posts.load({<span class="pl-s"><span class="pl-pds">'</span>id<span class="pl-pds">'</span></span> =&gt; <span class="pl-c1">1</span>, <span class="pl-s"><span class="pl-pds">'</span>author_id<span class="pl-pds">'</span></span> =&gt; <span class="pl-s"><span class="pl-pds">'</span>2<span class="pl-pds">'</span></span>}, {<span class="pl-s"><span class="pl-pds">'</span>id<span class="pl-pds">'</span></span> =&gt; <span class="pl-c1">2</span>, <span class="pl-s"><span class="pl-pds">'</span>author_id<span class="pl-pds">'</span></span> =&gt; <span class="pl-c1">3</span>})
+tag.attributes[<span class="pl-c1">:posts</span>] <span class="pl-c">#=&gt; {'id' =&gt; 1, 'author_id' =&gt; '2'}, {'id' =&gt; 2, 'author_id' =&gt; 3}</span>
+
+tag.creator <span class="pl-k">=</span> blogs.author.get(<span class="pl-c1">name:</span> <span class="pl-s"><span class="pl-pds">'</span>phil<span class="pl-pds">'</span></span>)
+tag.attributes[<span class="pl-c1">:creator</span>] <span class="pl-c">#=&gt; { 'id' =&gt; 2, 'name' =&gt; 'phil' }</span></pre></div>
+
+<p>Foreign keys can be updated with with the association writer by aliasing the original writer and accessing the
+underlying attributes.</p>
+
+<div class="highlight highlight-source-ruby"><pre><span class="pl-c1">Blog</span>::<span class="pl-c1">Tag</span>.class_eval <span class="pl-k">do</span>
+  <span class="pl-k">alias</span> cistern_creator<span class="pl-k">=</span> creator<span class="pl-k">=</span>
+  <span class="pl-k">def</span> <span class="pl-en">creator=</span>(<span class="pl-smi">creator</span>)
+    <span class="pl-v">self</span>.cistern_creator <span class="pl-k">=</span> creator
+    <span class="pl-v">self</span>.author_id <span class="pl-k">=</span> attributes[<span class="pl-c1">:creator</span>][<span class="pl-c1">:id</span>]
+  <span class="pl-k">end</span>
+<span class="pl-k">end</span>
+
+tag <span class="pl-k">=</span> blog.tags.get(<span class="pl-s"><span class="pl-pds">'</span>ruby<span class="pl-pds">'</span></span>)
+tag.author_id <span class="pl-k">=</span> <span class="pl-c1">4</span>
+tag.creator <span class="pl-k">=</span> blogs.author.get(<span class="pl-c1">name:</span> <span class="pl-s"><span class="pl-pds">'</span>phil<span class="pl-pds">'</span></span>) <span class="pl-c">#=&gt; #&lt;Blog::Author id=2 name='phil'&gt;</span>
+tag.author_id <span class="pl-c">#=&gt; 2</span></pre></div>
+
 <h4>
 <a id="data" class="anchor" href="#data" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Data</h4>
 
 <p>A uniform interface for mock data is mixed into the <code>Mock</code> class by default.</p>
 
 <div class="highlight highlight-source-ruby"><pre><span class="pl-c1">Blog</span>.mock!
-client <span class="pl-k">=</span> <span class="pl-c1">Blog</span>.<span class="pl-k">new</span>     <span class="pl-c"># Blog::Mock</span>
-client.data                  <span class="pl-c"># Cistern::Data::Hash</span>
+client <span class="pl-k">=</span> <span class="pl-c1">Blog</span>.<span class="pl-k">new</span> <span class="pl-c"># Blog::Mock</span>
+client.data       <span class="pl-c"># Cistern::Data::Hash</span>
 client.data[<span class="pl-s"><span class="pl-pds">"</span>posts<span class="pl-pds">"</span></span>] <span class="pl-k">+=</span> [<span class="pl-s"><span class="pl-pds">"</span>x<span class="pl-pds">"</span></span>] <span class="pl-c"># ["x"]</span></pre></div>
 
 <p>Mock data is class-level by default</p>
@@ -447,7 +494,7 @@ client.data[<span class="pl-s"><span class="pl-pds">"</span>posts<span class="pl
 
 <div class="highlight highlight-source-ruby"><pre>client.data.object_id <span class="pl-c"># 70199868585600</span>
 client.reset!
-client.data[<span class="pl-s"><span class="pl-pds">"</span>posts<span class="pl-pds">"</span></span>]   <span class="pl-c"># []</span>
+client.data[<span class="pl-s"><span class="pl-pds">"</span>posts<span class="pl-pds">"</span></span>]  <span class="pl-c"># []</span>
 client.data.object_id <span class="pl-c"># 70199868566840</span></pre></div>
 
 <p><code>clear</code> removes existing keys and values but keeps the same object.</p>
@@ -584,12 +631,13 @@ post.dirty_attributes <span class="pl-c"># =&gt; {}</span></pre></div>
 <li>Create new Pull Request</li>
 </ol>
       </section>
-      <footer>
-        <p><small>Hosted on <a href="https://pages.github.com">GitHub Pages</a> using the Dinky theme</small></p>
-      </footer>
     </div>
+    <footer>
+      <p>Project maintained by <a href="https://github.com/lanej">lanej</a></p>
+      <p>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></p>
+    </footer>
     <!--[if !IE]><script>fixScale(document);</script><![endif]-->
-		          <script type="text/javascript">
+              <script type="text/javascript">
             var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
             document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
           </script>
