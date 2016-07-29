@@ -1,38 +1,29 @@
-<!doctype html>
-<html>
+<!DOCTYPE html>
+<html lang="en-us">
   <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <meta charset="UTF-8">
     <title>Cistern by lanej</title>
-
-    <link rel="stylesheet" href="stylesheets/styles.css">
-    <link rel="stylesheet" href="stylesheets/github-dark.css">
-    <script src="javascripts/scale.fix.js"></script>
-    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
-
-    <!--[if lt IE 9]>
-    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
-    <![endif]-->
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="stylesheets/normalize.css" media="screen">
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/github-light.css" media="screen">
   </head>
   <body>
-    <div class="wrapper">
-      <header>
-        <h1>Cistern</h1>
-        <p>API client framework extracted from Fog</p>
-        <p class="view"><a href="https://github.com/lanej/cistern">View the Project on GitHub <small>lanej/cistern</small></a></p>
-        <ul>
-          <li><a href="https://github.com/lanej/cistern/zipball/master">Download <strong>ZIP File</strong></a></li>
-          <li><a href="https://github.com/lanej/cistern/tarball/master">Download <strong>TAR Ball</strong></a></li>
-          <li><a href="https://github.com/lanej/cistern">View On <strong>GitHub</strong></a></li>
-        </ul>
-      </header>
-      <section>
-        <h1>
+    <section class="page-header">
+      <h1 class="project-name">Cistern</h1>
+      <h2 class="project-tagline">Ruby API client framework</h2>
+      <a href="https://github.com/lanej/cistern" class="btn">View on GitHub</a>
+      <a href="https://github.com/lanej/cistern/zipball/master" class="btn">Download .zip</a>
+      <a href="https://github.com/lanej/cistern/tarball/master" class="btn">Download .tar.gz</a>
+    </section>
+
+    <section class="main-content">
+      <h1>
 <a id="cistern" class="anchor" href="#cistern" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Cistern</h1>
 
-<p><a href="https://gitter.im/lanej/cistern?utm_source=badge&amp;utm_medium=badge&amp;utm_campaign=pr-badge&amp;utm_content=badge"><img src="https://badges.gitter.im/lanej/cistern.svg" alt="Join the chat at https://gitter.im/lanej/cistern"></a></p>
-
-<p><a href="http://travis-ci.org/lanej/cistern"><img src="https://secure.travis-ci.org/lanej/cistern.png" alt="Build Status"></a>
+<p><a href="https://gitter.im/lanej/cistern?utm_source=badge&amp;utm_medium=badge&amp;utm_campaign=pr-badge&amp;utm_content=badge"><img src="https://badges.gitter.im/lanej/cistern.svg" alt="Join the chat at https://gitter.im/lanej/cistern"></a>
+<a href="http://travis-ci.org/lanej/cistern"><img src="https://secure.travis-ci.org/lanej/cistern.png" alt="Build Status"></a>
 <a href="https://gemnasium.com/lanej/cistern.png"><img src="https://gemnasium.com/lanej/cistern.png" alt="Dependencies"></a>
 <a href="http://badge.fury.io/rb/cistern"><img src="https://badge.fury.io/rb/cistern.svg" alt="Gem Version"></a>
 <a href="https://codeclimate.com/github/lanej/cistern"><img src="https://codeclimate.com/github/lanej/cistern/badges/gpa.svg" alt="Code Climate"></a></p>
@@ -43,36 +34,11 @@
 <a id="usage" class="anchor" href="#usage" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Usage</h2>
 
 <h3>
-<a id="notice-cistern-30" class="anchor" href="#notice-cistern-30" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Notice: Cistern 3.0</h3>
+<a id="client" class="anchor" href="#client" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Client</h3>
 
-<p>Cistern 3.0 will change the way Cistern interacts with your <code>Request</code>, <code>Collection</code> and <code>Model</code> classes.</p>
+<p>This represents the remote service that you are wrapping.  It defines the client's namespace and initialization parameters.</p>
 
-<p>Prior to 3.0, your <code>Request</code>, <code>Collection</code> and <code>Model</code> classes would have inherited from <code>&lt;service&gt;::Client::Request</code>, <code>&lt;service&gt;::Client::Collection</code> and <code>&lt;service&gt;::Client::Model</code> classes, respectively.</p>
-
-<p>In cistern <code>~&gt; 3.0</code>, the default will be for <code>Request</code>, <code>Collection</code> and <code>Model</code> classes to instead include their respective <code>&lt;service&gt;::Client</code> modules.</p>
-
-<p>If you want to be forwards-compatible today, you can configure your client by using <code>Cistern::Client.with</code></p>
-
-<div class="highlight highlight-source-ruby"><pre><span class="pl-k">class</span> <span class="pl-en">Blog</span>
-  <span class="pl-k">include</span> <span class="pl-c1">Cistern</span>::<span class="pl-c1">Client</span>.with(<span class="pl-c1">interface:</span> <span class="pl-c1">:module</span>)
-<span class="pl-k">end</span></pre></div>
-
-<p>Now request classes would look like:</p>
-
-<div class="highlight highlight-source-ruby"><pre><span class="pl-k">class</span> <span class="pl-en">Blog::GetPost</span>
-  <span class="pl-k">include</span> <span class="pl-c1">Blog</span>::<span class="pl-c1">Request</span>
-
-  <span class="pl-k">def</span> <span class="pl-en">real</span>
-    <span class="pl-s"><span class="pl-pds">"</span>post<span class="pl-pds">"</span></span>
-  <span class="pl-k">end</span>
-<span class="pl-k">end</span></pre></div>
-
-<h3>
-<a id="service" class="anchor" href="#service" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Service</h3>
-
-<p>This represents the remote service that you are wrapping. If the service name is <code>blog</code> then a good name is <code>Blog</code>.</p>
-
-<p>Service initialization parameters are enumerated by <code>requires</code> and <code>recognizes</code>. Parameters defined using <code>recognizes</code> are optional.</p>
+<p>Client initialization parameters are enumerated by <code>requires</code> and <code>recognizes</code>. Parameters defined using <code>recognizes</code> are optional.</p>
 
 <div class="highlight highlight-source-ruby"><pre><span class="pl-c"># lib/blog.rb</span>
 <span class="pl-k">class</span> <span class="pl-en">Blog</span>
@@ -90,8 +56,7 @@
 <span class="pl-c1">Blog</span>.<span class="pl-k">new</span>(<span class="pl-c1">hmac_id:</span> <span class="pl-s"><span class="pl-pds">"</span>1<span class="pl-pds">"</span></span>, <span class="pl-c1">url:</span> <span class="pl-s"><span class="pl-pds">"</span>http://example.org<span class="pl-pds">"</span></span>)
 <span class="pl-c1">Blog</span>.<span class="pl-k">new</span>(<span class="pl-c1">hmac_id:</span> <span class="pl-s"><span class="pl-pds">"</span>1<span class="pl-pds">"</span></span>)</pre></div>
 
-<p>Cistern will define for you two classes, <code>Mock</code> and <code>Real</code>. Create the corresponding files and initialzers for your
-new service.</p>
+<p>Cistern will define for two namespaced classes, <code>Blog::Mock</code> and <code>Blog::Real</code>. Create the corresponding files and initialzers for your new service.</p>
 
 <div class="highlight highlight-source-ruby"><pre><span class="pl-c"># lib/blog/real.rb</span>
 <span class="pl-k">class</span> <span class="pl-en">Blog::Real</span>
@@ -127,39 +92,6 @@ fake <span class="pl-k">=</span> <span class="pl-c1">Blog</span>.<span class="pl
 <span class="pl-c1">Blog</span>.mocking?          <span class="pl-c"># false</span>
 real.is_a?(<span class="pl-c1">Blog</span>::<span class="pl-c1">Real</span>) <span class="pl-c"># true</span>
 fake.is_a?(<span class="pl-c1">Blog</span>::<span class="pl-c1">Mock</span>) <span class="pl-c"># true</span></pre></div>
-
-<h3>
-<a id="working-with-data" class="anchor" href="#working-with-data" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Working with data</h3>
-
-<p><code>Cistern::Hash</code> contains many useful functions for working with data normalization and transformation.</p>
-
-<p><strong>#stringify_keys</strong></p>
-
-<div class="highlight highlight-source-ruby"><pre><span class="pl-c"># anywhere</span>
-<span class="pl-c1">Cistern</span>::<span class="pl-c1">Hash</span>.stringify_keys({<span class="pl-c1">a:</span> <span class="pl-c1">1</span>, <span class="pl-c1">b:</span> <span class="pl-c1">2</span>}) <span class="pl-c">#=&gt; {'a' =&gt; 1, 'b' =&gt; 2}</span>
-<span class="pl-c"># within a Resource</span>
-hash_stringify_keys({<span class="pl-c1">a:</span> <span class="pl-c1">1</span>, <span class="pl-c1">b:</span> <span class="pl-c1">2</span>}) <span class="pl-c">#=&gt; {'a' =&gt; 1, 'b' =&gt; 2}</span></pre></div>
-
-<p><strong>#slice</strong></p>
-
-<div class="highlight highlight-source-ruby"><pre><span class="pl-c"># anywhere</span>
-<span class="pl-c1">Cistern</span>::<span class="pl-c1">Hash</span>.slice({<span class="pl-c1">a:</span> <span class="pl-c1">1</span>, <span class="pl-c1">b:</span> <span class="pl-c1">2</span>, <span class="pl-c1">c:</span> <span class="pl-c1">3</span>}, <span class="pl-c1">:a</span>, <span class="pl-c1">:c</span>) <span class="pl-c">#=&gt; {a: 1, c: 3}</span>
-<span class="pl-c"># within a Resource</span>
-hash_slice({<span class="pl-c1">a:</span> <span class="pl-c1">1</span>, <span class="pl-c1">b:</span> <span class="pl-c1">2</span>, <span class="pl-c1">c:</span> <span class="pl-c1">3</span>}, <span class="pl-c1">:a</span>, <span class="pl-c1">:c</span>) <span class="pl-c">#=&gt; {a: 1, c: 3}</span></pre></div>
-
-<p><strong>#except</strong></p>
-
-<div class="highlight highlight-source-ruby"><pre><span class="pl-c"># anywhere</span>
-<span class="pl-c1">Cistern</span>::<span class="pl-c1">Hash</span>.except({<span class="pl-c1">a:</span> <span class="pl-c1">1</span>, <span class="pl-c1">b:</span> <span class="pl-c1">2</span>}, <span class="pl-c1">:a</span>) <span class="pl-c">#=&gt; {b: 2}</span>
-<span class="pl-c"># within a Resource</span>
-hash_except({<span class="pl-c1">a:</span> <span class="pl-c1">1</span>, <span class="pl-c1">b:</span> <span class="pl-c1">2</span>}, <span class="pl-c1">:a</span>) <span class="pl-c">#=&gt; {b: 2}</span></pre></div>
-
-<p><strong>#except!</strong></p>
-
-<div class="highlight highlight-source-ruby"><pre><span class="pl-c"># same as #except but modify specified Hash in-place</span>
-<span class="pl-c1">Cistern</span>::<span class="pl-c1">Hash</span>.except!({<span class="pl-c1">:a</span> =&gt; <span class="pl-c1">1</span>, <span class="pl-c1">:b</span> =&gt; <span class="pl-c1">2</span>}, <span class="pl-c1">:a</span>) <span class="pl-c">#=&gt; {:b =&gt; 2}</span>
-<span class="pl-c"># within a Resource</span>
-hash_except!({<span class="pl-c1">:a</span> =&gt; <span class="pl-c1">1</span>, <span class="pl-c1">:b</span> =&gt; <span class="pl-c1">2</span>}, <span class="pl-c1">:a</span>) <span class="pl-c">#=&gt; {:b =&gt; 2}</span></pre></div>
 
 <h3>
 <a id="requests" class="anchor" href="#requests" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Requests</h3>
@@ -524,6 +456,39 @@ client.data.object_id         <span class="pl-c"># 70199868378300</span></pre></
   <span class="pl-k">end</span>
 <span class="pl-k">end</span></pre></div>
 
+<h3>
+<a id="working-with-data" class="anchor" href="#working-with-data" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Working with data</h3>
+
+<p><code>Cistern::Hash</code> contains many useful functions for working with data normalization and transformation.</p>
+
+<p><strong>#stringify_keys</strong></p>
+
+<div class="highlight highlight-source-ruby"><pre><span class="pl-c"># anywhere</span>
+<span class="pl-c1">Cistern</span>::<span class="pl-c1">Hash</span>.stringify_keys({<span class="pl-c1">a:</span> <span class="pl-c1">1</span>, <span class="pl-c1">b:</span> <span class="pl-c1">2</span>}) <span class="pl-c">#=&gt; {'a' =&gt; 1, 'b' =&gt; 2}</span>
+<span class="pl-c"># within a Resource</span>
+hash_stringify_keys({<span class="pl-c1">a:</span> <span class="pl-c1">1</span>, <span class="pl-c1">b:</span> <span class="pl-c1">2</span>}) <span class="pl-c">#=&gt; {'a' =&gt; 1, 'b' =&gt; 2}</span></pre></div>
+
+<p><strong>#slice</strong></p>
+
+<div class="highlight highlight-source-ruby"><pre><span class="pl-c"># anywhere</span>
+<span class="pl-c1">Cistern</span>::<span class="pl-c1">Hash</span>.slice({<span class="pl-c1">a:</span> <span class="pl-c1">1</span>, <span class="pl-c1">b:</span> <span class="pl-c1">2</span>, <span class="pl-c1">c:</span> <span class="pl-c1">3</span>}, <span class="pl-c1">:a</span>, <span class="pl-c1">:c</span>) <span class="pl-c">#=&gt; {a: 1, c: 3}</span>
+<span class="pl-c"># within a Resource</span>
+hash_slice({<span class="pl-c1">a:</span> <span class="pl-c1">1</span>, <span class="pl-c1">b:</span> <span class="pl-c1">2</span>, <span class="pl-c1">c:</span> <span class="pl-c1">3</span>}, <span class="pl-c1">:a</span>, <span class="pl-c1">:c</span>) <span class="pl-c">#=&gt; {a: 1, c: 3}</span></pre></div>
+
+<p><strong>#except</strong></p>
+
+<div class="highlight highlight-source-ruby"><pre><span class="pl-c"># anywhere</span>
+<span class="pl-c1">Cistern</span>::<span class="pl-c1">Hash</span>.except({<span class="pl-c1">a:</span> <span class="pl-c1">1</span>, <span class="pl-c1">b:</span> <span class="pl-c1">2</span>}, <span class="pl-c1">:a</span>) <span class="pl-c">#=&gt; {b: 2}</span>
+<span class="pl-c"># within a Resource</span>
+hash_except({<span class="pl-c1">a:</span> <span class="pl-c1">1</span>, <span class="pl-c1">b:</span> <span class="pl-c1">2</span>}, <span class="pl-c1">:a</span>) <span class="pl-c">#=&gt; {b: 2}</span></pre></div>
+
+<p><strong>#except!</strong></p>
+
+<div class="highlight highlight-source-ruby"><pre><span class="pl-c"># same as #except but modify specified Hash in-place</span>
+<span class="pl-c1">Cistern</span>::<span class="pl-c1">Hash</span>.except!({<span class="pl-c1">:a</span> =&gt; <span class="pl-c1">1</span>, <span class="pl-c1">:b</span> =&gt; <span class="pl-c1">2</span>}, <span class="pl-c1">:a</span>) <span class="pl-c">#=&gt; {:b =&gt; 2}</span>
+<span class="pl-c"># within a Resource</span>
+hash_except!({<span class="pl-c1">:a</span> =&gt; <span class="pl-c1">1</span>, <span class="pl-c1">:b</span> =&gt; <span class="pl-c1">2</span>}, <span class="pl-c1">:a</span>) <span class="pl-c">#=&gt; {:b =&gt; 2}</span></pre></div>
+
 <h4>
 <a id="storage" class="anchor" href="#storage" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Storage</h4>
 
@@ -607,11 +572,35 @@ post.dirty_attributes <span class="pl-c"># =&gt; {}</span></pre></div>
 <span class="pl-k">end</span></pre></div>
 
 <h2>
+<a id="-30" class="anchor" href="#-30" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>~&gt; 3.0</h2>
+
+<h3>
+<a id="client-definition" class="anchor" href="#client-definition" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Client definition</h3>
+
+<p>Default resource definition is done by inheritance.</p>
+
+<div class="highlight highlight-source-ruby"><pre><span class="pl-k">class</span> <span class="pl-en">Blog::Post<span class="pl-e"> &lt; Blog::Model</span></span>
+<span class="pl-k">end</span></pre></div>
+
+<p>In cistern 3, resource definition is done by module inclusion.</p>
+
+<div class="highlight highlight-source-ruby"><pre><span class="pl-k">class</span> <span class="pl-en">Blog::Post</span>
+  <span class="pl-k">include</span> <span class="pl-c1">Blog</span>::<span class="pl-c1">Post</span>
+<span class="pl-k">end</span></pre></div>
+
+<p>Prepare for cistern 3 by using <code>Cistern::Client.with(interface: :module)</code> when defining the client.</p>
+
+<div class="highlight highlight-source-ruby"><pre><span class="pl-k">class</span> <span class="pl-en">Blog</span>
+  <span class="pl-k">include</span> <span class="pl-c1">Cistern</span>::<span class="pl-c1">Client</span>.with(<span class="pl-c1">interface:</span> <span class="pl-c1">:module</span>)
+<span class="pl-k">end</span></pre></div>
+
+<h2>
 <a id="examples" class="anchor" href="#examples" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Examples</h2>
 
 <ul>
 <li><a href="https://github.com/lanej/zendesk2">zendesk2</a></li>
 <li><a href="https://github.com/lanej/you_track">you_track</a></li>
+<li><a href="https://github.com/engineyard/core-client-rb">ey-core</a></li>
 </ul>
 
 <h2>
@@ -630,14 +619,16 @@ post.dirty_attributes <span class="pl-c"># =&gt; {}</span></pre></div>
 <li>Push to the branch (<code>git push origin my-new-feature</code>)</li>
 <li>Create new Pull Request</li>
 </ol>
-      </section>
-    </div>
-    <footer>
-      <p>Project maintained by <a href="https://github.com/lanej">lanej</a></p>
-      <p>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></p>
-    </footer>
-    <!--[if !IE]><script>fixScale(document);</script><![endif]-->
-              <script type="text/javascript">
+
+      <footer class="site-footer">
+        <span class="site-footer-owner"><a href="https://github.com/lanej/cistern">Cistern</a> is maintained by <a href="https://github.com/lanej">lanej</a>.</span>
+
+        <span class="site-footer-credits">This page was generated by <a href="https://pages.github.com">GitHub Pages</a> using the <a href="https://github.com/jasonlong/cayman-theme">Cayman theme</a> by <a href="https://twitter.com/jasonlong">Jason Long</a>.</span>
+      </footer>
+
+    </section>
+
+            <script type="text/javascript">
             var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
             document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
           </script>
