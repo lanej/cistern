@@ -1,7 +1,6 @@
 # Cistern
 
 [![Join the chat at https://gitter.im/lanej/cistern](https://badges.gitter.im/lanej/cistern.svg)](https://gitter.im/lanej/cistern?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
-
 [![Build Status](https://secure.travis-ci.org/lanej/cistern.png)](http://travis-ci.org/lanej/cistern)
 [![Dependencies](https://gemnasium.com/lanej/cistern.png)](https://gemnasium.com/lanej/cistern.png)
 [![Gem Version](https://badge.fury.io/rb/cistern.svg)](http://badge.fury.io/rb/cistern)
