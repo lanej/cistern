@@ -10,40 +10,11 @@ Cistern helps you consistently build your API clients and faciliates building mo
 
 ## Usage
 
-### Notice: Cistern 3.0
+### Client
 
-Cistern 3.0 will change the way Cistern interacts with your `Request`, `Collection` and `Model` classes.
+This represents the remote service that you are wrapping.  It defines the client's namespace and initialization parameters.
 
-Prior to 3.0, your `Request`, `Collection` and `Model` classes would have inherited from `<service>::Client::Request`, `<service>::Client::Collection` and `<service>::Client::Model` classes, respectively.
-
-In cistern `~> 3.0`, the default will be for `Request`, `Collection` and `Model` classes to instead include their respective `<service>::Client` modules.
-
-If you want to be forwards-compatible today, you can configure your client by using `Cistern::Client.with`
-
-```ruby
-class Blog
-  include Cistern::Client.with(interface: :module)
-end
-```
-
-Now request classes would look like:
-
-```ruby
-class Blog::GetPost
-  include Blog::Request
-
-  def real
-    "post"
-  end
-end
-```
-
-
-### Service
-
-This represents the remote service that you are wrapping. If the service name is `blog` then a good name is `Blog`.
-
-Service initialization parameters are enumerated by `requires` and `recognizes`. Parameters defined using `recognizes` are optional.
+Client initialization parameters are enumerated by `requires` and `recognizes`. Parameters defined using `recognizes` are optional.
 
 ```ruby
 # lib/blog.rb
@@ -63,8 +34,7 @@ Blog.new(hmac_id: "1", url: "http://example.org")
 Blog.new(hmac_id: "1")
 ```
 
-Cistern will define for you two classes, `Mock` and `Real`. Create the corresponding files and initialzers for your
-new service.
+Cistern will define for two namespaced classes, `Blog::Mock` and `Blog::Real`. Create the corresponding files and initialzers for your new service.
 
 ```ruby
 # lib/blog/real.rb
@@ -105,48 +75,6 @@ Blog.mocking?          # false
 real.is_a?(Blog::Real) # true
 fake.is_a?(Blog::Mock) # true
 ```
-
-### Working with data
-
-`Cistern::Hash` contains many useful functions for working with data normalization and transformation.
-
-**#stringify_keys**
-
-```ruby
-# anywhere
-Cistern::Hash.stringify_keys({a: 1, b: 2}) #=> {'a' => 1, 'b' => 2}
-# within a Resource
-hash_stringify_keys({a: 1, b: 2}) #=> {'a' => 1, 'b' => 2}
-```
-
-**#slice**
-
-```ruby
-# anywhere
-Cistern::Hash.slice({a: 1, b: 2, c: 3}, :a, :c) #=> {a: 1, c: 3}
-# within a Resource
-hash_slice({a: 1, b: 2, c: 3}, :a, :c) #=> {a: 1, c: 3}
-```
-
-**#except**
-
-```ruby
-# anywhere
-Cistern::Hash.except({a: 1, b: 2}, :a) #=> {b: 2}
-# within a Resource
-hash_except({a: 1, b: 2}, :a) #=> {b: 2}
-```
-
-
-**#except!**
-
-```ruby
-# same as #except but modify specified Hash in-place
-Cistern::Hash.except!({:a => 1, :b => 2}, :a) #=> {:b => 2}
-# within a Resource
-hash_except!({:a => 1, :b => 2}, :a) #=> {:b => 2}
-```
-
 
 ### Requests
 
@@ -507,6 +435,48 @@ class Blog
 end
 ```
 
+### Working with data
+
+`Cistern::Hash` contains many useful functions for working with data normalization and transformation.
+
+**#stringify_keys**
+
+```ruby
+# anywhere
+Cistern::Hash.stringify_keys({a: 1, b: 2}) #=> {'a' => 1, 'b' => 2}
+# within a Resource
+hash_stringify_keys({a: 1, b: 2}) #=> {'a' => 1, 'b' => 2}
+```
+
+**#slice**
+
+```ruby
+# anywhere
+Cistern::Hash.slice({a: 1, b: 2, c: 3}, :a, :c) #=> {a: 1, c: 3}
+# within a Resource
+hash_slice({a: 1, b: 2, c: 3}, :a, :c) #=> {a: 1, c: 3}
+```
+
+**#except**
+
+```ruby
+# anywhere
+Cistern::Hash.except({a: 1, b: 2}, :a) #=> {b: 2}
+# within a Resource
+hash_except({a: 1, b: 2}, :a) #=> {b: 2}
+```
+
+
+**#except!**
+
+```ruby
+# same as #except but modify specified Hash in-place
+Cistern::Hash.except!({:a => 1, :b => 2}, :a) #=> {:b => 2}
+# within a Resource
+hash_except!({:a => 1, :b => 2}, :a) #=> {:b => 2}
+```
+
+
 #### Storage
 
 Currently supported storage backends are:
@@ -590,10 +560,39 @@ class Blog::GetPost
 end
 ```
 
+## ~> 3.0
+
+### Client definition
+
+Default resource definition is done by inheritance.
+
+```ruby
+class Blog::Post < Blog::Model
+end
+```
+
+In cistern 3, resource definition is done by module inclusion.
+
+```ruby
+class Blog::Post
+  include Blog::Post
+end
+```
+
+Prepare for cistern 3 by using `Cistern::Client.with(interface: :module)` when defining the client.
+
+```ruby
+class Blog
+  include Cistern::Client.with(interface: :module)
+end
+```
+
 ## Examples
 
 * [zendesk2](https://github.com/lanej/zendesk2)
 * [you_track](https://github.com/lanej/you_track)
+* [ey-core](https://github.com/engineyard/core-client-rb)
+
 
 ## Releasing
 
