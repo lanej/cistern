@@ -85,10 +85,18 @@ module Cistern::Client
       class Real
         def initialize(options={})
         end
+
+        def mocking?
+          false
+        end
       end
 
       class Mock
         def initialize(options={})
+        end
+
+        def mocking?
+          true
         end
       end
 

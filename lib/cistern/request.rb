@@ -6,17 +6,15 @@ module Cistern::Request
       fail ArgumentError, "can't turn anonymous class into a Cistern request"
     end
 
-    cistern::Mock.module_eval <<-EOS, __FILE__, __LINE__
+    method = <<-EOS
       def #{name}(*args)
-        #{klass}.new(self)._mock(*args)
+        #{klass}.new(self).call(*args)
       end
     EOS
 
-    cistern::Real.module_eval <<-EOS, __FILE__, __LINE__
-      def #{name}(*args)
-        #{klass}.new(self)._real(*args)
-      end
-    EOS
+
+    cistern::Mock.module_eval method, __FILE__, __LINE__
+    cistern::Real.module_eval method, __FILE__, __LINE__
   end
 
   def self.service_request(*args)
@@ -39,6 +37,11 @@ module Cistern::Request
 
   def initialize(cistern)
     @cistern = cistern
+  end
+
+  # @fixme remove _{mock,real} methods and call {mock,real} directly before 3.0 release
+  def call(*args)
+    cistern.mocking? ? _mock(*args) : _real(*args)
   end
 
   module ClassMethods
