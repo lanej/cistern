@@ -39,9 +39,17 @@ module Cistern::Request
     @cistern = cistern
   end
 
-  # @fixme remove _{mock,real} methods and call {mock,real} directly before 3.0 release
+  # @fixme remove _{mock,real} methods and call {mock,real} directly before 3.0 release.
   def call(*args)
-    cistern.mocking? ? _mock(*args) : _real(*args)
+    cistern.mocking? ? mock(*args) : real(*args)
+  end
+
+  def real(*)
+    raise NotImplementedError
+  end
+
+  def mock(*)
+    raise NotImplementedError
   end
 
   module ClassMethods

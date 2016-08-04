@@ -192,14 +192,6 @@ module Cistern::Client
 
           super
         end
-
-        def _mock(*args)
-          mock(*args)
-        end
-
-        def _real(*args)
-          real(*args)
-        end
       end
     EOS
 
