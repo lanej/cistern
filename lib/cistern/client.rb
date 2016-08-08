@@ -44,7 +44,7 @@ module Cistern::Client
 
     if interface == :class
       Cistern.deprecation(
-        %q{class' interface is deprecated. Use `include Cistern::Client.with(interface: :module). See https://github.com/lanej/cistern#custom-architecture},
+        %q{'class' interface is deprecated. Use `include Cistern::Client.with(interface: :module). See https://github.com/lanej/cistern#custom-architecture},
         caller[2],
       )
     end
