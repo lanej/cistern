@@ -16,6 +16,7 @@ RSpec.configure do |rspec|
   else
     rspec.filter_run_excluding(:coverage)
   end
+
   rspec.around(:each, :deprecated) do |example|
     original_value = Cistern.deprecation_warnings?
     Cistern.deprecation_warnings = false

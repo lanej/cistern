@@ -1,6 +1,21 @@
 module Cistern::Request
   include Cistern::HashSupport
 
+  module ClassMethods
+    # @deprecated Use {#cistern_method} instead
+    def service_method(name = nil)
+      Cistern.deprecation(
+        '#service_method is deprecated.  Please use #cistern_method',
+        caller[0]
+      )
+      @_cistern_method ||= name
+    end
+
+    def cistern_method(name = nil)
+      @_cistern_method ||= name
+    end
+  end
+
   def self.cistern_request(cistern, klass, name)
     unless klass.name || klass.cistern_method
       fail ArgumentError, "can't turn anonymous class into a Cistern request"
@@ -41,7 +56,7 @@ module Cistern::Request
 
   # @fixme remove _{mock,real} methods and call {mock,real} directly before 3.0 release.
   def call(*args)
-    cistern.mocking? ? mock(*args) : real(*args)
+    cistern.mocking? ? dispatch(:mock, *args) : dispatch(:real, *args)
   end
 
   def real(*)
@@ -52,18 +67,20 @@ module Cistern::Request
     raise NotImplementedError
   end
 
-  module ClassMethods
-    # @deprecated Use {#cistern_method} instead
-    def service_method(name = nil)
+  private
+
+  def dispatch(to, *args)
+    legacy_method = :"_#{to}"
+
+    if respond_to?(legacy_method)
       Cistern.deprecation(
-        '#service_method is deprecated.  Please use #cistern_method',
+        '#_mock is deprecated.  Please use #mock and/or #call. See https://github.com/lanej/cistern#request-dispatch',
         caller[0]
       )
-      @_cistern_method ||= name
-    end
 
-    def cistern_method(name = nil)
-      @_cistern_method ||= name
+      public_send(legacy_method, *args)
+    else
+      public_send(to, *args)
     end
   end
 end

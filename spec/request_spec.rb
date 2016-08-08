@@ -46,8 +46,28 @@ describe 'Cistern::Request' do
   end
 
   describe 'deprecation', :deprecated do
+    it 'calls _mock and _real if present' do
+      class Sample::ListDeprecations < Sample::Request
+        def _mock
+          :_mock
+        end
+
+        def real
+          :real
+        end
+      end
+
+      actual = Sample.new.list_deprecations
+      expect(actual).to eq(:real)
+
+      Sample.mock!
+
+      actual = Sample.new.list_deprecations
+      expect(actual).to eq(:_mock)
+    end
+
     it 'responds to #service' do
-      class ListDeprecations < Sample::Request
+      class Sample::ListDeprecations < Sample::Request
         def real
           self
         end
