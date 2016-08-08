@@ -83,7 +83,9 @@ Requests are defined by subclassing `#{service}::Request`.
 * `cistern` represents the associated `Blog` instance.
 
 ```ruby
-class Blog::GetPost < Blog::Request
+class Blog::GetPost
+  include Blog::Request
+
   def real(params)
     # make a real request
     "i'm real"
@@ -101,7 +103,9 @@ Blog.new.get_post # "i'm real"
 The `#cistern_method` function allows you to specify the name of the generated method.
 
 ```ruby
-class Blog::GetPosts < Blog::Request
+class Blog::GetPosts
+  include Blog::Request
+
   cistern_method :get_all_the_posts
 
   def real(params)
@@ -193,7 +197,8 @@ Cistern attributes are designed to make your model flexible and developer friend
 For example:
 
 ```ruby
-class Blog::Post < Blog::Model
+class Blog::Post
+  include Blog::Model
   identity :id, type: :integer
 
   attribute :body
@@ -301,7 +306,8 @@ post.data.views #=> 3
 * `load` consumes an Array of data and constructs matching `model` instances
 
 ```ruby
-class Blog::Posts < Blog::Collection
+class Blog::Posts
+  include Blog::Collection
 
   attribute :count, type: :integer
 
@@ -344,7 +350,9 @@ There are two types of associations available.
 * `has_many` references a collection of resources and defines a reader / writer.
 
 ```ruby
-class Blog::Tag < Blog::Model
+class Blog::Tag
+  include Blog::Model
+
   identity :id
   attribute :author_id
 
