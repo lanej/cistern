@@ -54,9 +54,8 @@ module Cistern::Request
     @cistern = cistern
   end
 
-  # @fixme remove _{mock,real} methods and call {mock,real} directly before 3.0 release.
   def call(*args)
-    cistern.mocking? ? dispatch(:mock, *args) : dispatch(:real, *args)
+    dispatch(*args)
   end
 
   def real(*)
@@ -67,9 +66,12 @@ module Cistern::Request
     raise NotImplementedError
   end
 
-  private
+  protected
 
-  def dispatch(to, *args)
+  # @fixme remove _{mock,real} methods and call {mock,real} directly before 3.0 release.
+  def dispatch(*args)
+    to = cistern.mocking? ? :mock : :real
+
     legacy_method = :"_#{to}"
 
     if respond_to?(legacy_method)
