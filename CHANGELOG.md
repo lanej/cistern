@@ -1,5 +1,14 @@
 # Change Log
 
+## [v2.7.0](https://github.com/lanej/cistern/tree/v2.7.0) (2016-08-10)
+[Full Changelog](https://github.com/lanej/cistern/compare/v2.6.0...v2.7.0)
+
+**Merged pull requests:**
+
+- fix\(singular\): add associations support [\#70](https://github.com/lanej/cistern/pull/70) ([lanej](https://github.com/lanej))
+- refactor\(request\): cleanup and document interface [\#69](https://github.com/lanej/cistern/pull/69) ([lanej](https://github.com/lanej))
+- Add a Gitter chat badge to README.md [\#68](https://github.com/lanej/cistern/pull/68) ([gitter-badger](https://github.com/gitter-badger))
+
 ## [v2.6.0](https://github.com/lanej/cistern/tree/v2.6.0) (2016-07-26)
 [Full Changelog](https://github.com/lanej/cistern/compare/v2.5.0...v2.6.0)
 
