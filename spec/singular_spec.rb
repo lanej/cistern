@@ -6,6 +6,8 @@ describe 'Cistern::Singular' do
       attribute :name, type: :string
       attribute :count, type: :number
 
+      belongs_to :entity, -> { cistern.settings(name: '1') }
+
       def save
         result = @@settings = attributes.merge(dirty_attributes)
 
@@ -30,6 +32,10 @@ describe 'Cistern::Singular' do
 
       expect(sample.service).to eq(sample.cistern)
     end
+  end
+
+  it 'allows associations' do
+    expect(service.settings.load.entity.name).to eq('1')
   end
 
   it 'reloads' do
