@@ -15,6 +15,7 @@ module Cistern::Singular
     klass.send(:extend, Cistern::Attributes::ClassMethods)
     klass.send(:include, Cistern::Attributes::InstanceMethods)
     klass.send(:extend, Cistern::Model::ClassMethods)
+    klass.send(:extend, Cistern::Associations)
   end
 
   def collection
