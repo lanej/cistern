@@ -1,57 +1,79 @@
 require 'spec_helper'
 
 describe 'Cistern::Request' do
-  class RequestService
-    include Cistern::Client
+  before {
+    Sample.class_eval do
+      recognizes :key
+    end
 
-    recognizes :key
-
-    class Real
+    Sample::Real.class_eval do
       attr_reader :service_args
 
       def initialize(*args)
         @service_args = args
       end
     end
-  end
+  }
 
-  # @todo Sample::Service.request
-  class ListSamples < RequestService::Request
-    cistern_method :list_all_samples
+  describe '#cistern_method' do
+    it 'remaps the client request method' do
+      class ListSamples < Sample::Request
+        cistern_method :list_all_samples
+      end
 
-    def real(*args)
-      cistern.service_args + args + ['real']
-    end
-
-    def mock(*args)
-      args + ['mock']
+      expect(Sample.new).to respond_to(:list_all_samples)
+      expect(Sample.new).not_to respond_to(:list_samples)
     end
   end
 
-  it 'should execute a new-style request' do
-    expect(RequestService.new.list_all_samples('sample1')).to eq([{}, 'sample1', 'real'])
-    expect(RequestService::Real.new.list_all_samples('sample2')).to eq(%w(sample2 real))
-    expect(RequestService::Mock.new.list_all_samples('sample3')).to eq(%w(sample3 mock))
+  it 'calls the appropriate method' do
+    class GetSamples < Sample::Request
+      def real(*args)
+        cistern.service_args + args + ['real']
+      end
+
+      def mock(*args)
+        args + ['mock']
+      end
+    end
+
+    expect(Sample.new.get_samples('sample1')).to eq([{}, 'sample1', 'real'])
+    expect(Sample::Real.new.get_samples('sample2')).to eq(%w(sample2 real))
+    expect(Sample::Mock.new.get_samples('sample3')).to eq(%w(sample3 mock))
 
     # service access
-    expect(RequestService.new(key: 'value').list_all_samples('stat')).to eq([{ key: 'value' }, 'stat', 'real'])
+    expect(Sample.new(key: 'value').get_samples('stat')).to eq([{ key: 'value' }, 'stat', 'real'])
   end
 
   describe 'deprecation', :deprecated do
-    class DeprecatedRequestService
-      include Cistern::Client
+    it 'calls _mock and _real if present' do
+      class Sample::ListDeprecations < Sample::Request
+        def _mock
+          :_mock
+        end
+
+        def real
+          :real
+        end
+      end
+
+      actual = Sample.new.list_deprecations
+      expect(actual).to eq(:real)
+
+      Sample.mock!
+
+      actual = Sample.new.list_deprecations
+      expect(actual).to eq(:_mock)
     end
 
     it 'responds to #service' do
-      class ListDeprecations < DeprecatedRequestService::Request
-        service_method :list_deprecations
-
+      class Sample::ListDeprecations < Sample::Request
         def real
           self
         end
       end
 
-      sample = DeprecatedRequestService.new.list_deprecations
+      sample = Sample.new.list_deprecations
       expect(sample.service).to eq(sample.cistern)
     end
   end

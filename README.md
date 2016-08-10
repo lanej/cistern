@@ -81,27 +81,64 @@ fake.is_a?(Blog::Mock) # true
 Requests are defined by subclassing `#{service}::Request`.
 
 * `cistern` represents the associated `Blog` instance.
+* `#call` represents the primary entrypoint.  Invoked when calling `client#{request_method}`.
+* `#dispatch` determines which method to call. (`#mock` or `#real`)
+
+For example:
 
 ```ruby
-class Blog::GetPost < Blog::Request
-  def real(params)
-    # make a real request
-    "i'm real"
+class Blog::UpdatePost
+  include Blog::Request
+
+  def real(id, parameters)
+    cistern.connection.patch("/post/#{id}", parameters)
   end
 
-  def mock(params)
-    # return a fake response
-    "imposter!"
+  def mock(id, parameters)
+    post = cistern.data[:posts].fetch(id)
+
+    post.merge!(stringify_keys(parameters))
+
+    response(post: post)
   end
 end
+```
 
-Blog.new.get_post # "i'm real"
+However, if you want to add some preprocessing to your request's arguments override `#call` and call `#dispatch`.  You
+can also alter the response method's signatures based on the arguments provided to `#dispatch`.
+
+
+```ruby
+class Blog::UpdatePost
+  include Blog::Request
+
+  attr_reader :parameters
+
+  def call(post_id, parameters)
+    @parameters = stringify_keys(parameters)
+    dispatch(Integer(post_id))
+  end
+
+  def real(id)
+    cistern.connection.patch("/post/#{id}", parameters)
+  end
+
+  def mock(id)
+    post = cistern.data[:posts].fetch(id)
+
+    post.merge!(parameters)
+
+    response(post: post)
+  end
+end
 ```
 
 The `#cistern_method` function allows you to specify the name of the generated method.
 
 ```ruby
-class Blog::GetPosts < Blog::Request
+class Blog::GetPosts
+  include Blog::Request
+
   cistern_method :get_all_the_posts
 
   def real(params)
@@ -193,7 +230,8 @@ Cistern attributes are designed to make your model flexible and developer friend
 For example:
 
 ```ruby
-class Blog::Post < Blog::Model
+class Blog::Post
+  include Blog::Model
   identity :id, type: :integer
 
   attribute :body
@@ -301,7 +339,8 @@ post.data.views #=> 3
 * `load` consumes an Array of data and constructs matching `model` instances
 
 ```ruby
-class Blog::Posts < Blog::Collection
+class Blog::Posts
+  include Blog::Collection
 
   attribute :count, type: :integer
 
@@ -344,7 +383,9 @@ There are two types of associations available.
 * `has_many` references a collection of resources and defines a reader / writer.
 
 ```ruby
-class Blog::Tag < Blog::Model
+class Blog::Tag
+  include Blog::Model
+
   identity :id
   attribute :author_id
 
@@ -561,6 +602,42 @@ end
 ```
 
 ## ~> 3.0
+
+### Request Dispatch
+
+Default request interface passes through `#_mock` and `#_real` depending on the client mode.
+
+```ruby
+class Blog::GetPost
+  include Blog::Request
+
+  def setup(post_id, parameters)
+    [post_id, stringify_keys(parameters)]
+  end
+
+  def _mock(*args)
+    mock(*setup(*args))
+  end
+
+  def _real(post_id, parameters)
+    real(*setup(*args))
+  end
+end
+```
+
+In cistern 3, requests pass through `#call` in both modes. `#dispatch` is responsible for determining the mode and
+calling the appropriate method.
+
+```ruby
+class Blog::GetPost
+  include Blog::Request
+
+  def call(post_id, parameters)
+    normalized_parameters = stringify_keys(parameters)
+    dispatch(post_id, normalized_parameters)
+  end
+end
+```
 
 ### Client definition
 

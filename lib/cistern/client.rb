@@ -44,7 +44,7 @@ module Cistern::Client
 
     if interface == :class
       Cistern.deprecation(
-        %q{class' interface is deprecated. Use `include Cistern::Client.with(interface: :module). See https://github.com/lanej/cistern#custom-architecture},
+        %q{'class' interface is deprecated. Use `include Cistern::Client.with(interface: :module). See https://github.com/lanej/cistern#custom-architecture},
         caller[2],
       )
     end
@@ -85,10 +85,18 @@ module Cistern::Client
       class Real
         def initialize(options={})
         end
+
+        def mocking?
+          false
+        end
       end
 
       class Mock
         def initialize(options={})
+        end
+
+        def mocking?
+          true
         end
       end
 
@@ -183,14 +191,6 @@ module Cistern::Client
           cistern.requests << klass
 
           super
-        end
-
-        def _mock(*args)
-          mock(*args)
-        end
-
-        def _real(*args)
-          real(*args)
         end
       end
     EOS
