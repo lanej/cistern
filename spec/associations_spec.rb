@@ -47,10 +47,20 @@ describe Cistern::Associations do
 
     it 'accepts attribute options' do
       subject.class_eval do
-        belongs_to :other_associates, -> { Sample::Associates.new }, alias: 'others'
+        belongs_to :other_associates, -> { Sample::Associate.new(id: 3) }, alias: 'others'
       end
 
       expect(subject.attributes[:other_associates][:aliases]).to contain_exactly(:others)
+    end
+
+    it 'accepts a scope in block form' do
+      subject.class_eval do
+        belongs_to :other_associates, alias: 'others' do
+          Sample::Associate.new(id: 3)
+        end
+      end
+
+      expect(subject.new.other_associates).to eq(Sample::Associate.new(id: 3))
     end
 
     describe '{belongs_to}=' do
@@ -142,6 +152,16 @@ describe Cistern::Associations do
       end
 
       expect(subject.attributes[:other_associates][:aliases]).to contain_exactly(:others)
+    end
+
+    it 'accepts a scope in block form' do
+      subject.class_eval do
+        has_many :other_associates, alias: 'others' do
+          Sample::Associates.new(associate_id: 1)
+        end
+      end
+
+      expect(subject.new.other_associates).to eq(Sample::Associates.new(associate_id: 1))
     end
 
     describe '{has_many}=' do
