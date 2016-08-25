@@ -76,6 +76,59 @@ real.is_a?(Blog::Real) # true
 fake.is_a?(Blog::Mock) # true
 ```
 
+#### Data
+
+A uniform interface for mock data is mixed into the `Mock` class by default.
+
+```ruby
+Blog.mock!
+client = Blog.new # Blog::Mock
+client.data       # Cistern::Data::Hash
+client.data["posts"] += ["x"] # ["x"]
+```
+
+Mock data is class-level by default
+
+```ruby
+Blog::Mock.data["posts"] # ["x"]
+```
+
+`reset!` dimisses the `data` object.
+
+```ruby
+client.data.object_id # 70199868585600
+client.reset!
+client.data["posts"]  # []
+client.data.object_id # 70199868566840
+```
+
+`clear` removes existing keys and values but keeps the same object.
+
+```ruby
+client.data["posts"] += ["y"] # ["y"]
+client.data.object_id         # 70199868378300
+client.clear
+client.data["posts"]          # []
+client.data.object_id         # 70199868378300
+```
+
+* `store` and `[]=` write
+* `fetch` and `[]` read
+
+You can make the service bypass Cistern's mock data structures by simply creating a `self.data` function in your service `Mock` declaration.
+
+```ruby
+class Blog
+  include Cistern::Client
+
+  class Mock
+    def self.data
+      @data ||= {}
+    end
+  end
+end
+```
+
 ### Requests
 
 Requests are defined by subclassing `#{service}::Request`.
@@ -421,59 +474,6 @@ tag = blog.tags.get('ruby')
 tag.author_id = 4
 tag.creator = blogs.author.get(name: 'phil') #=> #<Blog::Author id=2 name='phil'>
 tag.author_id #=> 2
-```
-
-#### Data
-
-A uniform interface for mock data is mixed into the `Mock` class by default.
-
-```ruby
-Blog.mock!
-client = Blog.new # Blog::Mock
-client.data       # Cistern::Data::Hash
-client.data["posts"] += ["x"] # ["x"]
-```
-
-Mock data is class-level by default
-
-```ruby
-Blog::Mock.data["posts"] # ["x"]
-```
-
-`reset!` dimisses the `data` object.
-
-```ruby
-client.data.object_id # 70199868585600
-client.reset!
-client.data["posts"]  # []
-client.data.object_id # 70199868566840
-```
-
-`clear` removes existing keys and values but keeps the same object.
-
-```ruby
-client.data["posts"] += ["y"] # ["y"]
-client.data.object_id         # 70199868378300
-client.clear
-client.data["posts"]          # []
-client.data.object_id         # 70199868378300
-```
-
-* `store` and `[]=` write
-* `fetch` and `[]` read
-
-You can make the service bypass Cistern's mock data structures by simply creating a `self.data` function in your service `Mock` declaration.
-
-```ruby
-class Blog
-  include Cistern::Client
-
-  class Mock
-    def self.data
-      @data ||= {}
-    end
-  end
-end
 ```
 
 ### Working with data
