@@ -45,6 +45,14 @@ describe Cistern::Associations do
       expect(sample.associate).to eq(belongs_to)
     end
 
+    it 'accepts attribute options' do
+      subject.class_eval do
+        belongs_to :other_associates, -> { Sample::Associates.new }, alias: 'others'
+      end
+
+      expect(subject.attributes[:other_associates][:aliases]).to contain_exactly(:others)
+    end
+
     describe '{belongs_to}=' do
       it 'accepts a model' do
         sample = subject.new(id: 1, associate_id: 2)
@@ -126,6 +134,14 @@ describe Cistern::Associations do
 
       expect(model.associates.loaded).to eq(true)
       expect(model.associates.records).to contain_exactly(Sample::Associate.new(id: 3))
+    end
+
+    it 'accepts attribute options' do
+      subject.class_eval do
+        has_many :other_associates, -> { Sample::Associates.new }, alias: 'others'
+      end
+
+      expect(subject.attributes[:other_associates][:aliases]).to contain_exactly(:others)
     end
 
     describe '{has_many}=' do
