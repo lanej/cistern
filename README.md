@@ -447,6 +447,28 @@ class Blog::Tag
 end
 ```
 
+Resource blocks can be given as an argument
+
+```ruby
+has_many :posts, -> { cistern.posts(tag_id: identity) }
+```
+
+or a method block
+
+```ruby
+has_many :posts do
+  cistern.posts(tag_id: identity)
+end
+```
+
+Attribute options are available.
+
+```ruby
+has_many :posts, alias: :tag_posts do
+  cistern.posts(tag_id: identity)
+end
+```
+
 Relationships store the collection's attributes within the resources' attributes on write / load.
 
 ```ruby
