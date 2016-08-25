@@ -17,13 +17,16 @@ module Cistern::Associations
   #     identity :registration_id
   #     has_many :lawyers, -> { cistern.associates(firm_id: identity) }
   #    end
-  def has_many(name, scope)
+  def has_many(name, *args, &block)
     name_sym = name.to_sym
 
     reader_method = name
     writer_method = "#{name}="
 
-    attribute name, type: :array
+    options = args.last.is_a?(::Hash) ? args.pop : {}
+    scope = args.first || block
+
+    attribute name, options.merge(type: :array)
 
     define_method reader_method do
       collection = instance_exec(&scope)
@@ -51,16 +54,19 @@ module Cistern::Associations
   #     identity :registration_id
   #     belongs_to :leader, -> { cistern.employees.get(:ceo) }
   #    end
-  def belongs_to(name, block)
+  def belongs_to(name, *args, &block)
     name_sym = name.to_sym
 
     reader_method = name
     writer_method = "#{name}="
 
-    attribute name_sym
+    options = args.last.is_a?(::Hash) ? args.pop : {}
+    scope = args.first || block
+
+    attribute name_sym, options
 
     define_method reader_method do
-      model = instance_exec(&block)
+      model = instance_exec(&scope)
       attributes[name_sym] = model.attributes
       model
     end
