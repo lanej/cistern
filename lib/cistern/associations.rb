@@ -1,6 +1,16 @@
 # frozen_string_literal: true
 module Cistern::Associations
 
+  def self.extended(klass)
+    def klass.association_overlay
+      @association_overlay ||= const_set(:Associations, Module.new)
+    end
+
+    klass.include(klass.association_overlay)
+
+    super
+  end
+
   # Lists the associations defined on the resource
   # @return [Hash{Symbol=>Array}] mapping of association type to name
   def associations
@@ -26,19 +36,23 @@ module Cistern::Associations
     options = args.last.is_a?(::Hash) ? args.pop : {}
     scope = args.first || block
 
-    attribute name, options.merge(type: :array)
+    attribute name_sym, options.merge(writer: false, reader: false, type: :array)
 
-    define_method reader_method do
-      collection = instance_exec(&scope)
-      records = attributes[name_sym] || []
+    association_overlay.module_eval do
+      define_method reader_method do
+        collection = instance_exec(&scope)
+        records = attributes[name_sym] || []
 
-      collection.load(records) if records.any?
-      collection
+        collection.load(records) if records.any?
+        collection
+      end
     end
 
-    define_method writer_method do |models|
-      attributes[name] = Array(models).map do |model|
-        model.respond_to?(:attributes) ? model.attributes : model
+    association_overlay.module_eval do
+      define_method writer_method do |models|
+        attributes[name] = Array(models).map do |model|
+          model.respond_to?(:attributes) ? model.attributes : model
+        end
       end
     end
 
@@ -63,18 +77,22 @@ module Cistern::Associations
     options = args.last.is_a?(::Hash) ? args.pop : {}
     scope = args.first || block
 
-    attribute name_sym, options
+    attribute name_sym, options.merge(writer: false, reader: false)
 
-    define_method reader_method do
-      model = instance_exec(&scope)
-      attributes[name_sym] = model.attributes
-      model
+    association_overlay.module_eval do
+      define_method reader_method do
+        model = instance_exec(&scope)
+        attributes[name_sym] = model.attributes
+        model
+      end
     end
 
-    define_method writer_method do |model|
-      data = model.respond_to?(:attributes) ? model.attributes : model
-      attributes[name_sym] = data
-      model
+    association_overlay.module_eval do
+      define_method writer_method do |model|
+        data = model.respond_to?(:attributes) ? model.attributes : model
+        attributes[name_sym] = data
+        model
+      end
     end
 
     associations[:belongs_to] << name_sym
