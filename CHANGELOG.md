@@ -1,8 +1,7 @@
 # Change Log
 
-## [Unreleased](https://github.com/lanej/cistern/tree/HEAD)
-
-[Full Changelog](https://github.com/lanej/cistern/compare/v2.7.0...HEAD)
+## [v2.7.1](https://github.com/lanej/cistern/tree/v2.7.1) (2016-08-26)
+[Full Changelog](https://github.com/lanej/cistern/compare/v2.7.0...v2.7.1)
 
 **Implemented enhancements:**
 
