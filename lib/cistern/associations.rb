@@ -6,7 +6,7 @@ module Cistern::Associations
       @association_overlay ||= const_set(:Associations, Module.new)
     end
 
-    klass.include(klass.association_overlay)
+    klass.send(:include, klass.association_overlay)
 
     super
   end
