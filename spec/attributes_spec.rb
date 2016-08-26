@@ -226,6 +226,24 @@ describe Cistern::Attributes, 'parsing' do
     expect(subject.new(default: 'now im a different squash').default).to eq('now im a different squash')
   end
 
+  it 'can skip reader generation' do
+    subject.class_eval do
+      attribute :default, reader: false
+    end
+
+    expect(subject.new).not_to respond_to(:default)
+    expect(subject.new).to respond_to(:default=)
+  end
+
+  it 'can skip writer generation' do
+    subject.class_eval do
+      attribute :default, writer: false
+    end
+
+    expect(subject.new).to respond_to(:default)
+    expect(subject.new).not_to respond_to(:default=)
+  end
+
   context 'allowing the same alias for multiple attributes' do
     before {
       subject.class_eval do

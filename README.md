@@ -405,14 +405,12 @@ tag.creator = blogs.author.get(name: 'phil')
 tag.attributes[:creator] #=> { 'id' => 2, 'name' => 'phil' }
 ```
 
-Foreign keys can be updated with with the association writer by aliasing the original writer and accessing the
-underlying attributes.
+Foreign keys can be updated by overriding the association writer.
 
 ```ruby
 Blog::Tag.class_eval do
-  alias cistern_creator= creator=
   def creator=(creator)
-    self.cistern_creator = creator
+    super
     self.author_id = attributes[:creator][:id]
   end
 end

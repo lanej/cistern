@@ -55,8 +55,8 @@ module Cistern::Attributes
 
       attributes[name_sym] = options
 
-      define_attribute_reader(name_sym, options)
-      define_attribute_writer(name_sym, options)
+      define_attribute_reader(name_sym, options) unless options[:reader] == false
+      define_attribute_writer(name_sym, options) unless options[:writer] == false
 
       name_sym
     end

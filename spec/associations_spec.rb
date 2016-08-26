@@ -80,11 +80,28 @@ describe Cistern::Associations do
         expect(sample.attributes[:associate]).to eq(id: 2)
       end
 
-      it 'allows for overrides' do
+      it 'allows for aliased overrides' do
         subject.class_eval do
           alias cistern_associate= associate=
           def associate=(associate)
             self.cistern_associate = associate
+            self.associate_id = attributes[:associate][:id]
+          end
+        end
+
+        sample = subject.new(id: 1, associate_id: 3)
+
+        belongs_to = Sample::Associate.new(id: 2)
+
+        expect {
+          sample.associate = belongs_to
+        }.to change(sample, :associate_id).to(2)
+      end
+
+      it 'allows for overrides using super' do
+        subject.class_eval do
+          def associate=(associate)
+            super
             self.associate_id = attributes[:associate][:id]
           end
         end
