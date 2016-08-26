@@ -1,5 +1,22 @@
 # Change Log
 
+## [Unreleased](https://github.com/lanej/cistern/tree/HEAD)
+
+[Full Changelog](https://github.com/lanej/cistern/compare/v2.7.0...HEAD)
+
+**Implemented enhancements:**
+
+- custom wait for lambdas [\#21](https://github.com/lanej/cistern/issues/21)
+- accept alias as a attribute parameter [\#20](https://github.com/lanej/cistern/issues/20)
+- Offer mock data adapters [\#19](https://github.com/lanej/cistern/issues/19)
+- request method model [\#4](https://github.com/lanej/cistern/issues/4)
+- Service\#requires\_one [\#3](https://github.com/lanej/cistern/issues/3)
+
+**Merged pull requests:**
+
+- feature: allow using `super` to override association methods [\#73](https://github.com/lanej/cistern/pull/73) ([lanej](https://github.com/lanej))
+- fix\(associations\): enable attribute options and method scope blocks [\#72](https://github.com/lanej/cistern/pull/72) ([lanej](https://github.com/lanej))
+
 ## [v2.7.0](https://github.com/lanej/cistern/tree/v2.7.0) (2016-08-10)
 [Full Changelog](https://github.com/lanej/cistern/compare/v2.6.0...v2.7.0)
 
