@@ -170,12 +170,8 @@ module Cistern::Attributes
       @attributes ||= {}
     end
 
-    def attributes=(attributes)
-      @attributes = attributes
-    end
-
     def dup
-      super.tap { |m| m.attributes = attributes.dup }
+      super.tap { |m| m.set_attributes attributes.dup }
     end
 
     def identity
@@ -207,6 +203,8 @@ module Cistern::Attributes
 
       self
     end
+
+    alias attributes= merge_attributes
 
     # Update model's attributes.  New attributes take precedence over existing attributes.
     #
@@ -324,6 +322,12 @@ module Cistern::Attributes
           public_send(assignment_method, value)
         end
       end
+    end
+
+    protected
+
+    def set_attributes(attributes)
+      @attributes = attributes
     end
   end
 end
