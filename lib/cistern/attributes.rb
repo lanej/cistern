@@ -125,8 +125,8 @@ module Cistern::Attributes
   end
 
   module InstanceMethods
-    def dump
-      Marshal.dump(attributes)
+    def clone_attributes
+      Marshal.load Marshal.dump(attributes)
     end
 
     def read_attribute(name)
