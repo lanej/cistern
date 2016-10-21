@@ -1,5 +1,28 @@
 require 'spec_helper'
 
+describe Cistern::Attributes, '#clone_attributes' do
+  subject { Class.new(Sample::Model) }
+
+  it 'marshals the source attributes' do
+    subject.class_eval do
+      attribute :name
+      attribute :number
+      attribute :serial_number
+    end
+
+    model = subject.new(name: 'steve', number: 1, serial_number: 34)
+
+    cloned_attributes = model.clone_attributes
+
+    expect(cloned_attributes).to eq(model.attributes)
+
+    model.number = 3
+
+    expect(cloned_attributes[:number]).to eq(1)
+  end
+
+end
+
 describe Cistern::Attributes, '#request_attributes' do
   subject { Class.new(Sample::Model) }
 
