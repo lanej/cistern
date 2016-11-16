@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require 'awesome_print'
 
 module Cistern::Formatter::AwesomePrint
@@ -28,13 +29,13 @@ module AwesomePrint::Cistern
   #------------------------------------------------------------------------------
   def awesome_cistern_model(object)
     data = object.attributes.keys.sort.each_with_object({}) { |e, a| a[e] = object.public_send(e) }
-    "#{object} " << awesome_hash(data)
+    "#{object} " + awesome_hash(data)
   end
 
   # Format Cistern::Model
   #------------------------------------------------------------------------------
   def awesome_cistern_collection(object)
-    "#{object.class.name} " << awesome_hash(attributes: object.attributes, records: object.to_a)
+    "#{object.class.name} " + awesome_hash(attributes: object.attributes, records: object.to_a)
   end
 end
 

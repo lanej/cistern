@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 module Cistern::Model
   include Cistern::Attributes::InstanceMethods
   include Cistern::HashSupport
@@ -66,27 +67,29 @@ module Cistern::Model
   end
 
   def save
-    fail NotImplementedError
+    raise NotImplementedError
   end
 
   def reload
     requires :identity
 
-    if data = collection.get(identity)
-      new_attributes = data.attributes
-      merge_attributes(new_attributes)
-      self
-    end
+    data = collection.get(identity)
+
+    return unless data
+
+    new_attributes = data.attributes
+    merge_attributes(new_attributes)
+    self
   end
 
-  def ==(comparison_object)
+  def ==(other)
     super ||
-      (comparison_object.is_a?(self.class) &&
-       comparison_object.identity == identity &&
-       !comparison_object.new_record?)
+      (other.is_a?(self.class) &&
+       other.identity == identity &&
+       !other.new_record?)
   end
 
-  alias_method :eql?, :==
+  alias eql? ==
 
   def hash
     if identity
@@ -96,12 +99,12 @@ module Cistern::Model
     end
   end
 
-  def wait_for(timeout = cistern_class.timeout, interval = cistern_class.poll_interval, &block)
-    cistern_class.wait_for(timeout, interval) { reload && block.call(self) }
+  def wait_for(timeout = cistern_class.timeout, interval = cistern_class.poll_interval)
+    cistern_class.wait_for(timeout, interval) { reload && yield(self) }
   end
 
-  def wait_for!(timeout = cistern_class.timeout, interval = cistern_class.poll_interval, &block)
-    cistern_class.wait_for!(timeout, interval) { reload && block.call(self) }
+  def wait_for!(timeout = cistern_class.timeout, interval = cistern_class.poll_interval)
+    cistern_class.wait_for!(timeout, interval) { reload && yield(self) }
   end
 
   def service_class

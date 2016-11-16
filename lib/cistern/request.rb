@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 module Cistern::Request
   include Cistern::HashSupport
 
@@ -18,7 +19,7 @@ module Cistern::Request
 
   def self.cistern_request(cistern, klass, name)
     unless klass.name || klass.cistern_method
-      fail ArgumentError, "can't turn anonymous class into a Cistern request"
+      raise ArgumentError, "can't turn anonymous class into a Cistern request"
     end
 
     method = <<-EOS
@@ -26,7 +27,6 @@ module Cistern::Request
         #{klass}.new(self).call(*args)
       end
     EOS
-
 
     cistern::Mock.module_eval method, __FILE__, __LINE__
     cistern::Real.module_eval method, __FILE__, __LINE__

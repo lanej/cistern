@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 module Cistern::Coverage
   unless Kernel.respond_to? :caller_locations
     abort <<-ABORT
@@ -17,8 +18,6 @@ Try a newer ruby (should be > 2.0)
   # returns the first caller_locations entry before entries in `file`
   def self.find_caller_before(file)
     enum = caller_locations.each
-
-    call = nil
 
     # seek to the first entry from within `file`
     while (call = enum.next)

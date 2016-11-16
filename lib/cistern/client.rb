@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 module Cistern::Client
   module Collections
     def collections
@@ -33,6 +34,7 @@ module Cistern::Client
     super
   end
 
+  # rubocop:disable Metrics/MethodLength
   def self.setup(klass, options = {})
     request_class    = options[:request] || 'Request'
     collection_class = options[:collection] || 'Collection'
@@ -40,17 +42,17 @@ module Cistern::Client
     singular_class   = options[:singular] || 'Singular'
 
     interface = options[:interface] || :class
-    interface_callback = (:class == interface) ? :inherited : :included
+    interface_callback = :class == interface ? :inherited : :included
 
     if interface == :class
       Cistern.deprecation(
-        %q{'class' interface is deprecated. Use `include Cistern::Client.with(interface: :module). See https://github.com/lanej/cistern#custom-architecture},
+        "'class' interface is deprecated. Use `include Cistern::Client.with(interface: :module). See https://github.com/lanej/cistern#custom-architecture",
         caller[2],
       )
     end
 
     unless klass.name
-      fail ArgumentError, "can't turn anonymous class into a Cistern cistern"
+      raise ArgumentError, "can't turn anonymous class into a Cistern cistern"
     end
 
     klass.class_eval <<-EOS, __FILE__, __LINE__
@@ -62,11 +64,11 @@ module Cistern::Client
             '#cistern is deprecated.  Please use #cistern',
             caller[0]
           )
-          #{klass.name}
+    #{klass.name}
         end
 
         def cistern
-          #{klass.name}
+    #{klass.name}
         end
       end
 
@@ -75,11 +77,11 @@ module Cistern::Client
           '#cistern is deprecated.  Please use #cistern',
           caller[0]
         )
-        #{klass.name}
+    #{klass.name}
       end
 
       def self.cistern
-        #{klass.name}
+    #{klass.name}
       end
 
       class Real
@@ -100,7 +102,7 @@ module Cistern::Client
         end
       end
 
-      #{interface} #{model_class}
+    #{interface} #{model_class}
         def self.#{interface_callback}(klass)
           cistern.models << klass
 
@@ -114,15 +116,15 @@ module Cistern::Client
             '#cistern is deprecated.  Please use #cistern',
             caller[0]
           )
-          #{klass.name}
+    #{klass.name}
         end
 
         def self.cistern
-          #{klass.name}
+    #{klass.name}
         end
       end
 
-      #{interface} #{singular_class}
+    #{interface} #{singular_class}
         def self.#{interface_callback}(klass)
           cistern.singularities << klass
 
@@ -136,15 +138,15 @@ module Cistern::Client
             '#service is deprecated.  Please use #cistern',
             caller[0]
           )
-          #{klass.name}
+    #{klass.name}
         end
 
         def self.cistern
-          #{klass.name}
+    #{klass.name}
         end
       end
 
-      #{interface} #{collection_class}
+    #{interface} #{collection_class}
         include ::Cistern::Collection
 
         def self.#{interface_callback}(klass)
@@ -162,15 +164,15 @@ module Cistern::Client
             '#service is deprecated.  Please use #cistern',
             caller[0]
           )
-          #{klass.name}
+    #{klass.name}
         end
 
         def self.cistern
-          #{klass.name}
+    #{klass.name}
         end
       end
 
-      #{interface} #{request_class}
+    #{interface} #{request_class}
         include ::Cistern::Request
 
         def self.service
@@ -178,11 +180,11 @@ module Cistern::Client
             '#service is deprecated.  Please use #cistern',
             caller[0]
           )
-          #{klass.name}
+    #{klass.name}
         end
 
         def self.cistern
-          #{klass.name}
+    #{klass.name}
         end
 
         def self.#{interface_callback}(klass)
@@ -260,14 +262,14 @@ module Cistern::Client
       missing_required_options = required_arguments - required_options.keys
 
       unless missing_required_options.empty?
-        fail "Missing required options: #{missing_required_options.inspect}"
+        raise "Missing required options: #{missing_required_options.inspect}"
       end
 
       unrecognized_options = options.keys - (required_arguments + recognized_arguments)
 
-      unless unrecognized_options.empty?
-        fail "Unrecognized options: #{unrecognized_options.inspect}"
-      end
+      return if unrecognized_options.empty?
+
+      raise "Unrecognized options: #{unrecognized_options.inspect}"
     end
 
     def setup
@@ -308,7 +310,7 @@ module Cistern::Client
       setup
       validate_options(options)
 
-      const_get(self.mocking? ? :Mock : :Real).new(options)
+      const_get(mocking? ? :Mock : :Real).new(options)
     end
 
     def reset!

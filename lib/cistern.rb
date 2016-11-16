@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require 'cistern/version'
 
 # stdlib
@@ -39,7 +40,7 @@ module Cistern
   end
 
   def self.deprecation_warnings?
-    @deprecation_warnings.nil? ? true : !!@deprecation_warnings
+    @deprecation_warnings.nil? ? true : @deprecation_warnings
   end
 
   def self.deprecation_warnings=(status)

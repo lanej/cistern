@@ -1,6 +1,7 @@
+# frozen_string_literal: true
 module Cistern::Attributes
   PROTECTED_METHODS = [:cistern, :service, :identity, :collection].freeze
-  TRUTHY = ['true', '1'].freeze
+  TRUTHY = %w(true 1).freeze
 
   module ClassMethods
     def parsers
@@ -20,13 +21,13 @@ module Cistern::Attributes
 
     def transforms
       @transforms ||= {
-        squash: proc do |_, _v, options|
-          v      = Cistern::Hash.stringify_keys(_v)
+        squash: proc do |_, rv, options|
+          v      = Cistern::Hash.stringify_keys(rv)
           squash = options[:squash]
 
           v.is_a?(::Hash) ? squasher(v, squash.dup) : v
         end,
-        none: ->(_, v, _) { v }
+        none: ->(_, v, _) { v },
       }
     end
 
@@ -46,7 +47,7 @@ module Cistern::Attributes
       name_sym = name.to_sym
 
       if attributes.key?(name_sym)
-        fail(ArgumentError, "#{self.name} attribute[#{name_sym}] specified more than once")
+        raise(ArgumentError, "#{self.name} attribute[#{name_sym}] specified more than once")
       end
 
       add_coverage(options)
@@ -81,11 +82,11 @@ module Cistern::Attributes
       attribute_call = Cistern::Coverage.find_caller_before('cistern/attributes.rb')
 
       # Only use DSL attribute calls from within a model
-      if attribute_call && attribute_call.label.start_with?('<class:')
-        options[:coverage_file] = attribute_call.absolute_path
-        options[:coverage_line] = attribute_call.lineno
-        options[:coverage_hits] = 0
-      end
+      return unless attribute_call && attribute_call.label.start_with?('<class:')
+
+      options[:coverage_file] = attribute_call.absolute_path
+      options[:coverage_line] = attribute_call.lineno
+      options[:coverage_hits] = 0
     end
 
     def define_attribute_reader(name, options)
@@ -98,7 +99,7 @@ module Cistern::Attributes
       options[:aliases].each { |new_alias| aliases[new_alias] << name }
     end
 
-    def define_attribute_writer(name, options)
+    def define_attribute_writer(name, _options)
       return if instance_methods.include?("#{name}=".to_sym)
 
       send(:define_method, "#{name}=") { |value| write_attribute(name, value) }
@@ -108,7 +109,7 @@ module Cistern::Attributes
 
     def normalize_options(options)
       options[:squash] = Array(options[:squash]).map(&:to_s) if options[:squash]
-      options[:aliases] = Array(options[:aliases] || options[:alias]).map { |a| a.to_sym }
+      options[:aliases] = Array(options[:aliases] || options[:alias]).map(&:to_sym)
 
       transform = options.key?(:squash) ? :squash : :none
       options[:transform] ||= transforms.fetch(transform)
@@ -183,11 +184,9 @@ module Cistern::Attributes
     def identity=(new_identity)
       key = self.class.identity
 
-      if key
-        public_send("#{key}=", new_identity)
-      else
-        fail ArgumentError, 'Identity not specified'
-      end
+      raise ArgumentError, 'Identity not specified' unless key
+
+      public_send("#{key}=", new_identity)
     end
 
     # Update model's attributes.  New attributes take precedence over existing attributes.
@@ -228,13 +227,13 @@ module Cistern::Attributes
     def requires(*args)
       missing, required = missing_attributes(args)
 
+      return required if missing.empty?
+
       if missing.length == 1
-        fail(ArgumentError, "#{missing.keys.first} is required for this operation")
-      elsif missing.any?
-        fail(ArgumentError, "#{missing.keys[0...-1].join(', ')} and #{missing.keys[-1]} are required for this operation")
+        raise(ArgumentError, "#{missing.keys.first} is required for this operation")
       end
 
-      required
+      raise(ArgumentError, "#{missing.keys[0...-1].join(', ')} and #{missing.keys[-1]} are required for this operation")
     end
 
     # Require specification of one or more attributes.
@@ -245,7 +244,7 @@ module Cistern::Attributes
       missing, required = missing_attributes(args)
 
       if missing.length == args.length
-        fail(ArgumentError, "#{missing.keys[0...-1].join(', ')} or #{missing.keys[-1]} are required for this operation")
+        raise(ArgumentError, "#{missing.keys[0...-1].join(', ')} or #{missing.keys[-1]} are required for this operation")
       end
 
       required
@@ -264,10 +263,10 @@ module Cistern::Attributes
     end
 
     def request_attributes(set = attributes)
-      set.inject({}) do |a,(k,v)|
+      set.inject({}) do |a, (k, v)|
         aliases = self.class.attributes[k.to_sym][:aliases]
         aliases << k if aliases.empty?
-        aliases.each_with_object(a) { |n,r| r[n.to_s] = v }
+        aliases.each_with_object(a) { |n, r| r[n.to_s] = v }
       end
     end
 
@@ -278,9 +277,9 @@ module Cistern::Attributes
     private
 
     def missing_attributes(keys)
-      keys.map(&:to_sym).reduce({}) { |a,e| a.merge(e => public_send("#{e}")) }
-        .partition { |_,v| v.nil? }
-        .map { |s| Hash[s] }
+      keys.map(&:to_sym).reduce({}) { |a, e| a.merge(e => public_send(e.to_s)) }
+          .partition { |_, v| v.nil? }
+          .map { |s| Hash[s] }
     end
 
     def changed!(attribute, from, to)
@@ -318,7 +317,7 @@ module Cistern::Attributes
 
         assignment_method = "#{key}="
 
-        if !protected_methods.include?(symbol_key) && self.respond_to?(assignment_method, true)
+        if !protected_methods.include?(symbol_key) && respond_to?(assignment_method, true)
           public_send(assignment_method, value)
         end
       end
@@ -326,6 +325,7 @@ module Cistern::Attributes
 
     protected
 
+    # rubocop:disable Style/AccessorMethodName
     def set_attributes(attributes)
       @attributes = attributes
     end

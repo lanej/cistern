@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require 'formatador'
 
 module Cistern::Formatter::Formatador
@@ -15,8 +16,8 @@ module Cistern::Formatter::Formatador
     data = "#{Thread.current[:formatador].indentation}<#{model.class.name}"
     Thread.current[:formatador].indent do
       unless model.class.attributes.empty?
-        data << "\n#{Thread.current[:formatador].indentation}"
-        data << model.class.attributes.map { |attribute, _| "#{attribute}=#{model.send(attribute).inspect}" }.join(",\n#{Thread.current[:formatador].indentation}")
+        data += "\n#{Thread.current[:formatador].indentation}"
+        data += model.class.attributes.map { |attribute, _| "#{attribute}=#{model.send(attribute).inspect}" }.join(",\n#{Thread.current[:formatador].indentation}")
       end
     end
     data << "\n#{Thread.current[:formatador].indentation}>"
@@ -28,11 +29,11 @@ module Cistern::Formatter::Formatador
     data = "#{Thread.current[:formatador].indentation}<#{collection.class.name}\n"
     Thread.current[:formatador].indent do
       unless collection.class.attributes.empty?
-        data << "#{Thread.current[:formatador].indentation}"
+        data << Thread.current[:formatador].indentation.to_s
         data << collection.class.attributes.map { |attribute| "#{attribute}=#{send(attribute).inspect}" }.join(",\n#{Thread.current[:formatador].indentation}")
         data << "\n"
       end
-      data << "#{Thread.current[:formatador].indentation}["
+      data += "#{Thread.current[:formatador].indentation}["
       unless collection.empty?
         data << "\n"
         Thread.current[:formatador].indent do

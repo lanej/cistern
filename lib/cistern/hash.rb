@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 class Cistern::Hash
   # @example
   #   Cistern::Hash.slice({ :a => 1, :b => 2 }, :a) #=> { :a => 1 }
