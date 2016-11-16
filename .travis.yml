@@ -5,7 +5,9 @@ rvm:
 bundler_args: "--without development"
 before_install:
 - gem install bundler -v "~> 1.10"
-script: bundle exec rake --trace
+script:
+  - bundle exec rubocop
+  - bundle exec rake --trace
 notifications:
   email: false
 sudo: false
