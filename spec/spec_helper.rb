@@ -1,6 +1,6 @@
-if ENV['TRAVIS']
-  require 'codeclimate-test-reporter'
-  CodeClimate::TestReporter.start
+if ENV['COVERAGE']
+  require 'simplecov'
+  SimpleCov.start
 end
 
 require File.expand_path('../../lib/cistern', __FILE__)

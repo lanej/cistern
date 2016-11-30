@@ -21,3 +21,8 @@ matrix:
 env:
   matrix:
     secure: eiDhDgp8jBYKZVOqe891g4StnFsqRXcQwlDSnXthRSuWNMd6oFyFOo/s9aXd9lNFkaTBnSAFrUvywH1t2+H3j+cPMn/91W2s2Ldc+SxVxjrY3mWyr6NIudro/rdK7nIfIcWJFtm0teSXg/1nRPZt0qlXc4bZmvwvN3T8MvdgI2I=
+  global:
+    COVERAGE=1
+
+after_success:
+  - bundle exec codeclimate-test-reporter

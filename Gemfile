@@ -15,7 +15,8 @@ group :test do
   gem 'rspec', '~> 3.3'
   gem 'listen', '~> 3.0.5'
   gem 'redis-namespace', '~> 1.4', '< 1.5'
-  gem 'codeclimate-test-reporter', require: false
+  gem 'codeclimate-test-reporter', '~> 1.0'
+  gem 'simplecov'
 end
 
 group :formatters do
