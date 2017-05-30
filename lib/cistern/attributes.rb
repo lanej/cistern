@@ -121,7 +121,11 @@ module Cistern::Attributes
     def read_attribute(name)
       options = self.class.attributes[name] || {}
       # record the attribute was accessed
-      self.class.attributes[name.to_s.to_sym][:coverage_hits] += 1 rescue  nil
+      begin
+        self.class.attributes[name.to_s.to_sym][:coverage_hits] += 1
+      rescue
+        nil
+      end
 
       default = options[:default]
 
