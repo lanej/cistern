@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 class Cistern::String
   def self.camelize(string)
     string.gsub(/[A-Z]+/) { |w| "_#{w.downcase}" }.gsub(/^_/, '')

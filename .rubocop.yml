@@ -1,0 +1,96 @@
+---
+AllCops:
+  TargetRubyVersion: 2.3
+  DisplayCopNames: true
+  Include:
+    - '**/*.rake'
+    - '**/Gemfile'
+    - '**/Rakefile'
+    - '**/*.rb'
+  Exclude:
+    - 'spec/**/*.rb'
+
+Style/RedundantReturn:
+  AllowMultipleReturnValues: true
+
+HashSyntax:
+  Enabled: false
+
+BlockNesting:
+  Enabled: true
+
+AssignmentInCondition:
+  Enabled: false
+
+CollectionMethods:
+  Enabled: false
+
+Metrics/AbcSize:
+  Max: 75
+
+Metrics/LineLength:
+  Enabled: false
+
+Metrics/MethodLength:
+  Max: 50
+
+Metrics/ClassLength:
+  Max: 300
+
+Metrics/ModuleLength:
+  Max: 300
+
+Metrics/CyclomaticComplexity:
+  Max: 10
+
+Metrics/PerceivedComplexity:
+  Max: 10
+
+Performance/TimesMap:
+  Enabled: false
+
+HandleExceptions:
+  Enabled: false
+
+Documentation:
+  Enabled: false
+
+RegexpLiteral:
+  Enabled: false
+
+SignalException:
+  EnforcedStyle: only_raise
+
+Style/AsciiComments:
+  Enabled: false
+
+Style/BlockDelimiters:
+  EnforcedStyle: braces_for_chaining
+
+Style/BracesAroundHashParameters:
+  EnforcedStyle: context_dependent
+
+Style/TrailingCommaInLiteral:
+  EnforcedStyleForMultiline: consistent_comma
+
+Style/TrailingCommaInArguments:
+  Enabled: false
+
+Style/ClassAndModuleChildren:
+  EnforcedStyle: compact
+
+Style/TrivialAccessors:
+  Enabled: true
+  ExactNameMatch: true
+
+Style/LineEndConcatenation:
+  Enabled: false
+
+Style/PredicateName:
+  Enabled: false
+
+Style/EachWithObject:
+  Enabled: false
+
+Style/NumericPredicate:
+  Enabled: false

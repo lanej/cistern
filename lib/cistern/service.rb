@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 class Cistern::Service
   def self.inherited(klass)
     Cistern.deprecation(

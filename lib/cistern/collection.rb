@@ -1,10 +1,11 @@
+# frozen_string_literal: true
 module Cistern::Collection
   include Cistern::HashSupport
 
   BLACKLISTED_ARRAY_METHODS = [
     :compact!, :flatten!, :reject!, :reverse!, :rotate!, :map!,
     :shuffle!, :slice!, :sort!, :sort_by!, :delete_if,
-    :keep_if, :pop, :shift, :delete_at, :compact
+    :keep_if, :pop, :shift, :delete_at, :compact,
   ].to_set # :nodoc:
 
   def self.cistern_collection(cistern, klass, name)
@@ -52,7 +53,7 @@ module Cistern::Collection
     end
   end
 
-  alias_method :build, :initialize
+  alias build initialize
 
   def initialize(attributes = {})
     @loaded = false
@@ -60,7 +61,7 @@ module Cistern::Collection
   end
 
   def all(_ = {})
-    fail NotImplementedError
+    raise NotImplementedError
   end
 
   def create(attributes = {})
@@ -68,7 +69,7 @@ module Cistern::Collection
   end
 
   def get(_identity)
-    fail NotImplementedError
+    raise NotImplementedError
   end
 
   def clear
@@ -103,7 +104,7 @@ module Cistern::Collection
 
   def new(attributes = {})
     unless attributes.is_a?(::Hash)
-      fail(ArgumentError.new("Initialization parameters must be an attributes hash, got #{attributes.class} #{attributes.inspect}"))
+      raise ArgumentError, "Initialization parameters must be an attributes hash, got #{attributes.class} #{attributes.inspect}"
     end
     model.new(
       {
@@ -128,10 +129,10 @@ module Cistern::Collection
     super || array_delegable?(method)
   end
 
-  def ==(comparison_object)
-    comparison_object.equal?(self) ||
-      (comparison_object.is_a?(self.class) &&
-       comparison_object.to_a == to_a)
+  def ==(other)
+    other.equal?(self) ||
+      (other.is_a?(self.class) &&
+       other.to_a == to_a)
   end
 
   protected
@@ -146,5 +147,9 @@ module Cistern::Collection
     else
       super
     end
+  end
+
+  def respond_to_missing?(method, *)
+    array_delegable?(method) || super
   end
 end

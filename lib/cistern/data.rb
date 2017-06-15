@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 module Cistern::Data
   def self.extended(klass)
     klass.send(:extend, ClassMethods)

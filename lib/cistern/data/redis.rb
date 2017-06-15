@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 class Cistern::Data::Redis
   Cistern::Data.backends[:redis] = self
 
@@ -21,9 +22,10 @@ class Cistern::Data::Redis
   end
 
   def clear
-    unless (keys = client.keys('*')).empty?
-      client.del(*keys)
-    end
+    keys = client.keys('*')
+    return if keys.empty?
+
+    client.del(*keys)
   end
 
   def store(key, value, *args)
@@ -32,7 +34,7 @@ class Cistern::Data::Redis
     client.set(key, Cistern::Data::Redis.marshal.dump(value), *args)
   end
 
-  alias_method :[]=, :store
+  alias []= store
 
   def fetch(key, *args)
     assign_default(key)
@@ -40,7 +42,7 @@ class Cistern::Data::Redis
     Cistern::Data::Redis.marshal.load(client.get(key, *args))
   end
 
-  alias_method :[], :fetch
+  alias [] fetch
 
   protected
 

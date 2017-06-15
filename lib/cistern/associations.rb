@@ -1,6 +1,5 @@
 # frozen_string_literal: true
 module Cistern::Associations
-
   def self.extended(klass)
     def klass.association_overlay
       @association_overlay ||= const_set(:Associations, Module.new)
@@ -14,7 +13,7 @@ module Cistern::Associations
   # Lists the associations defined on the resource
   # @return [Hash{Symbol=>Array}] mapping of association type to name
   def associations
-    @associations ||= Hash.new { |h,k| h[k] = [] }
+    @associations ||= Hash.new { |h, k| h[k] = [] }
   end
 
   # Define an assocation that references a collection.

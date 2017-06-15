@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 class Cistern::Data::Hash
   Cistern::Data.backends[:hash] = self
 
@@ -16,7 +17,7 @@ class Cistern::Data::Hash
     hash.store(key, *args)
   end
 
-  alias_method :[]=, :store
+  alias []= store
 
   def fetch(key, *args)
     assign_default(key)
@@ -24,7 +25,7 @@ class Cistern::Data::Hash
     hash.fetch(key, *args)
   end
 
-  alias_method :[], :fetch
+  alias [] fetch
 
   protected
 

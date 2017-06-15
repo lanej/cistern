@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 module Cistern::Formatter::Default
   class << self
     def call(object)
