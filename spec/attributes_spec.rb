@@ -157,6 +157,17 @@ describe Cistern::Attributes, 'parsing' do
     expect(subject.new(attributes: 'x').adam_attributes).to eq('x')
   end
 
+  it 'should parse date' do
+    subject.class_eval do
+      attribute :start_date, type: :date
+    end
+
+    date = Date.today
+    start_date = subject.new(start_date: date.to_s).start_date
+    expect(start_date).to be_a(Date)
+    expect(start_date.iso8601).to eq(date.iso8601)
+  end
+
   it 'should parse time' do
     subject.class_eval do
       attribute :created_at, type: :time

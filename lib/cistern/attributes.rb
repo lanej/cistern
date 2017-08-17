@@ -7,6 +7,7 @@ module Cistern::Attributes
       @parsers ||= {
         array:   ->(v, _) { [*v] },
         boolean: ->(v, _) { TRUTHY.include?(v.to_s.downcase) },
+        date:    ->(v, _) { v.is_a?(Date) ? v : v && Date.parse(v.to_s) },
         float:   ->(v, _) { v && v.to_f },
         integer: ->(v, _) { v && v.to_i },
         string:  ->(v, _) { v && v.to_s },
