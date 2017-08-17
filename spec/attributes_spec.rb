@@ -191,6 +191,16 @@ describe Cistern::Attributes, 'parsing' do
     expect(subject.new(list: 'item').list).to eq(['item'])
   end
 
+  it 'should parse an integer' do
+    subject.class_eval do
+      attribute :int, type: :integer
+    end
+
+    expect(subject.new(int: '42.5').int).to eq(42)
+    expect(subject.new(int: '42').int).to eq(42)
+    expect(subject.new(int: 42).int).to eq(42)
+  end
+
   it 'should parse a float' do
     subject.class_eval do
       attribute :floater, type: :float
