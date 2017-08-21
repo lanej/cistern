@@ -1,5 +1,23 @@
 # Change Log
 
+## [Unreleased](https://github.com/lanej/cistern/tree/HEAD)
+
+[Full Changelog](https://github.com/lanej/cistern/compare/v2.7.2...HEAD)
+
+**Merged pull requests:**
+
+- fix codeclimate reporting [\#80](https://github.com/lanej/cistern/pull/80) ([lanej](https://github.com/lanej))
+- Add support for a Date type. [\#78](https://github.com/lanej/cistern/pull/78) ([leklund](https://github.com/leklund))
+- fix 0.12 branch for ruby 2.4 [\#77](https://github.com/lanej/cistern/pull/77) ([ehowe](https://github.com/ehowe))
+
+## [v2.7.2](https://github.com/lanej/cistern/tree/v2.7.2) (2016-10-21)
+[Full Changelog](https://github.com/lanej/cistern/compare/v2.7.1...v2.7.2)
+
+**Merged pull requests:**
+
+- feature: add \#clone\_attributes [\#75](https://github.com/lanej/cistern/pull/75) ([lanej](https://github.com/lanej))
+- fix: alias attributes= to merge\_attributes [\#74](https://github.com/lanej/cistern/pull/74) ([lanej](https://github.com/lanej))
+
 ## [v2.7.1](https://github.com/lanej/cistern/tree/v2.7.1) (2016-08-26)
 [Full Changelog](https://github.com/lanej/cistern/compare/v2.7.0...v2.7.1)
 
