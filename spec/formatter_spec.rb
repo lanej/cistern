@@ -44,15 +44,15 @@ describe Cistern::Formatter::AwesomePrint do
   before { Cistern.formatter = described_class }
 
   it 'formats a model' do
-    expect(
-      Inspector.new(id: 1, name: 'name').inspect
-    ).to match(
-      /(?x-mi:\#<Inspector:0x[0-9a-f]+>\ {\n\ \ \ \ \ \ :id\x1B\[0;37m\ =>\ \x1B\[0m\x1B\[1;34m1\x1B\[0m,\n\ \ \ \ :name\x1B\[0;37m\ =>\ \x1B\[0m\x1B\[0;33m"name"\x1B\[0m\n})/
-    )
+    object = Inspector.new(id: 1, name: 'name')
+
+    expect(object.inspect).to eq(object.ai)
   end
 
   it 'formats a collection' do
-    expect(Inspectors.new.all.inspect).to match(/Inspectors\s+{.*}$/m) # close enough
+    object = Inspectors.new.all
+
+    expect(object.inspect).to eq(object.ai)
   end
 end
 
