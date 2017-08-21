@@ -4,11 +4,11 @@ if ENV.key?('COVERAGE')
 end
 
 require File.expand_path('../../lib/cistern', __FILE__)
+Cistern.deprecation_warnings = ENV.key?('DEBUG')
+
 Dir[File.expand_path('../{support,shared,matchers,fixtures}/*.rb', __FILE__)].each { |f| require(f) }
 
 Bundler.require(:test)
-
-Cistern.deprecation_warnings = !!ENV['DEBUG']
 
 RSpec.configure do |rspec|
   if Kernel.respond_to?(:caller_locations)
