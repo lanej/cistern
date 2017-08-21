@@ -1,3 +1,3 @@
 module Cistern
-  VERSION = '2.7.2'
+  VERSION = '2.8.0'
 end
