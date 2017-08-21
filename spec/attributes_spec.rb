@@ -157,6 +157,17 @@ describe Cistern::Attributes, 'parsing' do
     expect(subject.new(attributes: 'x').adam_attributes).to eq('x')
   end
 
+  it 'should parse date' do
+    subject.class_eval do
+      attribute :start_date, type: :date
+    end
+
+    date = Date.today
+    start_date = subject.new(start_date: date.to_s).start_date
+    expect(start_date).to be_a(Date)
+    expect(start_date.iso8601).to eq(date.iso8601)
+  end
+
   it 'should parse time' do
     subject.class_eval do
       attribute :created_at, type: :time
@@ -189,6 +200,16 @@ describe Cistern::Attributes, 'parsing' do
 
     expect(subject.new(list: []).list).to eq([])
     expect(subject.new(list: 'item').list).to eq(['item'])
+  end
+
+  it 'should parse an integer' do
+    subject.class_eval do
+      attribute :int, type: :integer
+    end
+
+    expect(subject.new(int: '42.5').int).to eq(42)
+    expect(subject.new(int: '42').int).to eq(42)
+    expect(subject.new(int: 42).int).to eq(42)
   end
 
   it 'should parse a float' do

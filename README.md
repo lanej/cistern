@@ -205,7 +205,7 @@ Cistern attributes are designed to make your model flexible and developer friend
 	model.merge_attributes("post" => 1)
 	model.post_id #=> 1
 	```
-* `:type` automatically casts the attribute do the specified type. 
+* `:type` automatically casts the attribute do the specified type. Supported types: `array`, `boolean`, `date`, `float`, `integer`, `string`, `time`.
 	```ruby
 	attribute :private_ips, type: :array
 
