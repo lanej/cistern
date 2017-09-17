@@ -14,7 +14,7 @@ module Cistern::Formatter::Formatador
 
   def self.model_inspect(model)
     Thread.current[:formatador] ||= Formatador.new
-    data = "#{Thread.current[:formatador].indentation}<#{model.class.name}"
+    data = ["#{Thread.current[:formatador].indentation}<#{model.class.name}"]
     Thread.current[:formatador].indent do
       unless model.class.attributes.empty?
         data << "\n#{Thread.current[:formatador].indentation}"
@@ -22,12 +22,12 @@ module Cistern::Formatter::Formatador
       end
     end
     data << "\n#{Thread.current[:formatador].indentation}>"
-    data
+    data.join
   end
 
   def self.collection_inspect(collection)
     Thread.current[:formatador] ||= Formatador.new
-    data = "#{Thread.current[:formatador].indentation}<#{collection.class.name}\n"
+    data = ["#{Thread.current[:formatador].indentation}<#{collection.class.name}\n"]
     Thread.current[:formatador].indent do
       unless collection.class.attributes.empty?
         data << "#{Thread.current[:formatador].indentation}"
@@ -46,7 +46,7 @@ module Cistern::Formatter::Formatador
       data << "]\n"
     end
     data << "#{Thread.current[:formatador].indentation}>"
-    data
+    data.join
   end
 
   def table(attributes = nil)
