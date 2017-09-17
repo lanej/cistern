@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Cistern::Model
   include Cistern::Attributes::InstanceMethods
   include Cistern::HashSupport

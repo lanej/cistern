@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Cistern::Collection
   include Cistern::HashSupport
 

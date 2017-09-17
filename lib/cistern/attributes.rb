@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Cistern::Attributes
   PROTECTED_METHODS = [:cistern, :service, :identity, :collection].freeze
   TRUTHY = ['true', '1'].freeze

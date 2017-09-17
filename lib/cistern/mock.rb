@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Cistern
   class Mock
     def self.not_implemented(method = '')

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Cistern
   module WaitFor
     def self.wait_for(timeout = Cistern.timeout, interval = Cistern.poll_interval, &_block)
