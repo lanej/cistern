@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Cistern::HashSupport
   def hash_slice(*args); Cistern::Hash.slice(*args); end
   def hash_except(*args); Cistern::Hash.except(*args); end

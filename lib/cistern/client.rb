@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Cistern::Client
   module Collections
     def collections

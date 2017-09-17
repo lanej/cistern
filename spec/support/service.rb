@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 RSpec.configure do |config|
   config.before(:each) {
     Object.send(:remove_const, :Sample) if Object.constants.include?(:Sample)

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class Cistern::Data::Hash
   Cistern::Data.backends[:hash] = self
 

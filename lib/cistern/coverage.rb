@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Cistern::Coverage
   unless Kernel.respond_to? :caller_locations
     abort <<-ABORT

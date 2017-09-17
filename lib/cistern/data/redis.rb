@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class Cistern::Data::Redis
   Cistern::Data.backends[:redis] = self
 

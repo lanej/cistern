@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Cistern::Singular
   include Cistern::Model
 
