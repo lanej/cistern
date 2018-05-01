@@ -29,7 +29,9 @@ module AwesomePrint::Cistern
   # Format Cistern::Model
   #------------------------------------------------------------------------------
   def awesome_cistern_model(object)
-    data = object.attributes.keys.sort.each_with_object({}) { |e, a| a[e] = object.public_send(e) }
+    data = object.attributes.keys.sort.each_with_object({}) do |e, a|
+      a[e] = object.read_attribute(e)
+    end
     "#{object} #{awesome_hash(data)}"
   end
 

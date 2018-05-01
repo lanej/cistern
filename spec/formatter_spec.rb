@@ -5,6 +5,9 @@ require 'spec_helper'
 class Inspector < Sample::Model
   identity :id
   attribute :name
+
+  has_many :employees, -> { Inspectors.new(associate_id: id).all }
+  has_many :managers, -> { Inspectors.new(associate_id: nil).all }
 end
 
 class Anon < Sample::Model
@@ -12,11 +15,13 @@ class Anon < Sample::Model
 end
 
 class Inspectors < Sample::Collection
+  attribute :associate_id
+
   model Inspector
 
   def all(options = {})
     merge_attributes(options)
-    load([{ id: 1, name: '2' }, { id: 3, name: '4' }])
+    load([{ id: 1, name: '2', managers: [{ id: 5, name: '5'}]}, { id: 3, name: '4' }, employees: [{ id: 9, name: '8'}]])
   end
 end
 
@@ -66,20 +71,33 @@ describe Cistern::Formatter::Formatador do
 
     expect(Inspector.new(id: 1, name: 'name').inspect).to eq('  <Inspector
     id=1,
-    name="name"
+    name="name",
+    employees=nil,
+    managers=nil
   >')
   end
 
   it 'formats a collection' do
     expect(Inspectors.new.all.inspect).to eq('  <Inspectors
+    associate_id=nil
     [
       <Inspector
         id=1,
-        name="2"
+        name="2",
+        employees=nil,
+        managers=[{"id"=>5, "name"=>"5"}]
       >,
       <Inspector
         id=3,
-        name="4"
+        name="4",
+        employees=nil,
+        managers=nil
+      >,
+      <Inspector
+        id=nil,
+        name=nil,
+        employees=[{"id"=>9, "name"=>"8"}],
+        managers=nil
       >
     ]
   >')
