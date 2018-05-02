@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 module Cistern::Associations
-
   def self.extended(klass)
     def klass.association_overlay
       @association_overlay ||= const_set(:Associations, Module.new)
@@ -15,7 +14,7 @@ module Cistern::Associations
   # Lists the associations defined on the resource
   # @return [Hash{Symbol=>Array}] mapping of association type to name
   def associations
-    @associations ||= Hash.new { |h,k| h[k] = [] }
+    @associations ||= Hash.new { |h, k| h[k] = [] }
   end
 
   # Define an assocation that references a collection.
@@ -51,9 +50,15 @@ module Cistern::Associations
 
     association_overlay.module_eval do
       define_method writer_method do |models|
-        attributes[name] = Array(models).map do |model|
-          model.respond_to?(:attributes) ? model.attributes : model
-        end
+        previous_value = attributes[name_sym]
+        new_value =
+          attributes[name_sym] = Array(models).map do |model|
+            model.respond_to?(:attributes) ? model.attributes : model
+          end
+
+        changed!(name_sym, previous_value, new_value)
+
+        new_value
       end
     end
 
@@ -90,9 +95,13 @@ module Cistern::Associations
 
     association_overlay.module_eval do
       define_method writer_method do |model|
-        data = model.respond_to?(:attributes) ? model.attributes : model
-        attributes[name_sym] = data
-        model
+        previous_value = attributes[name_sym]
+        new_value = model.respond_to?(:attributes) ? model.attributes : model
+        attributes[name_sym] = new_value
+
+        changed!(name_sym, previous_value, new_value)
+
+        new_value
       end
     end
 
