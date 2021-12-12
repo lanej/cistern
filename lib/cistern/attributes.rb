@@ -2,18 +2,19 @@
 
 module Cistern::Attributes
   PROTECTED_METHODS = [:cistern, :service, :identity, :collection].freeze
-  TRUTHY = ['true', '1'].freeze
+  TRUTHY = [true, 'On', 'ON', 'on', 'True', 'TRUE', 'true', '1', 1].freeze
 
   module ClassMethods
     def parsers
       @parsers ||= {
-        array:   ->(v, _) { [*v] },
-        boolean: ->(v, _) { TRUTHY.include?(v.to_s.downcase) },
-        date:    ->(v, _) { v.is_a?(Date) ? v : v && Date.parse(v.to_s) },
-        float:   ->(v, _) { v && v.to_f },
-        integer: ->(v, _) { v && v.to_i },
-        string:  ->(v, _) { v && v.to_s },
-        time:    ->(v, _) { v.is_a?(Time) ? v : v && Time.parse(v.to_s) },
+        array:          ->(v, _) { [*v] },
+        boolean:        ->(v, _) { TRUTHY.include?(v) },
+        date:           ->(v, _) { v.is_a?(Date) ? v : v && Date.parse(v.to_s) },
+        float:          ->(v, _) { v&.to_f },
+        integer:        ->(v, _) { v&.to_i },
+        strict_integer: ->(v, _) { Integer(v) },
+        string:         ->(v, _) { v&.to_s },
+        time:           ->(v, _) { v.is_a?(Time) ? v : v && Time.parse(v.to_s) },
       }
     end
 

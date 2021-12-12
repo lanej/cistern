@@ -204,14 +204,23 @@ describe Cistern::Attributes, 'parsing' do
     expect(subject.new(list: 'item').list).to eq(['item'])
   end
 
-  it 'should parse an integer' do
-    subject.class_eval do
-      attribute :int, type: :integer
+  context 'with type integer' do
+    before do
+      subject.class_eval do
+        attribute :int, type: :integer
+      end
     end
 
-    expect(subject.new(int: '42.5').int).to eq(42)
-    expect(subject.new(int: '42').int).to eq(42)
-    expect(subject.new(int: 42).int).to eq(42)
+    [
+      ['42.5', 42],
+      ['42', 42],
+      [42, 42],
+      ["4f", 4],
+    ].each do |input, output|
+      specify("input of #{input.inspect} casts to #{output.inspect}") do
+        expect(subject.new(int: input).int).to eq(output)
+      end
+    end
   end
 
   it 'should parse a float' do
@@ -250,7 +259,8 @@ describe Cistern::Attributes, 'parsing' do
     expect(subject.new({ 'squash' => { 'type' => 'fred' } }).butternut_id).to be_nil
 
     # override intermediate processing
-    expect(subject.new({ 'squash' => { 'id' => '12', 'type' => 'fred' } }).squash).to eq({ 'id' => '12', 'type' => 'fred' })
+    expect(subject.new({ 'squash' => { 'id' => '12', 'type' => 'fred' } }).squash)
+      .to eq({ 'id' => '12', 'type' => 'fred' })
 
     # alias of override
     expect(subject.new({ 'squash' => { 'id' => '12', 'type' => 'fred' } }).vegetable).to eq({ 'id' => '12', 'type' => 'fred' })

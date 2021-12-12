@@ -72,11 +72,13 @@ describe Cistern::Collection do
 end
 
 describe Cistern::Singular do
-  subject { Class.new(Sample::Singular) do
-    def reload
-      attributes
-    end
-  end.new({}) }
+  subject do
+    Class.new(Sample::Singular) do
+      def reload
+        attributes
+      end
+    end.new({})
+  end
 
   include_examples 'hash_support'
 end

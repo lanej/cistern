@@ -51,20 +51,22 @@ describe 'mock data' do
       include_examples 'mock_data#backend', :hash
     end
 
-    describe 'Cistern::Data::Redis' do
-      include_examples 'mock_data#backend', :redis
+    if ENV.key?('REDIS_URI')
+      describe 'Cistern::Data::Redis' do
+        include_examples 'mock_data#backend', :redis
 
-      context 'with an explicit client' do
-        before(:each) do
-          @other = Redis::Namespace.new('other_cistern', Redis.new)
-          @other.set('x', 'y')
-        end
+        context 'with an explicit client' do
+          before(:each) do
+            @other = Redis::Namespace.new('other_cistern', Redis.new)
+            @other.set('x', 'y')
+          end
 
-        include_examples 'mock_data#backend', :redis, client: Redis::Namespace.new('cistern', Redis.new)
+          include_examples 'mock_data#backend', :redis, client: Redis::Namespace.new('cistern', Redis.new)
 
-        after(:each) do
-          expect(@other.get('x')).to eq('y')
-          @other.del('x')
+          after(:each) do
+            expect(@other.get('x')).to eq('y')
+            @other.del('x')
+          end
         end
       end
     end
