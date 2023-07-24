@@ -613,12 +613,12 @@ class Blog::GetPost
     [post_id, stringify_keys(parameters)]
   end
 
-  def _mock(*args)
-    mock(*setup(*args))
+  def _mock(*args, **kwargs)
+    mock(*setup(*args, **kwargs))
   end
 
   def _real(post_id, parameters)
-    real(*setup(*args))
+    real(*setup(*args, **kwargs))
   end
 end
 ```

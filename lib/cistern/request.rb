@@ -24,8 +24,8 @@ module Cistern::Request
     end
 
     method = <<-EOS
-      def #{name}(*args)
-        #{klass}.new(self).call(*args)
+      def #{name}(*args, **kwargs)
+        #{klass}.new(self).call(*args, **kwargs)
       end
     EOS
 
@@ -34,12 +34,12 @@ module Cistern::Request
     cistern::Real.module_eval method, __FILE__, __LINE__
   end
 
-  def self.service_request(*args)
+  def self.service_request(*args, **kwargs)
     Cistern.deprecation(
       '#service_request is deprecated.  Please use #cistern_request',
       caller[0]
     )
-    cistern_request(*args)
+    cistern_request(*args, **kwargs)
   end
 
   attr_reader :cistern
@@ -56,8 +56,8 @@ module Cistern::Request
     @cistern = cistern
   end
 
-  def call(*args)
-    dispatch(*args)
+  def call(*args, **kwargs)
+    dispatch(*args, **kwargs)
   end
 
   def real(*)
@@ -71,7 +71,7 @@ module Cistern::Request
   protected
 
   # @fixme remove _{mock,real} methods and call {mock,real} directly before 3.0 release.
-  def dispatch(*args)
+  def dispatch(*args, **kwargs)
     to = cistern.mocking? ? :mock : :real
 
     legacy_method = :"_#{to}"
@@ -82,9 +82,9 @@ module Cistern::Request
         caller[0]
       )
 
-      public_send(legacy_method, *args)
+      public_send(legacy_method, *args, **kwargs)
     else
-      public_send(to, *args)
+      public_send(to, *args, **kwargs)
     end
   end
 end
