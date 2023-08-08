@@ -30,7 +30,7 @@ module Cistern::Data
       data.clear
     end
 
-    def store_in(*args)
+    def store_in(*args, **kwargs)
       @storage = *args
       @data    = nil
     end

@@ -248,11 +248,11 @@ module Cistern::Client
       @_requests ||= []
     end
 
-    def requires(*args)
+    def requires(*args, **kwargs)
       required_arguments.concat(args)
     end
 
-    def recognizes(*args)
+    def recognizes(*args, **kwargs)
       recognized_arguments.concat(args)
     end
 

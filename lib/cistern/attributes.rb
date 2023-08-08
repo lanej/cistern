@@ -65,11 +65,11 @@ module Cistern::Attributes
       name_sym
     end
 
-    def identity(*args)
-      args.any? ? @identity = attribute(*args) : (@identity ||= parent_identity)
+    def identity(*args, **kwargs)
+      args.any? ? @identity = attribute(*args, **kwargs) : (@identity ||= parent_identity)
     end
 
-    def ignore_attributes(*args)
+    def ignore_attributes(*args, **kwargs)
       @ignored_attributes = args
     end
 
@@ -229,7 +229,7 @@ module Cistern::Attributes
     #
     # @raise [ArgumentError] if any requested attribute does not have a value
     # @return [Hash] of matching attributes
-    def requires(*args)
+    def requires(*args, **kwargs)
       missing, required = missing_attributes(args)
 
       if missing.length == 1
@@ -245,7 +245,7 @@ module Cistern::Attributes
     #
     # @raise [ArgumentError] if no requested attributes have values
     # @return [Hash] of matching attributes
-    def requires_one(*args)
+    def requires_one(*args, **kwargs)
       missing, required = missing_attributes(args)
 
       if missing.length == args.length

@@ -11,7 +11,7 @@ describe 'Cistern::Request' do
     Sample::Real.class_eval do
       attr_reader :service_args
 
-      def initialize(*args)
+      def initialize(*args, **kwargs)
         @service_args = args
       end
     end
@@ -30,11 +30,11 @@ describe 'Cistern::Request' do
 
   it 'calls the appropriate method' do
     class GetSamples < Sample::Request
-      def real(*args)
+      def real(*args, **kwargs)
         cistern.service_args + args + ['real']
       end
 
-      def mock(*args)
+      def mock(*args, **kwargs)
         args + ['mock']
       end
     end
