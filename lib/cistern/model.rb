@@ -14,7 +14,7 @@ module Cistern::Model
   def self.cistern_model(cistern, klass, name)
     cistern.const_get(:Collections).module_eval <<-EOS, __FILE__, __LINE__
       def #{name}(attributes={})
-    #{klass.name}.new(attributes.merge(cistern: self))
+    #{klass.name}.new({cistern: self}.merge(attributes))
       end
     EOS
   end
